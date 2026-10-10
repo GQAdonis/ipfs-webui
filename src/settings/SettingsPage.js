@@ -22,6 +22,7 @@ import IpfsCheckForm from '../components/ipfs-check-form/IpfsCheckForm.js'
 import { JsonEditor } from './editor/JsonEditor.js'
 import Experiments from '../components/experiments/ExperimentsPanel.js'
 import Title from './Title.js'
+import { AgentChatSettings } from '../agent-chat/index.js'
 import CliTutorMode from '../components/cli-tutor-mode/CliTutorMode.js'
 import Checkbox from '../components/checkbox/Checkbox.js'
 import ComponentLoader from '../loader/ComponentLoader.js'
@@ -134,6 +135,10 @@ export const SettingsPage = ({
     </Box>
 
     <Experiments t={t} />
+
+    <Box className='mb3 pa4-l pa2'>
+      <AgentChatSettings />
+    </Box>
 
     <Box className='mb3 pa4-l pa2 joyride-settings-tutormode'>
       <div className='charcoal'>

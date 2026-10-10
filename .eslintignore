@@ -1,3 +1,4 @@
 !.storybook
 build
 storybook-static
+public/agent-chat

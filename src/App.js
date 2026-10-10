@@ -18,6 +18,7 @@ import Notify from './components/notify/Notify.js'
 import Connected from './components/connected/Connected.js'
 import TourHelper from './components/tour/TourHelper.js'
 import FilesExploreForm from './files/explore-form/files-explore-form.tsx'
+import { AgentChatLauncher } from './agent-chat/index.js'
 
 export class App extends Component {
   static propTypes = {
@@ -101,6 +102,7 @@ export class App extends Component {
         />
 
         <Notify />
+        <AgentChatLauncher />
       </div>
     )
   }

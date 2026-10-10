@@ -1,0 +1,35 @@
+{
+  "title": "Agent chat",
+  "description": "A chat sidebar that talks to your node's `ipfs mcp` agent endpoint. It is off by default. While it is off, nothing is loaded and no request is made. There is no default endpoint: you choose the address.",
+  "originAllowlist": "The endpoint refuses browser origins it does not list. Before you turn the chat on, add this Web UI's origin to the node's agent.origin_allowlist setting. The list is empty by default.",
+  "originValue": "This Web UI's origin:",
+  "toggle": {
+    "label": "Enable agent chat"
+  },
+  "endpoint": {
+    "label": "Agent endpoint (/agui URL)",
+    "placeholder": "http://127.0.0.1:PORT/agui",
+    "help": "The address `ipfs mcp --http --agui` listens on, ending in /agui. Use https, or http on this machine only.",
+    "error": {
+      "empty": "Enter the /agui address of your node.",
+      "invalid": "This is not a valid URL.",
+      "scheme": "Use https, or http on localhost, 127.0.0.1 or [::1].",
+      "path": "The address must end in /agui.",
+      "extras": "Remove the username, password, query and fragment."
+    }
+  },
+  "token": {
+    "label": "Access token",
+    "help": "The bearer token of the node's UI principal. It is saved in this browser profile so you do not enter it again after a reload. Use Forget token to remove it.",
+    "isSet": "A token is saved in this browser profile.",
+    "isNotSet": "No token is set.",
+    "set": "Set token",
+    "forget": "Forget token"
+  },
+  "launcher": {
+    "label": "Agent chat",
+    "loading": "Loading chat",
+    "loadError": "The chat could not be loaded. Press the button to try again."
+  },
+  "desktopManaged": "IPFS Desktop manages the agent chat connection. The endpoint and token are set up by the app, so there is nothing to configure here."
+}
