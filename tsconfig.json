@@ -101,6 +101,10 @@
     "src/components/shell/Shell.js",
     "src/i18n-decorator.js",
     "src/i18n.js",
-    "src/lib/i18n-localeParser.js"
-  ]
+    "src/lib/i18n-localeParser.js",
+    "src/settings/Title.js",
+    "src/webmcp/*.js",
+    "src/webmcp/vendor/**/*.d.ts"
+  ],
+  "exclude": ["src/webmcp/*.test.js"]
 }

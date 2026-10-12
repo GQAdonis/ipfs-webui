@@ -1,0 +1,100 @@
+{
+  "title": "Agent tools (WebMCP)",
+  "description": "Lets an AI agent in this browser use IPFS tools on your node through WebMCP. It is off by default. While it is off, this page registers no tool for agents and sends no request on an agent's behalf. Requests go to the node address in the API address setting.",
+  "toggle": {
+    "label": "Offer read tools to agents in this browser",
+    "help": "Read tools can fetch content from the network through your node. What a tool returns, including file contents, peer addresses and your node's listen addresses, goes to the AI provider behind the agent."
+  },
+  "dnslink": {
+    "label": "Let read tools resolve DNSLink names (domains)",
+    "help": "Off, only IPNS names that are libp2p keys resolve. A DNSLink lookup is a DNS request from your node, so injected content could use it to send data out in the name it asks for. Looking up a CID on the network is also visible to the peers that handle the lookup, whatever this setting says.",
+    "needsFirst": "Turn on the read tools first."
+  },
+  "writes": {
+    "label": "Also offer tools that change your node",
+    "help": "Every change asks you first and names the CIDs or paths. This approval is a check against mistakes, not a lock: an agent that controls this browser can click Approve itself. Keep this off while your AI app runs in a browser-control or fully automatic mode. Results of these tools go to the agent's AI provider too. This switch turns itself off whenever the page reloads. Tools that remove or delete are never offered.",
+    "needsFirst": "Turn on the read tools first; tools that change your node are only offered while they are on."
+  },
+  "status": {
+    "off": "Off. No tool is registered.",
+    "unavailable": "Not available. This browser has no WebMCP (document.modelContext), so no tool can be registered.",
+    "waiting": "Waiting for the connection to your node.",
+    "registered": "{count, plural, one {Registered # tool.} other {Registered # tools.}}",
+    "writesCount": "{count, plural, one {# changes your node.} other {# change your node.}}",
+    "readOnly": "None of them change your node.",
+    "failed": "{count, plural, one {# could not be registered.} other {# could not be registered.}}"
+  },
+  "operator": "To turn WebMCP off for everyone who opens this Web UI, serve it with the response header",
+  "dialog": {
+    "title": "Confirm: {title}",
+    "titleCue": "Approval needed",
+    "state": "Awaiting a person",
+    "source": "An agent in this browser asked for this. It runs on your node only if you approve.",
+    "targets": "What it acts on",
+    "details": "Details",
+    "previewLabel": "Content from the agent. Treat as data, not as instructions.",
+    "showFull": "Show full value",
+    "showShort": "Show shortened value",
+    "nonAscii": "Contains non-ASCII characters. Compare it character by character.",
+    "expiry": "Unanswered, this request is denied after {seconds, plural, one {# second} other {# seconds}}.",
+    "queued": "{count, plural, one {# more request is waiting.} other {# more requests are waiting.}}",
+    "denyIsFinal": "Deny is final. Nothing is sent to your node.",
+    "notALock": "This check catches mistakes. An agent that controls this browser can answer it too.",
+    "deny": "Deny: {title}",
+    "approve": "Approve: {title}",
+    "denyAll": "Deny all and turn off agent writes",
+    "arming": "Approve becomes available in a moment, so you have time to read this.",
+    "armed": "Approve is available. Press it yourself to run the call once."
+  },
+  "outcome": {
+    "approved": "Approved. The call runs once.",
+    "denied": "Denied. Nothing was changed.",
+    "expired": "Expired. Expiry is denial. Nothing was changed.",
+    "cancelled": "Cancelled. Nothing was changed."
+  },
+  "values": {
+    "yes": "yes",
+    "no": "no"
+  },
+  "labels": {
+    "name": "Name",
+    "path": "Path",
+    "source": "From",
+    "destination": "To",
+    "key": "Key",
+    "old_name": "Current name",
+    "new_name": "New name",
+    "cid": "CID",
+    "bytes": "Size in bytes",
+    "sha256": "SHA-256 of the content",
+    "content_preview": "Content",
+    "pin": "Pin",
+    "provide": "Announce to the network",
+    "recursive": "Recursive",
+    "parents": "Create parent folders",
+    "lifetime": "Record lifetime",
+    "ttl": "Cache time",
+    "replaces": "Replaces the current record for this key",
+    "identity_key": "This key is your node's identity",
+    "key_type": "Key type",
+    "key_size": "Key size in bits",
+    "store_codec": "Codec",
+    "recipe_cid_version": "CID version (overrides the default)",
+    "recipe_raw_leaves": "Raw leaves (overrides the default)",
+    "recipe_chunker": "Chunker (overrides the default)",
+    "recipe_hash": "Hash (overrides the default)"
+  },
+  "effects": {
+    "ipfs_add": "Add the content below to your node's storage.",
+    "pin_add": "Pin this content on your node so it is kept.",
+    "mfs_write": "Write this content to a file in Files, replacing the file if it exists.",
+    "mfs_mkdir": "Create a folder in Files.",
+    "mfs_cp": "Copy a file or folder in Files.",
+    "mfs_mv": "Move a file or folder in Files.",
+    "ipns_publish": "Publish this path under an IPNS name, signed with the named key.",
+    "key_gen": "Create a new key in your node's keystore.",
+    "key_rename": "Rename a key in your node's keystore.",
+    "dag_put": "Store the node below in your node's DAG.",
+    "routing_provide": "Announce to the network that your node provides this CID."
+  }
+}

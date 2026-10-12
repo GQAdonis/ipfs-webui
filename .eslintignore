@@ -2,3 +2,4 @@
 build
 storybook-static
 public/agent-chat
+src/webmcp/vendor

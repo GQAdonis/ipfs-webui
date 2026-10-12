@@ -19,6 +19,7 @@ import Connected from './components/connected/Connected.js'
 import TourHelper from './components/tour/TourHelper.js'
 import FilesExploreForm from './files/explore-form/files-explore-form.tsx'
 import { AgentChatLauncher } from './agent-chat/index.js'
+import { WebMcpHost } from './webmcp/index.js'
 
 export class App extends Component {
   static propTypes = {
@@ -103,6 +104,7 @@ export class App extends Component {
 
         <Notify />
         <AgentChatLauncher />
+        <WebMcpHost />
       </div>
     )
   }
