@@ -914,7 +914,7 @@ export const TOOL_DEFINITIONS = [
         "confirmation": "none",
         "annotations": {
             "readOnlyHint": true,
-            "untrustedContentHint": false,
+            "untrustedContentHint": true,
             "consequentialHint": false,
             "debugging": false
         },
@@ -950,7 +950,7 @@ export const TOOL_DEFINITIONS = [
         "confirmation": "none",
         "annotations": {
             "readOnlyHint": true,
-            "untrustedContentHint": false,
+            "untrustedContentHint": true,
             "consequentialHint": false,
             "debugging": false
         },
@@ -1014,7 +1014,7 @@ export const TOOL_DEFINITIONS = [
         "confirmation": "none",
         "annotations": {
             "readOnlyHint": true,
-            "untrustedContentHint": false,
+            "untrustedContentHint": true,
             "consequentialHint": false,
             "debugging": true
         },

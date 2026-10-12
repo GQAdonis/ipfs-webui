@@ -1,5 +1,6 @@
 import { paginateArray, rpc, str, toNumber } from './util.js';
-const peer = (p) => ({ id: str(p.id), addrs: (p.multiaddrs ?? []).map(str) });
+// The browser has no trusted-peers list, so every peer-supplied entry is marked untrusted.
+const peer = (p) => ({ id: str(p.id), addrs: (p.multiaddrs ?? []).map(str), untrusted: true });
 export const routing_findprovs = async (input, ctx) => {
     const wanted = input.num_providers ?? 20;
     const providers = [];
@@ -52,6 +53,7 @@ export const swarm_peers = async (input, ctx) => {
                 id: str(p.peer),
                 addr: str(p.addr),
                 direction: p.direction ?? 'unknown',
+                untrusted: true,
             };
             if (p.latency)
                 out.latency = p.latency;
