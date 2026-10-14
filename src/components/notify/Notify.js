@@ -8,7 +8,7 @@ const Notify = ({ t, notify, notifyI18nKey, doNotifyDismiss }) => {
   if (!show) return null
 
   return (
-    <Toast error={error} onDismiss={doNotifyDismiss}>
+    <Toast error={error} onDismiss={doNotifyDismiss} dismissLabel={t('dismiss')}>
       {t(notifyI18nKey, msgArgs)}
     </Toast>
   )

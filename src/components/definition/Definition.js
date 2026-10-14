@@ -21,7 +21,7 @@ Definition.propTypes = {
 
 export const Term = ({ children, width = 100 }) => {
   return (
-    <dt className='db ma0 pb1 pb0-ns dtc-ns silver tracked ttu f7' style={{ width }}>
+    <dt className='db ma0 pb1 pb0-ns dtc-ns silver f7' style={{ width }}>
       {children}
     </dt>
   )

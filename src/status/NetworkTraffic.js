@@ -3,6 +3,7 @@ import { connect } from 'redux-bundler-react'
 import { withTranslation } from 'react-i18next'
 import Speedometer from './Speedometer.js'
 import { Title } from './Commons.js'
+import { withChartPalette } from '../promethity/tokens.js'
 
 class NetworkTraffic extends React.Component {
   state = {
@@ -33,7 +34,7 @@ class NetworkTraffic extends React.Component {
   }
 
   render () {
-    const { t } = this.props
+    const { t, palette } = this.props
     const { downFilled, upFilled, commonTotal } = this.state
 
     return (
@@ -43,7 +44,7 @@ class NetworkTraffic extends React.Component {
           <div className='mh2 mv3 mt0-l'>
             <Speedometer
               title={t('app:terms.downSpeed')}
-              color='#69c4cd'
+              color={palette.down}
               filled={downFilled}
               total={commonTotal}
             />
@@ -51,7 +52,7 @@ class NetworkTraffic extends React.Component {
           <div className='mh2 mt3 mt0-l'>
             <Speedometer
               title={t('app:terms.upSpeed')}
-              color='#f39021'
+              color={palette.up}
               filled={upFilled}
               total={commonTotal}
             />
@@ -64,5 +65,5 @@ class NetworkTraffic extends React.Component {
 
 export default connect(
   'selectNodeBandwidth',
-  withTranslation('status')(NetworkTraffic)
+  withTranslation('status')(withChartPalette(NetworkTraffic))
 )

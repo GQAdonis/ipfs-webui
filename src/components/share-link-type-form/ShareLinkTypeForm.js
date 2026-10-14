@@ -55,7 +55,7 @@ const ShareLinkTypeForm = ({ t, shareLinkType, localGatewayUrl, publicGateway, p
               <span className='f6 fw6 charcoal'>
                 {t(`shareLink.${key}.label`)}
                 { recommended &&
-                  <span className='dib ml2 ph2 pv1 f6 fw6 white bg-teal br2'>{t('shareLink.recommendedBadge')}</span> }
+                  <span className='dib ml2 ph2 pv1 f6 fw6 prom-badge'>{t('shareLink.recommendedBadge')}</span> }
               </span>
             }
           />

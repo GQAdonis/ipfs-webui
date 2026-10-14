@@ -13,17 +13,17 @@ export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonE
   color?: string
 }
 
-const getButtonClassName = ({ fill, bg, color, danger, disabled }: Pick<ButtonProps, 'fill' | 'bg' | 'color' | 'danger' | 'disabled'>, type: ButtonProps['type']) => {
-  if (danger) return 'bg-red fill-white white'
-  if (disabled) return 'bg-gray-muted fill-snow light-gray'
+// A disabled button keeps its variant and dims once, through `.Button:disabled` (0.45) in button.css.
+const getButtonClassName = ({ fill, bg, color, danger }: Pick<ButtonProps, 'fill' | 'bg' | 'color' | 'danger'>, type: ButtonProps['type']) => {
+  if (danger) return 'bg-red'
   if (type === 'link') return 'link bg-transparent'
   return `${fill} ${bg} ${color}`
 }
 
 const defaultProps: Partial<ButtonProps> = {
   bg: 'bg-teal',
-  color: 'white',
-  fill: 'white',
+  color: '',
+  fill: '',
   className: '',
   minWidth: 140
 }

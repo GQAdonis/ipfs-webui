@@ -32,7 +32,7 @@ export const ModalActions: React.FC<ModalActionsProps> = ({
 }) => (
   <div
     className={`flex justify-${justify} pa2 ${className}`}
-    style={{ backgroundColor: '#f4f6f8' }}
+    style={{ backgroundColor: 'var(--raised)' }}
     {...props}
   >
     {children}

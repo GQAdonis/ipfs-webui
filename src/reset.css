@@ -12,7 +12,7 @@ button:not(.disabled) {
 }
   
 button:not(.default):focus-visible {
-    outline: 1px solid #bbb;
+    outline: var(--focus-ring);
     outline-offset: -1px;
 }
 
@@ -22,11 +22,11 @@ button.button-inside-focus:focus {
 
 
 button.button-inside-focus:focus > *:first-child {
-    outline: 1px solid #bbb;
+    outline: var(--focus-ring);
 }
 
 button.hoverable-button:hover {
-    background: #E8E9ED
+    background: var(--raised)
 }
 
 button.hoverable-button:focus {

@@ -41,7 +41,7 @@ export const CardTitle: React.FC<{
   children: React.ReactNode
 }> = ({ className = '', children }) => {
   return (
-    <div className={`ttu tracked f6 fw4 teal ${className}`}>
+    <div className={`prom-title ${className}`}>
       {children}
     </div>
   )

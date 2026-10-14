@@ -14,13 +14,13 @@ import './SelectedActions.css'
 
 const styles = {
   bar: {
-    background: '#F0F6FA',
-    borderColor: '#CFE0E2',
-    color: '#59595A'
+    background: 'var(--raised)',
+    borderColor: 'var(--control)',
+    color: 'var(--text)'
   },
   count: {
-    backgroundColor: '#69C4CD',
-    color: '#F9FAFB',
+    backgroundColor: 'var(--control)',
+    color: 'var(--text)',
     width: '38px',
     height: '38px'
   },
@@ -30,7 +30,7 @@ const styles = {
     transform: 'translate(-50%, -50%)'
   },
   size: {
-    color: '#A4BFCC'
+    color: 'var(--text-muted)'
   }
 }
 
@@ -100,27 +100,27 @@ class SelectedActions extends React.Component {
           </div>
           <div className='flex' role="menu" aria-label={t('menuOptions')} ref={ this.containerRef }>
             <button role="menuitem" className='tc mh2' onClick={share}>
-              <StrokeShare className='w3 hover-fill-navy-muted' fill='#A4BFCC' aria-hidden="true"/>
+              <StrokeShare className='w3 hover-fill-navy-muted' fill='var(--text-muted)' aria-hidden="true"/>
               <p className='ma0 f6'>{t('actions.share')}</p>
             </button>
             <button role="menuitem" className='tc mh2' onClick={download}>
-              <StrokeDownload className='w3 hover-fill-navy-muted' fill='#A4BFCC' aria-hidden="true"/>
+              <StrokeDownload className='w3 hover-fill-navy-muted' fill='var(--text-muted)' aria-hidden="true"/>
               <p className='ma0 f6'>{t('app:actions.download')}</p>
             </button>
             <button role="menuitem" className={classNames('tc mh2', classes.action(isMfs))} onClick={isMfs ? remove : null}>
-              <StrokeTrash className={classes.svg(isMfs)} fill='#A4BFCC' aria-hidden="true"/>
+              <StrokeTrash className={classes.svg(isMfs)} fill='var(--text-muted)' aria-hidden="true"/>
               <p className='ma0 f6'>{t('app:actions.remove')}</p>
             </button>
             <button role="menuitem" className={classNames('tc mh2', classes.action(isSingle))} onClick={isSingle ? setPinning : null}>
-              <StrokePin className={classes.svg(isSingle)} fill='#A4BFCC' aria-hidden="true"/>
+              <StrokePin className={classes.svg(isSingle)} fill='var(--text-muted)' aria-hidden="true"/>
               <p className='ma0 f6'>{t('app:actions.setPinning')}</p>
             </button>
             <button role="menuitem" className={classNames('tc mh2', classes.action(isSingle))} onClick={isSingle ? inspect : null} {...singleFileTooltip}>
-              <StrokeIpld className={classes.svg(isSingle)} fill='#A4BFCC' aria-hidden="true"/>
+              <StrokeIpld className={classes.svg(isSingle)} fill='var(--text-muted)' aria-hidden="true"/>
               <p className='ma0 f6'>{t('app:actions.inspect')}</p>
             </button>
             <button role="menuitem" className={classNames('tc mh2', classes.action(isSingle && isMfs))} onClick={(isSingle && isMfs) ? rename : null} {...singleFileTooltip}>
-              <StrokePencil className={classes.svg(isSingle && isMfs)} fill='#A4BFCC' aria-hidden="true"/>
+              <StrokePencil className={classes.svg(isSingle && isMfs)} fill='var(--text-muted)' aria-hidden="true"/>
               <p className='ma0 f6'>{t('app:actions.rename')}</p>
             </button>
           </div>

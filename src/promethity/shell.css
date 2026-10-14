@@ -1,0 +1,52 @@
+/* Promethity shell (webui-shell-redesign 1.1). The content column and top bar
+   sit on `ground`; the nav rail steps up to `surface` (styled in
+   navigation/NavBar.css). Depth comes from fills alone: no borders, no
+   shadows (kubo DESIGN.md, Layout and shape). Every value is a var()
+   reference, so light and dark both resolve through the data-theme attribute
+   in tokens.css. */
+
+.app-shell-column {
+  background-color: var(--ground);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+.app-topbar {
+  min-height: 75px;
+  padding-top: 20px;
+  padding-bottom: 15px;
+  background-color: var(--ground);
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+/* Help and connection state stay visible at every width (H5). Below 40em the
+   form takes its own row and the status cluster wraps beneath it, so neither
+   is clipped or hidden. */
+.app-topbar-status {
+  gap: var(--space-2);
+  margin-left: var(--space-3);
+  min-width: 0;
+}
+
+@media (max-width: 40em) {
+  .app-topbar {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-2);
+  }
+
+  .app-topbar-status {
+    flex: 1 1 100%;
+    justify-content: space-between;
+    margin-left: 0;
+  }
+}
+
+/* Drag-and-drop file overlay: a transient ember wash over the drop zone,
+   shown only while a file is held over the window. */
+.appOverlay {
+  background-color: var(--accent);
+  opacity: 0.2;
+}

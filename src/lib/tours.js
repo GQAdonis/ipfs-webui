@@ -1,11 +1,47 @@
 import React from 'react'
 
+/* Promethity tour skin (webui-shell-redesign 1.2). Tooltips are flat panels on
+   the tokens: `raised` fill, `text` copy, the accent reserved for the Next
+   action with an `on-accent` label. The app-hint tooltip is the section's one
+   callout, so it sits on `accent-tint`. Every colour is a var() reference, so
+   both themes resolve through the data-theme attribute in tokens.css. No
+   borders, no shadows (kubo DESIGN.md). */
+
+const tourPanelStyles = {
+  tooltip: {
+    borderRadius: 'var(--radius-md)',
+    fontFamily: 'var(--font-body)'
+  },
+  buttonNext: {
+    backgroundColor: 'var(--accent)',
+    color: 'var(--on-accent)',
+    borderRadius: 'var(--radius-sm)'
+  },
+  buttonBack: {
+    color: 'var(--text-muted)'
+  },
+  buttonSkip: {
+    color: 'var(--text-muted)'
+  },
+  buttonClose: {
+    color: 'var(--text-muted)'
+  },
+  options: {
+    width: '500px',
+    backgroundColor: 'var(--raised)',
+    arrowColor: 'var(--raised)',
+    primaryColor: 'var(--accent)',
+    textColor: 'var(--text)',
+    zIndex: 999
+  }
+}
+
 /**
  * @type {import('react-joyride').CustomTour}
  */
 export const appTour = {
   getSteps: ({ t }) => [{
-    content: <div className='montserrat white'>
+    content: <div>
       <p className='ma0 pa0 tl f6'>{t('tour.tooltip')}</p>
     </div>,
     placement: 'left',
@@ -13,13 +49,14 @@ export const appTour = {
     disableBeacon: true
   }],
   styles: {
+    tooltip: tourPanelStyles.tooltip,
     tooltipContent: { padding: '0 20px 0 0' },
     tooltipFooter: { display: 'none' },
     options: {
       width: '250px',
-      backgroundColor: 'rgba(105, 196, 205, 0.85)',
-      arrowColor: 'rgba(105, 196, 205, 0.85)',
-      textColor: '#fff',
+      backgroundColor: 'var(--accent-tint)',
+      arrowColor: 'var(--accent-tint)',
+      textColor: 'var(--text)',
       zIndex: 999
     }
   }
@@ -31,8 +68,8 @@ export const appTour = {
 export const welcomeTour = {
   getSteps: ({ t }) => [
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step1.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step1.title')}</h2>
         <p className='tl f6'>{t('tour.step1.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step1.paragraph2')}</p>
         <p className='tl f6'>{t('tour.step1.paragraph3')}</p>
@@ -41,14 +78,7 @@ export const welcomeTour = {
       target: 'body'
     }
   ],
-  styles: {
-    options: {
-      width: '500px',
-      primaryColor: '#378085',
-      textColor: '#34373f',
-      zIndex: 999
-    }
-  }
+  styles: tourPanelStyles
 }
 
 /**
@@ -57,8 +87,8 @@ export const welcomeTour = {
 export const statusTour = {
   getSteps: ({ t, Trans }) => [
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step1.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step1.title')}</h2>
         <p className='tl f6'>{t('tour.step1.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step1.paragraph2')}</p>
       </div>,
@@ -66,8 +96,8 @@ export const statusTour = {
       target: 'body'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step2.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step2.title')}</h2>
         <p className='tl f6'>{t('tour.step2.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step2.paragraph2')}</p>
       </div>,
@@ -75,9 +105,10 @@ export const statusTour = {
       target: '.joyride-app-status'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step3.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step3.title')}</h2>
         <p className='tl f6'>{t('tour.step3.paragraph1')}</p>
+        <p className='tl f6'>{t('tour.step3.paragraph2')}</p>
         <Trans i18nKey='tour.step3.paragraph2' t={t}>
           <p className='tl f6'>Click on <code>Advanced</code> to see more info such as the gateway URL and addresses.</p>
         </Trans>
@@ -86,8 +117,8 @@ export const statusTour = {
       target: '.joyride-status-node'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step4.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step4.title')}</h2>
         <p className='tl f6'>{t('tour.step4.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step4.paragraph2')}</p>
       </div>,
@@ -95,8 +126,8 @@ export const statusTour = {
       target: '.joyride-status-charts'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.stepExplore.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.stepExplore.title')}</h2>
         <p className='tl f6'>{t('tour.stepExplore.paragraph')}</p>
       </div>,
       locale: { last: t('tour.finish') },
@@ -104,14 +135,7 @@ export const statusTour = {
       target: '.joyride-app-explore'
     }
   ],
-  styles: {
-    options: {
-      width: '500px',
-      primaryColor: '#378085',
-      textColor: '#34373f',
-      zIndex: 999
-    }
-  }
+  styles: tourPanelStyles
 }
 
 /**
@@ -120,8 +144,8 @@ export const statusTour = {
 export const filesTour = {
   getSteps: ({ t, Trans }) => [
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step1.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step1.title')}</h2>
         <Trans i18nKey='tour.step1.paragraph1' t={t}>
           <p className='tl f6'>
             This is where the files on your <a className='teal link' href='https://docs.ipfs.tech/concepts/file-systems/' rel='noopener noreferrer' target='_blank'>
@@ -134,8 +158,8 @@ export const filesTour = {
       target: 'body'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step2.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step2.title')}</h2>
         <p className='tl f6'>{t('tour.step2.paragraph1')}</p>
         <ul className='pl4'>
           <li className='tl f6'>{t('tour.step2.bullet1')}</li>
@@ -147,8 +171,8 @@ export const filesTour = {
       target: '.joyride-files-breadcrumbs'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step3.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step3.title')}</h2>
         <p className='tl f6'>{t('tour.step3.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step3.paragraph2')}</p>
         <Trans i18nKey='tour.step3.paragraph3' t={t}>
@@ -162,8 +186,8 @@ export const filesTour = {
       target: '.joyride-files-add'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step6.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step6.title')}</h2>
         <p className='tl f6'>{t('tour.step6.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step6.paragraph2')}</p>
       </div>,
@@ -171,8 +195,8 @@ export const filesTour = {
       target: '.filegrid-view'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step5.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step5.title')}</h2>
         <p className='tl f6'>{t('tour.step5.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step5.paragraph2')}</p>
         <p className='tl f6'>{t('tour.step5.paragraph3')}</p>
@@ -182,14 +206,7 @@ export const filesTour = {
       target: '.filelist-view'
     }
   ],
-  styles: {
-    options: {
-      width: '500px',
-      primaryColor: '#378085',
-      textColor: '#34373f',
-      zIndex: 999
-    }
-  }
+  styles: tourPanelStyles
 }
 
 /**
@@ -198,8 +215,8 @@ export const filesTour = {
 export const peersTour = {
   getSteps: ({ t }) => [
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step1.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step1.title')}</h2>
         <p className='tl f6'>{t('tour.step1.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step1.paragraph2')}</p>
       </div>,
@@ -207,31 +224,26 @@ export const peersTour = {
       target: 'body'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step2.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step2.title')}</h2>
         <p className='tl f6'>{t('tour.step2.paragraph1')}</p>
+        <p className='tl f6'>{t('tour.step2.paragraph2')}</p>
       </div>,
       placement: 'bottom',
       target: '.joyride-peers-map'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step3.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step3.title')}</h2>
         <p className='tl f6'>{t('tour.step3.paragraph1')}</p>
+        <p className='tl f6'>{t('tour.step3.paragraph2')}</p>
       </div>,
       locale: { last: t('tour.finish') },
       placement: 'top',
       target: '.joyride-peers-table'
     }
   ],
-  styles: {
-    options: {
-      width: '500px',
-      primaryColor: '#378085',
-      textColor: '#34373f',
-      zIndex: 999
-    }
-  }
+  styles: tourPanelStyles
 }
 
 /**
@@ -240,8 +252,8 @@ export const peersTour = {
 export const settingsTour = {
   getSteps: ({ t, Trans }) => [
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step1.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step1.title')}</h2>
         <p className='tl f6'>{t('tour.step1.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step1.paragraph2')}</p>
       </div>,
@@ -249,16 +261,17 @@ export const settingsTour = {
       target: 'body'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step2.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step2.title')}</h2>
         <p className='tl f6'>{t('tour.step2.paragraph1')}</p>
+        <p className='tl f6'>{t('tour.step2.paragraph2')}</p>
       </div>,
       placement: 'auto',
       target: '.joyride-settings-customapi'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step3.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step3.title')}</h2>
         <Trans i18nKey='tour.step3.paragraph1' t={t}>
           <p className='tl f6'>If you have accounts with third-party remote pinning services, add them here so you can pin/unpin items to those services directly from the Files screen. You can learn more about third-party pinning services in the <a className='teal link' href='https://docs.ipfs.tech/how-to/work-with-pinning-services' rel='noopener noreferrer' target='_blank'>IPFS Docs</a>.
           </p>
@@ -268,8 +281,8 @@ export const settingsTour = {
       target: '.joyride-settings-pinning'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step4.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step4.title')}</h2>
         <Trans i18nKey='tour.step4.paragraph1' t={t}>
           <p className='tl f6'>You can change the language of the Web UI.
           If your preferred language isn't available, head over our project page in <a className='teal link' href='https://www.transifex.com/ipfs/ipfs-webui/translate/' rel='noopener noreferrer' target='_blank'>Transifex</a> to help us translate!
@@ -280,8 +293,8 @@ export const settingsTour = {
       target: '.joyride-settings-language'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step5.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step5.title')}</h2>
         <p className='tl f6'>{t('tour.step5.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step5.paragraph2')}</p>
       </div>,
@@ -289,16 +302,16 @@ export const settingsTour = {
       target: '.joyride-settings-analytics'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step6.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step6.title')}</h2>
         <p className='tl f6'>{t('tour.step6.paragraph1')}</p>
       </div>,
       placement: 'auto',
       target: '.joyride-settings-tutormode'
     },
     {
-      content: <div className='montserrat charcoal'>
-        <h2 className='f3 fw4'>{t('tour.step7.title')}</h2>
+      content: <div>
+        <h2 className='prom-tour-title'>{t('tour.step7.title')}</h2>
         <p className='tl f6'>{t('tour.step7.paragraph1')}</p>
         <p className='tl f6'>{t('tour.step7.paragraph2')}</p>
       </div>,
@@ -307,12 +320,5 @@ export const settingsTour = {
       target: '.joyride-settings-config'
     }
   ],
-  styles: {
-    options: {
-      width: '500px',
-      primaryColor: '#378085',
-      textColor: '#34373f',
-      zIndex: 999
-    }
-  }
+  styles: tourPanelStyles
 }

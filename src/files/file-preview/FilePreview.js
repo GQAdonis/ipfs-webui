@@ -123,7 +123,7 @@ const Preview = (props) => {
       </div>
       <GlyphCancel
         onClick={onClose}
-        style={{ width: '44px', height: '44px', fill: '#244c5a', cursor: 'pointer', flexShrink: 0 }}
+        style={{ width: '44px', height: '44px', fill: 'var(--text)', cursor: 'pointer', flexShrink: 0 }}
       />
     </div>
   )

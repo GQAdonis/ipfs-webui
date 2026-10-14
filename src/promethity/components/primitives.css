@@ -1,0 +1,517 @@
+/* Settings primitives (webui-settings-primitives): Field, Switch,
+   SegmentedControl, Combobox, StatusLine, ApplyBar, PolicyDecision.
+   Every value is a var() reference to tokens.css, so light and dark both
+   resolve through the data-theme attribute. Surfaces separate by fill. The
+   one outline besides the focus ring is the D7 form-control edge: a 1px
+   text-muted inset on inputs, the switch track, segmented controls and the
+   combobox list (WCAG 2.2 1.4.11; kubo DESIGN.md, Color). */
+
+.pm-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- Field: label, control, help, error ---- */
+
+.pm-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-body);
+}
+
+.pm-label {
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.pm-help,
+.pm-error {
+  margin: 0;
+  max-width: 66ch;
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+
+.pm-help {
+  color: var(--text-muted);
+}
+
+.pm-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--err);
+}
+
+.pm-error svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.pm-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background-color: var(--control);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  transition: box-shadow var(--motion-duration) var(--motion-ease);
+}
+
+.pm-input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.pm-input:hover:not(:disabled) {
+  box-shadow: inset 0 0 0 1px var(--text);
+}
+
+.pm-input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.pm-input[aria-invalid='true'] {
+  box-shadow: inset 0 0 0 2px var(--err);
+}
+
+.pm-input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---- Switch ---- */
+
+.pm-switch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-body);
+}
+
+.pm-switch-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+}
+
+.pm-switch-track {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: 46px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background-color: var(--control);
+  box-shadow: inset 0 0 0 1px var(--text-muted);
+  cursor: pointer;
+  transition: background-color var(--motion-duration) var(--motion-ease);
+}
+
+.pm-switch-track[aria-checked='true'] {
+  background-color: var(--text);
+}
+
+.pm-switch-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background-color: var(--text-muted);
+  transition: transform var(--motion-duration) var(--motion-ease), background-color var(--motion-duration) var(--motion-ease);
+}
+
+.pm-switch-track[aria-checked='true'] .pm-switch-thumb {
+  background-color: var(--ground);
+  transform: translateX(20px);
+}
+
+.pm-switch-track:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.pm-switch-track:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pm-switch-label {
+  flex: 0 1 auto;
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.pm-switch-state {
+  flex: none;
+  min-width: 3ch;
+  font-family: var(--font-mono);
+  font-size: var(--text-code);
+  color: var(--text-muted);
+}
+
+/* ---- SegmentedControl ---- */
+
+.pm-segmented-field {
+  min-width: 0;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border: 0;
+  font-family: var(--font-body);
+}
+
+.pm-segmented-field > legend {
+  margin-bottom: var(--space-2);
+}
+
+.pm-segmented-field > .pm-help,
+.pm-segmented-field > .pm-error {
+  margin-top: var(--space-2);
+}
+
+.pm-segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  background-color: var(--control);
+  box-shadow: inset 0 0 0 1px var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.pm-segmented-option {
+  position: relative;
+  display: inline-flex;
+}
+
+.pm-segmented-option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pm-segmented-option span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: color var(--motion-duration) var(--motion-ease), background-color var(--motion-duration) var(--motion-ease);
+}
+
+.pm-segmented-option:hover input:not(:disabled) + span {
+  color: var(--text);
+}
+
+.pm-segmented-option span[data-checked] {
+  background-color: var(--raised);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.pm-segmented-option input:focus-visible + span {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.pm-segmented-option input:disabled + span {
+  opacity: 0.45;
+}
+
+@media (max-width: 480px) {
+  .pm-segmented {
+    display: flex;
+    width: 100%;
+  }
+
+  .pm-segmented-option {
+    flex: 1 1 auto;
+  }
+
+  .pm-segmented-option span {
+    justify-content: center;
+    width: 100%;
+    padding: 0 var(--space-3);
+  }
+}
+
+/* ---- Combobox ---- */
+
+.pm-combobox {
+  position: relative;
+  font-family: var(--font-body);
+}
+
+.pm-combobox-control {
+  position: relative;
+}
+
+.pm-combobox-input {
+  padding-right: 44px;
+}
+
+.pm-combobox-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.pm-combobox-toggle:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.pm-combobox-list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  max-height: 264px;
+  margin: 0;
+  padding: var(--space-1);
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--text-muted);
+  border-radius: var(--radius-md);
+  background-color: var(--raised);
+  color: var(--text);
+}
+
+.pm-combobox-list[hidden] {
+  display: none;
+}
+
+.pm-combobox-option {
+  display: flex;
+  flex-direction: column;
+  min-height: 40px;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-body);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.pm-combobox-option:hover {
+  background-color: var(--control);
+}
+
+/* The highlighted option (aria-activedescendant) keeps focus visible while
+   DOM focus stays on the input. */
+.pm-combobox-option[aria-selected='true'] {
+  background-color: var(--control);
+  outline: var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.pm-combobox-option[data-current] > span:first-child {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.pm-combobox-option[data-current][aria-selected='true'] > span:first-child {
+  color: var(--text);
+}
+
+.pm-combobox-description {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+}
+
+.pm-combobox-hint {
+  margin-top: var(--space-2);
+  font-size: var(--text-small);
+  color: var(--text-muted);
+}
+
+/* ---- State tones: state colour on its own tint ---- */
+
+.pm-tone-ok {
+  background-color: var(--ok-tint);
+  color: var(--ok);
+}
+
+.pm-tone-warn {
+  background-color: var(--warn-tint);
+  color: var(--warn);
+}
+
+.pm-tone-err {
+  background-color: var(--err-tint);
+  color: var(--err);
+}
+
+.pm-tone-info {
+  background-color: var(--info-tint);
+  color: var(--info);
+}
+
+/* ---- StatusLine ---- */
+
+.pm-status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+
+.pm-status svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.pm-status-word {
+  font-weight: 700;
+}
+
+.pm-status-body {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---- ApplyForm / ApplyBar ---- */
+
+.pm-apply-form {
+  display: block;
+}
+
+.pm-apply-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--raised);
+  font-family: var(--font-body);
+}
+
+.pm-apply-status {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.pm-apply-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ---- PolicyDecision ---- */
+
+.pm-policy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--raised);
+  font-family: var(--font-body);
+}
+
+.pm-policy-subject {
+  flex: 1 1 12rem;
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pm-policy-decision {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-small);
+}
+
+.pm-policy-note {
+  flex: 1 1 100%;
+  max-width: 66ch;
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* The inset edge is a box-shadow, which forced-colors mode removes; draw the
+   same edge as a real border so controls stay identifiable. */
+@media (forced-colors: active) {
+  .pm-input,
+  .pm-switch-track,
+  .pm-segmented {
+    border: 1px solid ButtonText;
+  }
+
+  .pm-switch-thumb {
+    background-color: ButtonText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-input,
+  .pm-switch-track,
+  .pm-switch-thumb,
+  .pm-segmented-option span {
+    transition: none;
+  }
+}

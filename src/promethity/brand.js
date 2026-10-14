@@ -5,5 +5,10 @@
 
 export const BRAND = Object.freeze({
   name: 'Promethity',
-  tagline: 'Fire you can hold.'
+  tagline: 'Fire you can hold.',
+  // Where this fork's source lives, and the upstream project it is built on
+  // (D8: attribution in About and the footer). The MIT notice in LICENSE stays
+  // as upstream wrote it.
+  forkRepo: 'https://github.com/GQAdonis/ipfs-webui',
+  upstreamRepo: 'https://github.com/ipfs/ipfs-webui'
 })

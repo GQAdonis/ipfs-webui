@@ -105,6 +105,9 @@
     "src/settings/Title.js",
     "src/promethity/brand-wordmark.js",
     "src/promethity/brand-p-icon.js",
+    "src/promethity/brand.js",
+    "src/promethity/icons.js",
+    "src/promethity/page-title.js",
     "src/webmcp/*.js",
     "src/webmcp/vendor/**/*.d.ts"
   ],

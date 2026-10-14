@@ -1,14 +1,20 @@
 /*
- * WebMCP confirmation dialog and Settings controls. Colors are the Web UI's own palette
- * (ipfs-css): navy #0b3a53, charcoal #34373f, teal #378085, snow #edf0f4, on white.
- * Every text pairing used here is at least 4.5:1 (white on teal 4.58, white on charcoal
- * 11.9, white on the unarmed grey #5c6670 5.85, navy on white 12.0, navy on snow 10.5, navy on #d9dbe2 8.7). The dialog sets its own background and
- * text colors, so it reads the same whatever the browser color scheme is. No transitions
- * or animation, so prefers-reduced-motion needs no special case.
+ * WebMCP confirmation dialog and Settings controls, on the Promethity tokens
+ * (src/promethity/tokens.css) so light and dark both follow the data-theme
+ * attribute. Depth comes from fills: the dialog is a `raised` sheet on a
+ * `ground` scrim, the content preview steps down to `surface`, and secondary
+ * actions sit on `control`. No borders, no shadows, no accent bars. The
+ * request state is a warn-tint chip that carries its own word. Approve is the
+ * one accent fill (on-accent label); while it is not yet armed it drops to a
+ * control fill with muted text and a not-allowed cursor, and the hint line
+ * below says why. Contrast pairings used here (text on raised, text-muted on
+ * control, warn on warn-tint, on-accent on accent) are the DESIGN.md pairings
+ * recomputed per theme by src/promethity/tokens.test.js. No transitions or
+ * animation, so prefers-reduced-motion needs no special case.
  */
 
 .webmcp-backdrop {
-  background: rgba(11, 58, 83, 0.72);
+  background-color: color-mix(in srgb, var(--ground) 82%, transparent);
 }
 
 .webmcp-dialog {
@@ -16,15 +22,30 @@
   max-height: 90vh;
   overflow-y: auto;
   box-sizing: border-box;
-  background: #fff;
-  color: #34373f;
+  padding: var(--space-4);
+  background-color: var(--raised);
+  color: var(--text);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-body);
+}
+
+.webmcp-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
 }
 
 .webmcp-state {
   display: inline-block;
-  padding: 0.25rem 0.625rem;
-  background: #edf0f4;
-  border-left: 4px solid #f39021;
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--warn-tint);
+  color: var(--warn);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-small);
+  font-weight: 600;
 }
 
 .webmcp-list {
@@ -34,63 +55,70 @@
 .webmcp-row {
   display: grid;
   grid-template-columns: minmax(6rem, 30%) 1fr;
-  gap: 0.25rem 0.75rem;
-  padding: 0.25rem 0;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.webmcp-label {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 600;
 }
 
 .webmcp-value {
   overflow-wrap: anywhere;
   word-break: break-all;
+  font-family: var(--font-mono);
+  font-size: var(--text-code);
 }
 
 .webmcp-preview {
-  padding: 0.75rem;
-  background: #edf0f4;
-  color: #34373f;
+  padding: var(--space-3);
+  background-color: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-md);
 }
 
 .webmcp-btn {
   min-width: 7rem;
   min-height: 2.75rem;
-  margin: 0.25rem 0 0 0.75rem;
-  padding: 0.5rem 1rem;
+  margin: var(--space-1) 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-4);
   border: 0;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-sm);
   font: inherit;
   font-weight: 600;
-  color: #fff;
+  background-color: var(--control);
+  color: var(--text);
   cursor: pointer;
 }
 
-.webmcp-btn-deny {
-  background: #34373f;
-}
-
-.webmcp-btn-deny:hover {
-  background: #1f1f24;
+.webmcp-btn-deny:hover,
+.webmcp-btn-secondary:hover {
+  filter: brightness(1.12);
 }
 
 .webmcp-btn-approve {
-  background: #378085;
+  background-color: var(--accent);
+  color: var(--on-accent);
 }
 
 .webmcp-btn-approve:hover {
-  background: #2c6a6e;
+  filter: brightness(1.08);
 }
 
-/* Not armed yet: the label stays readable (contrast holds), the cursor says it will not act. */
+/* Not armed yet: the fill drops to a control step, the label stays readable
+   (text-muted on control holds 4.5:1), the cursor says it will not act. */
 .webmcp-btn-approve[aria-disabled='true'] {
-  background: #5c6670;
+  background-color: var(--control);
+  color: var(--text-muted);
   cursor: not-allowed;
+  filter: none;
 }
 
 .webmcp-btn-secondary {
-  background: #edf0f4;
-  color: #0b3a53;
-}
-
-.webmcp-btn-secondary:hover {
-  background: #d9dbe2;
+  background-color: var(--surface);
+  color: var(--text);
 }
 
 .webmcp-link {
@@ -99,21 +127,17 @@
   border: 0;
   background: none;
   font: inherit;
-  font-size: 0.875rem;
-  color: #0b3a53;
+  font-size: var(--text-small);
+  color: var(--text);
   text-decoration: underline;
+  text-underline-offset: 0.2em;
   cursor: pointer;
 }
 
 .webmcp-dialog button:focus-visible,
 .webmcp-settings input:focus-visible {
-  outline: 3px solid #0b3a53;
-  outline-offset: 2px;
-}
-
-/* White ring so the focus indicator also holds on the navy-tinted backdrop. */
-.webmcp-dialog button:focus-visible {
-  box-shadow: 0 0 0 2px #fff;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .webmcp-visually-hidden {
@@ -129,11 +153,29 @@
 }
 
 @media (forced-colors: active) {
+  .webmcp-dialog,
   .webmcp-state {
     border: 1px solid CanvasText;
   }
 
   .webmcp-btn {
     border: 1px solid ButtonText;
+  }
+}
+
+@media (max-width: 30em) {
+  /* The decision row stays in view while the request scrolls (Approve is never
+     below the fold on a phone). */
+  .webmcp-footer {
+    position: sticky;
+    bottom: calc(-1 * var(--space-4));
+    margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
+    padding: var(--space-2) var(--space-4) var(--space-3);
+    background-color: var(--raised);
+  }
+
+  .webmcp-btn {
+    flex: 1 1 100%;
+    margin-left: 0;
   }
 }

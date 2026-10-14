@@ -2,11 +2,11 @@
   "title": "Diagnostics",
   "tabs": {
     "logs": "Logs",
-    "retrieval-check": "Retrieval Check",
-    "dht-provide": "DHT Provide"
+    "retrieval-check": "Retrieval check",
+    "dht-provide": "DHT provide"
   },
   "logs": {
-    "title": "Node Logs",
+    "title": "Node logs",
     "streaming": {
       "statusActive": "Streaming Active",
       "statusStopped": "Streaming Stopped",
@@ -23,24 +23,25 @@
       "tooltipCollapse": "Collapse logs",
       "tooltipPlay": "Start streaming",
       "tooltipPause": "Stop streaming",
-      "tooltipSettings": "Configure streaming"
+      "tooltipSettings": "Configure streaming",
+      "toolbar": "Log controls"
     },
     "storage": {
-      "title": "Storage Statistics",
+      "title": "Storage statistics",
       "totalEntries": "Total Entries",
       "estimatedSize": "Estimated Size",
       "memoryBuffer": "Memory Buffer",
       "trashTooltip": "Clear all logs"
     },
     "config": {
-      "title": "Buffer Configuration",
+      "title": "Buffer configuration",
       "memoryBuffer": "Memory Buffer (entries)",
       "persistentBuffer": "Persistent Buffer (entries)",
       "warnThreshold": "Warning Threshold (logs/sec)",
       "autoDisableThreshold": "Auto-disable Threshold (logs/sec)"
     },
     "gologLevel": {
-      "title": "Log Level Configuration",
+      "title": "Log level configuration",
       "placeholder": "e.g. error,bitswap=info,nat=debug",
       "description": "Choose what gets logged and how much detail to show. Start with a base level like 'error' to see only problems, or add specific components to track (like 'error,nat=debug' to debug UPnP issues). Same syntax as GOLOG_LOG_LEVEL. <0>Learn more</0>",
       "invalidSubsystemLevel": "Subsystem \"{subsystem}\" must be followed by an equal sign and a log level."
@@ -58,7 +59,7 @@
       "recommendations": "Recommendations:",
       "cancel": "Cancel",
       "debugGlobal": {
-        "title": "Enable Debug Logging Globally?",
+        "title": "Enable debug logging globally?",
         "message": "You are about to enable DEBUG level logging for all subsystems. This will generate a very high volume of logs and may impact browser performance.",
         "detail1": "Debug logs can generate 100+ messages per second",
         "detail2": "High CPU usage and memory consumption",
@@ -66,10 +67,10 @@
         "suggestion1": "Consider enabling debug logs for specific subsystems only",
         "suggestion2": "Use for short debugging sessions (< 5 minutes)",
         "suggestion3": "Monitor the log rate indicator and disable if needed",
-        "confirm": "Enable Debug Globally"
+        "confirm": "Enable debug globally"
       },
       "highRate": {
-        "title": "High Log Rate Detected",
+        "title": "High log rate detected",
         "message": "Current log rate is {rate} logs/second, which may cause performance issues.",
         "detail1": "High log rates can slow down the browser",
         "detail2": "Memory usage will increase rapidly",
@@ -78,7 +79,7 @@
         "confirm": "Continue"
       },
       "autoDisable": {
-        "title": "Log Streaming Auto-Disabled",
+        "title": "Log streaming auto-disabled",
         "message": "Log streaming was automatically disabled due to extremely high rate ({rate} logs/sec).",
         "detail1": "This protects your browser from potential crashes",
         "detail2": "Logs are still being cached in persistent storage",
@@ -88,15 +89,15 @@
       }
     },
     "unsupported": {
-      "title": "Unsupported Kubo Version",
+      "title": "Unsupported Kubo version",
       "description": "Your current version of Kubo ({version}) does not support the log level management feature required for this diagnostics page.",
-      "upgradeTitle": "Upgrade Required",
+      "upgradeTitle": "Upgrade required",
       "upgradeDescription": "To use the log level management features, you need to upgrade to a newer version of Kubo that supports getting log levels and tailing logs from the RPC API endpoint.",
       "downloadKubo": "Download Kubo"
     }
   },
   "dhtProvide": {
-    "title": "DHT Provide",
+    "title": "DHT provide",
     "node": "Node",
     "unknown": "Unknown",
     "cidLabel": "CID to provide",

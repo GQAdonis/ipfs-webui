@@ -6,6 +6,7 @@ import { connect } from 'redux-bundler-react'
 import PropTypes from 'prop-types'
 import filesize from 'filesize'
 import { Title } from './Commons.js'
+import { withChartPalette } from '../promethity/tokens.js'
 
 // matching units returned by 'ipfs stats bw' in CLI
 const bwUnits = {
@@ -17,8 +18,12 @@ const bwUnits = {
 const chartsize = filesize.partial({ round: 1, exponent: 2, ...bwUnits })
 const tootltipSize = filesize.partial({ round: 0, output: 'array', ...bwUnits })
 
-const defaultSettings = {
-  defaultFontFamily: "'Inter UI', system-ui, sans-serif",
+// Chart.js 2 reads canvas colours, not CSS, so axis, grid and legend colours
+// come from the token palette (src/promethity/tokens.js). Grid lines are a
+// `raised` fill step on the panel, not a drawn rule.
+const defaultSettings = (palette) => ({
+  defaultFontFamily: palette.fontBody,
+  defaultFontColor: palette.textMuted,
   responsive: true,
   tooltips: {
     mode: 'x',
@@ -31,54 +36,54 @@ const defaultSettings = {
       type: 'time',
       time: {
         minUnit: 'second'
-      }
+      },
+      gridLines: { color: palette.grid, zeroLineColor: palette.grid },
+      ticks: { fontColor: palette.textMuted, fontFamily: palette.fontBody }
     }],
     yAxes: [{
       stacked: true,
+      gridLines: { color: palette.grid, zeroLineColor: palette.grid },
       ticks: {
         callback: v => chartsize(v) + '/s',
         suggestedMax: 200000,
-        maxTicksLimit: 5
+        maxTicksLimit: 5,
+        fontColor: palette.textMuted,
+        fontFamily: palette.fontBody
       }
     }]
   },
   legend: {
     reverse: true,
     display: true,
-    position: 'bottom'
+    position: 'bottom',
+    labels: { fontColor: palette.text, fontFamily: palette.fontBody }
   }
-}
+})
 
 const Tooltip = ({ t, bw, show, pos }) => {
   if (!show) {
     return null
   }
 
+  // A `raised` fill over the chart, text on tokens; no shadow (DESIGN.md).
+  // The caret is a clip-path triangle in the same fill.
   return (
-    <div className='sans-serif absolute bg-white pa2 br3' style={{
+    <div className='sans-serif absolute pa2 prom-chart-tooltip' style={{
       top: `${pos.top + window.scrollY}px`,
       left: `${pos.left}px`,
-      transform: 'translateY(calc(-100% - 20px))',
-      filter: 'drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.2))'
+      transform: 'translateY(calc(-100% - 20px))'
     }}>
-      <div className='absolute' style={{
-        bottom: '-14px',
-        left: '0',
-        width: '0',
-        height: '0',
-        borderTop: '20px solid white',
-        borderRight: '20px solid transparent'
-      }} />
+      <div className='prom-chart-tooltip-caret' />
       <div className='dt'>
         <div className='dt-row'>
-          <span className='dtc f7 charcoal tr'>{t('app:terms.in').toLowerCase()}:</span>
-          <span className='f4 ml1 charcoal-muted'>{bw.in[0]}</span>
-          <span className='f7 charcoal-muted'>{bw.in[1]}/s</span>
+          <span className='dtc f7 tr prom-chart-tooltip-label'>{t('app:terms.in').toLowerCase()}:</span>
+          <span className='f4 ml1 prom-chart-tooltip-value'>{bw.in[0]}</span>
+          <span className='f7 prom-chart-tooltip-label'>{bw.in[1]}/s</span>
         </div>
         <div className='dt-row'>
-          <span className='dtc f7 charcoal tr'>{t('app:terms.out').toLowerCase()}:</span>
-          <span className='f4 ml1 charcoal-muted'>{bw.out[0]}</span>
-          <span className='f7 charcoal-muted'>{bw.out[1]}/s</span>
+          <span className='dtc f7 tr prom-chart-tooltip-label'>{t('app:terms.out').toLowerCase()}:</span>
+          <span className='f4 ml1 prom-chart-tooltip-value'>{bw.out[0]}</span>
+          <span className='f7 prom-chart-tooltip-label'>{bw.out[1]}/s</span>
         </div>
       </div>
     </div>
@@ -88,6 +93,7 @@ const Tooltip = ({ t, bw, show, pos }) => {
 class NodeBandwidthChart extends React.Component {
   static propTypes = {
     nodeBandwidthChartData: PropTypes.object.isRequired,
+    palette: PropTypes.object.isRequired,
     animatedPoints: PropTypes.number
   }
 
@@ -110,41 +116,30 @@ class NodeBandwidthChart extends React.Component {
     return tooltip
   }
 
-  // generates tooltip data.
+  // Flat series fills from the token palette (webui-dataviz-reskin 1.1), one
+  // fill per series. Both series are named in the legend.
   data = () => {
-    const { t, nodeBandwidthChartData } = this.props
+    const { t, nodeBandwidthChartData, palette } = this.props
 
-    return function (canvas) {
-      const ctx = canvas.getContext('2d')
-
-      const gradientIn = ctx.createLinearGradient(canvas.width / 2, 0, canvas.width / 2, canvas.height)
-      gradientIn.addColorStop(0, '#70c5cd')
-      gradientIn.addColorStop(1, '#c6f1f3')
-
-      const gradientOut = ctx.createLinearGradient(canvas.width / 2, 0, canvas.width / 2, canvas.height / 2)
-      gradientOut.addColorStop(0, '#f19237')
-      gradientOut.addColorStop(1, '#f9d1a6')
-
-      return {
-        datasets: [
-          {
-            label: t('app:terms.out'),
-            data: nodeBandwidthChartData.out,
-            borderColor: gradientOut,
-            backgroundColor: gradientOut,
-            pointRadius: 2,
-            cubicInterpolationMode: 'monotone'
-          },
-          {
-            label: t('app:terms.in'),
-            data: nodeBandwidthChartData.in,
-            borderColor: gradientIn,
-            backgroundColor: gradientIn,
-            pointRadius: 2,
-            cubicInterpolationMode: 'monotone'
-          }
-        ]
-      }
+    return {
+      datasets: [
+        {
+          label: t('app:terms.out'),
+          data: nodeBandwidthChartData.out,
+          borderColor: palette.up,
+          backgroundColor: palette.up,
+          pointRadius: 2,
+          cubicInterpolationMode: 'monotone'
+        },
+        {
+          label: t('app:terms.in'),
+          data: nodeBandwidthChartData.in,
+          borderColor: palette.down,
+          backgroundColor: palette.down,
+          pointRadius: 2,
+          cubicInterpolationMode: 'monotone'
+        }
+      ]
     }
   }
 
@@ -160,18 +155,19 @@ class NodeBandwidthChart extends React.Component {
   }
 
   render () {
-    const { t, animatedPoints, nodeBandwidthChartData } = this.props
+    const { t, animatedPoints, nodeBandwidthChartData, palette } = this.props
 
     if (nodeBandwidthChartData.in.length === 0) {
       return null
     }
 
     const tooltip = this.tooltip
+    const settings = defaultSettings(palette)
 
     const options = {
-      ...defaultSettings,
+      ...settings,
       tooltips: {
-        ...defaultSettings.tooltips,
+        ...settings.tooltips,
         custom: function (model) {
           const data = { show: true }
 
@@ -211,4 +207,4 @@ class NodeBandwidthChart extends React.Component {
   }
 }
 
-export default connect('selectNodeBandwidthChartData', withTranslation('status')(NodeBandwidthChart))
+export default connect('selectNodeBandwidthChartData', withTranslation('status')(withChartPalette(NodeBandwidthChart)))

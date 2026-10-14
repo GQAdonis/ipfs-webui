@@ -1,7 +1,7 @@
 import React, { type CSSProperties, useMemo, useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import IconTooltip from '../../components/tooltip/icon-tooltip'
-import { GlyphShrink, GlyphExpand, GlyphPlay, GlyphPause, GlyphMoveDown, GlyphSettings, GlyphTrash } from '../../icons/all'
+import { ExpandIcon, CollapseIcon, PlayIcon, PauseIcon, ScrollLatestIcon, ConfigureIcon, ClearIcon } from '../../promethity/icons.js'
 import { BufferConfigModal } from './buffer-config-modal'
 import { useLogs } from '../../contexts/logs'
 import './log-viewer.css'
@@ -42,9 +42,10 @@ interface TopControlsProps {
   hasEntries: boolean
   hasInteracted: boolean
   setHasInteracted: (value: boolean) => void
+  onClear: () => void
 }
 
-const TopControls: React.FC<TopControlsProps> = ({ isExpanded, setIsExpanded, isStreaming, startStreaming, stopStreaming, onSettingsClick, isAtBottom, scrollToBottom, hasEntries, hasInteracted, setHasInteracted }) => {
+const TopControls: React.FC<TopControlsProps> = ({ onClear, isExpanded, setIsExpanded, isStreaming, startStreaming, stopStreaming, onSettingsClick, isAtBottom, scrollToBottom, hasEntries, hasInteracted, setHasInteracted }) => {
   const { t } = useTranslation('diagnostics')
   const [showInitialTooltip, setShowInitialTooltip] = useState(true)
 
@@ -73,20 +74,6 @@ const TopControls: React.FC<TopControlsProps> = ({ isExpanded, setIsExpanded, is
     }
   }, [hasInteracted])
 
-  const SizeControl = useMemo(() => {
-    if (!isExpanded) {
-      return GlyphExpand
-    }
-    return GlyphShrink
-  }, [isExpanded])
-
-  const PlayPauseControl = useMemo(() => {
-    if (isStreaming) {
-      return GlyphPause
-    }
-    return GlyphPlay
-  }, [isStreaming])
-
   const toggleStreaming = useCallback(() => {
     setHasInteracted(true)
     if (isStreaming) {
@@ -96,56 +83,47 @@ const TopControls: React.FC<TopControlsProps> = ({ isExpanded, setIsExpanded, is
     }
   }, [isStreaming, startStreaming, stopStreaming, setHasInteracted])
 
-  // because the settings icon is from ipfs-css and the others are from lucide, we need to adjust a little bit to make it look the same
-  const settingsIconStyle = { transformBox: 'fill-box', transformOrigin: 'center', transform: 'scale(1.50)' } as const
+  const SizeIcon = isExpanded ? CollapseIcon : ExpandIcon
+  const PlayPauseIcon = isStreaming ? PauseIcon : PlayIcon
+  const sizeLabel = isExpanded ? t('logs.entries.tooltipCollapse') : t('logs.entries.tooltipExpand')
+  const streamLabel = isStreaming ? t('logs.entries.tooltipPause') : t('logs.entries.tooltipPlay')
+  const nudge = !isStreaming && !hasEntries && !hasInteracted
 
   return (
-    <div className='absolute top-1 right-0 mr3 z-10 flex flex-column flex-start items-end'>
-      <IconTooltip key={isExpanded ? 'expanded' : 'collapsed'} text={isExpanded ? t('logs.entries.tooltipCollapse') : t('logs.entries.tooltipExpand')} position='left'>
-        <SizeControl width={32} height={32} className='pointer gray o-70 hover-o-100 hover-black mb1' onClick={() => setIsExpanded(!isExpanded)} />
-      </IconTooltip>
-      <IconTooltip text={t('logs.entries.tooltipSettings')} position='left'>
-        <GlyphSettings width={32} height={32} className='pointer gray o-70 hover-o-100 hover-black mb1 fill-current-color' style={settingsIconStyle} onClick={onSettingsClick} />
-      </IconTooltip>
-      <IconTooltip
-        text={isStreaming ? t('logs.entries.tooltipPause') : t('logs.entries.tooltipPlay')}
-        position='left'
-        forceShow={showInitialTooltip && !isStreaming && !hasEntries}
-      >
-        <PlayPauseControl
-          width={32}
-          height={32}
-          className={`pointer mb1 ${!isStreaming && !hasEntries && !hasInteracted ? 'navy-muted pulsate' : isStreaming ? 'gray breathe hover-black' : 'gray o-70 hover-o-100 hover-black'}`}
-          onClick={toggleStreaming}
-        />
-      </IconTooltip>
+    <div className='log-toolbar' role='toolbar' aria-label={t('logs.entries.toolbar')}>
       {!isAtBottom && (
-        <IconTooltip text={t('logs.entries.tooltipGoToLatest')} position='left'>
-          <GlyphMoveDown width={32} height={32} className='pointer gray o-70 hover-o-100 hover-black' onClick={scrollToBottom} />
+        <IconTooltip text={t('logs.entries.tooltipGoToLatest')} position='bottom'>
+          <button type='button' className='prom-log-btn' aria-label={t('logs.entries.tooltipGoToLatest')} onClick={scrollToBottom}>
+            <ScrollLatestIcon size={24} />
+          </button>
         </IconTooltip>
       )}
+      <IconTooltip
+        text={streamLabel}
+        position='bottom'
+        forceShow={showInitialTooltip && !isStreaming && !hasEntries}
+      >
+        <button type='button' className={`prom-log-btn ${nudge ? 'prom-log-btn-nudge pulsate' : ''} ${isStreaming ? 'breathe' : ''}`} aria-label={streamLabel} aria-pressed={isStreaming} onClick={toggleStreaming}>
+          <PlayPauseIcon size={24} />
+        </button>
+      </IconTooltip>
+      <IconTooltip text={t('logs.entries.tooltipSettings')} position='bottom'>
+        <button type='button' className='prom-log-btn' aria-label={t('logs.entries.tooltipSettings')} onClick={onSettingsClick}>
+          <ConfigureIcon size={24} />
+        </button>
+      </IconTooltip>
+      <IconTooltip key={isExpanded ? 'expanded' : 'collapsed'} text={sizeLabel} position='bottom'>
+        <button type='button' className='prom-log-btn' aria-label={sizeLabel} aria-expanded={isExpanded} onClick={() => setIsExpanded(!isExpanded)}>
+          <SizeIcon size={24} />
+        </button>
+      </IconTooltip>
+      <IconTooltip text={t('logs.storage.trashTooltip')} position='bottom'>
+        <button type='button' className='prom-log-btn' aria-label={t('logs.storage.trashTooltip')} onClick={onClear}>
+          <ClearIcon size={24} />
+        </button>
+      </IconTooltip>
     </div>
   )
-}
-
-interface BottomControlsProps {
-  clearEntries: () => void
-  onClear: () => void
-}
-
-const BottomControls: React.FC<BottomControlsProps> = ({ clearEntries, onClear }) => {
-  const { t } = useTranslation('diagnostics')
-
-  const handleClear = useCallback(() => {
-    clearEntries()
-    onClear()
-  }, [clearEntries, onClear])
-
-  return <div className='absolute bottom-1 right-0 mr3 z-10'>
-    <IconTooltip text={t('logs.storage.trashTooltip')} position='left'>
-      <GlyphTrash width={32} height={32} className='pointer gray o-70 hover-o-100 hover-black mb1 fill-current-color' onClick={handleClear} />
-    </IconTooltip>
-  </div>
 }
 
 export interface LogViewerProps {
@@ -249,6 +227,11 @@ export const LogViewer: React.FC<LogViewerProps> = ({ logEntries, isStreaming, c
     setHasInteracted(false)
   }, [isStreaming, stopStreaming])
 
+  const handleClear = useCallback(() => {
+    clearEntries()
+    handleClearReset()
+  }, [clearEntries, handleClearReset])
+
   const styles = useMemo<CSSProperties>(() => {
     const baseStyles = {
       ...style
@@ -283,7 +266,7 @@ export const LogViewer: React.FC<LogViewerProps> = ({ logEntries, isStreaming, c
           style={{
             backdropFilter: 'blur(4px)',
             WebkitBackdropFilter: 'blur(4px)',
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            backgroundColor: 'color-mix(in srgb, var(--ground) 70%, transparent)',
             zIndex: 999
           }}
           role="button"
@@ -298,15 +281,14 @@ export const LogViewer: React.FC<LogViewerProps> = ({ logEntries, isStreaming, c
         />
       )}
       <div className='relative code' style={styles}>
-        <TopControls isExpanded={isExpanded} setIsExpanded={setIsExpanded} isStreaming={isStreaming} startStreaming={startStreaming} stopStreaming={stopStreaming} onSettingsClick={() => setIsSettingsModalOpen(true)} isAtBottom={isAtBottom} scrollToBottom={scrollToBottom} hasEntries={logEntries.length > 0} hasInteracted={hasInteracted} setHasInteracted={setHasInteracted} />
+        <TopControls isExpanded={isExpanded} setIsExpanded={setIsExpanded} isStreaming={isStreaming} startStreaming={startStreaming} stopStreaming={stopStreaming} onSettingsClick={() => setIsSettingsModalOpen(true)} isAtBottom={isAtBottom} scrollToBottom={scrollToBottom} hasEntries={logEntries.length > 0} hasInteracted={hasInteracted} setHasInteracted={setHasInteracted} onClear={handleClear} />
         <div
           ref={containerRef}
-          className='ba b--black-20 bg-near-white f6 overflow-auto overflow-x-hidden flex-auto'
+          className='bg-near-white f6 overflow-auto overflow-x-hidden flex-auto'
           style={{ minHeight: 0 }}
           onScroll={handleScroll}
         >
           <LogEntryList logEntries={logEntries} isStreaming={isStreaming} />
-          <BottomControls clearEntries={clearEntries} onClear={handleClearReset} />
         </div>
 
         <BufferConfigModal

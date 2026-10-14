@@ -21,3 +21,12 @@
 .BreadcrumbsButton.no-events {
     pointer-events: none;
 }
+
+/* Root chip (L5): a 44px target on the shared control fill. */
+.BreadcrumbsRoot {
+  min-height: 44px;
+  min-width: 44px;
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+  font-size: var(--text-small);
+}

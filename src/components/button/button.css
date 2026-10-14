@@ -1,37 +1,87 @@
+/* Promethity button skin (webui-shell-redesign 1.2). One primary per view on
+   the accent fill; secondary actions sit on neutral fills; danger on the err
+   fill. Labels come from the tokens, not from the caller's text classes: the
+   old white label on a teal/red fill failed WCAG 2.2 AA in the dark theme.
+   Fills only — no borders, no shadows; the only outline is the accent focus
+   ring (kubo DESIGN.md, Components and states). */
+
 .Button {
-  opacity: 0.9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  font-family: var(--font-body);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--motion-duration) var(--motion-ease), color var(--motion-duration) var(--motion-ease), opacity var(--motion-duration) var(--motion-ease), filter var(--motion-duration) var(--motion-ease);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
-.Button:hover {
-  opacity: 1;
+/* Label colour follows the fill. Solid accent/state fills take the on-accent
+   label; neutral fills (remapped to surface/control/raised by
+   theme-overrides.css) take the primary text colour. The `fill` property is
+   set alongside so icon glyphs inside the button inherit it. */
+.Button.bg-teal,
+.Button.bg-aqua,
+.Button.bg-link,
+.Button.bg-red,
+.Button.bg-green {
+  color: var(--on-accent);
+  fill: var(--on-accent);
 }
 
-.Button:active {
-  opacity: 0.95;
-  box-shadow: inset 0 0 8px rgba(0,0,0,0.3);
+.Button.bg-navy,
+.Button.bg-charcoal,
+.Button.bg-gray,
+.Button.bg-gray-muted,
+.Button.bg-snow,
+.Button.bg-washed-blue {
+  color: var(--text);
+  fill: var(--text);
+}
+
+.Button.bg-navy,
+.Button.bg-charcoal {
+  background-color: var(--control);
+}
+
+.Button:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+.Button:not(:disabled):active {
+  filter: brightness(0.96);
 }
 
 .Button:focus {
   outline: none;
 }
 
-/* Improve touch responsiveness */
-@media (hover: none) and (pointer: coarse) {
-  .Button {
-    min-height: 44px;
-    padding: 12px 16px;
-  }
+.Button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .Button:disabled {
-  opacity: 0.8;
-  box-shadow: initial;
+  opacity: 0.45;
   cursor: default;
 }
 
-.Button.link:focus {
-  outline: none;
-  box-shadow: none;
+.Button.link {
+  color: var(--accent-text);
+  background-color: transparent;
+}
+
+.Button.link:not(:disabled):hover,
+.Button.link:not(:disabled):focus-visible {
+  color: var(--accent-text);
+  filter: none;
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Button {
+    transition: none;
+  }
 }

@@ -192,12 +192,12 @@ export const PeersTable = ({ className, t, peerLocationsForSwarm, selectedPeers 
   return (
     <div className={`bg-white-70 center ${className}`} style={{ height: `${tableHeight}px`, maxWidth: 1764 }}>
         <FilterInput filter={filter} setFilter={filterCb} t={t} filteredCount={sortedList.length} />
-        { peers && <AutoSizer disableHeight>
+        { peers && <div className='peers-table-frame'><div className='peers-table-inner'><AutoSizer disableHeight>
           {({ width }) => (
             <>
               <Table
                 className='tl fw4 w-100 f6'
-                headerClassName='teal fw2 ttu tracked ph2 no-select'
+                headerClassName='charcoal-muted fw6 ph2 no-select'
                 rowClassName={(rowInfo) => rowClassRenderer(rowInfo, peers, selectedPeers)}
                 width={width}
                 height={tableHeight}
@@ -209,7 +209,7 @@ export const PeersTable = ({ className, t, peerLocationsForSwarm, selectedPeers 
                 sortBy={sortBy}
                 sortDirection={sortDirection}>
                 <Column label={t('app:terms.location')} cellRenderer={locationCellRenderer(t)} dataKey='location' width={350} className='f6 charcoal truncate pl2' />
-                <Column label={t('app:terms.latency')} cellRenderer={latencyCellRenderer} dataKey='latency' width={100} className='f6 charcoal pl2' />
+                <Column label={t('app:terms.latency')} cellRenderer={latencyCellRenderer} dataKey='latency' width={130} className='f6 charcoal pl2' />
                 <Column label={t('app:terms.peerId')} cellRenderer={peerIdCellRenderer(t)} dataKey='peerId' width={200} className='charcoal monospace truncate f6 pl2' />
                 <Column label={t('app:terms.connection')} cellRenderer={connectionCellRenderer(t)} dataKey='connection' width={200} className='charcoal monospace truncate f7 pl2' />
                 <Column label={t('agentVersion')} cellRenderer={agentVersionCellRenderer(t)} dataKey='agentVersion' width={250} className='charcoal monospace truncate f7 pl2' />
@@ -217,7 +217,7 @@ export const PeersTable = ({ className, t, peerLocationsForSwarm, selectedPeers 
               </Table>
             </>
           )}
-        </AutoSizer> }
+        </AutoSizer></div></div> }
       </div>
   )
 }

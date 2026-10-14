@@ -1,4 +1,4 @@
-.ComponentLoader { animation: fadeCube 4s ease-in-out infinite both;}
+.ComponentLoader { color: var(--text-muted); animation: fadeCube 4s ease-in-out infinite both;}
 
 .ComponentLoader .shape {
   stroke-dashoffset: 4187;
@@ -34,4 +34,16 @@
   60% { opacity: 1; }
   75% { opacity: 0; }
   100% { opacity: 0; }
+}
+
+/* Flat token fills: no gradients. The body and face steps differ by fill
+   alone; the three shading paths of the upstream art are dropped. */
+.ComponentLoader .body { color: var(--raised); }
+.ComponentLoader .face { color: var(--control); }
+.ComponentLoader path:not(.shape):not(.body):not(.face) { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ComponentLoader, .ComponentLoader .shape, .ComponentLoader path:not(.shape) { animation: none; }
+  .ComponentLoader .shape { stroke-dashoffset: 0; }
+  .ComponentLoader path:not(.shape) { opacity: 1; }
 }
