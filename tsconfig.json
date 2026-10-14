@@ -103,6 +103,8 @@
     "src/i18n.js",
     "src/lib/i18n-localeParser.js",
     "src/settings/Title.js",
+    "src/promethity/brand-wordmark.js",
+    "src/promethity/brand-p-icon.js",
     "src/webmcp/*.js",
     "src/webmcp/vendor/**/*.d.ts"
   ],

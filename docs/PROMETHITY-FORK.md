@@ -6,7 +6,7 @@ Source: `assessment-ui.md` section 5.8 (phase `agent-backend-settings`), which f
 
 - New `src/promethity/` folder (`tokens.css`, `fonts.css`, `base.css`, `theme-overrides.css`, `brand.js` constants, logo components) imported last in `src/index.js`. `theme-overrides.css` remaps the ipfs-css/Tachyons colour classes (`.bg-navy`, `.aqua`, `.teal`, `.bg-snow`, `.charcoal`, `.b--*`, and friends) onto Promethity tokens, so the ~163 files using Tachyons classes recolour with zero edits. Override-layer files do not conflict with upstream at all.
 - The brand name lives in one constant (`src/promethity/brand.js`) and one Helmet helper, so titles compose as `${t('title')} | ${brand.name}` instead of editing the Transifex-managed locale files.
-- Only the ~12 files below are structurally edited. Everything else is upstream code under an override layer.
+- Only the files below are structurally edited. Everything else is upstream code under an override layer.
 
 Non-goals (recorded so a merger does not "fix" them): no React 19 / Vite / Tailwind migration of this shell, no rewrite of Tachyons markup across the 163 files, and no edits inside `ipld-explorer-components` (the `/explore` route is themed at the wrapper level only; its internal markup stays upstream and is a known visual seam).
 
@@ -16,6 +16,7 @@ Non-goals (recorded so a merger does not "fix" them): no React 19 / Vite / Tailw
 |---|---|---|
 | `src/App.js` | Shell redesign: `surface` rail + `ground` top bar replace the navy rail and washed-blue top bar; inline hex styles (lines ~70/74) and the `main` class change. | Small file; reapply the shell wrapper on top of upstream's route/bundle wiring. |
 | `src/navigation/NavBar.js` | Rail restyle: Promethity wordmark (p icon when collapsed under 860px), Lucide icons, active item is `accent-text` + 600 with a fill step, no accent bars. | Upstream adds nav items here often; take upstream's item list, keep the fork's presentation. |
+| `src/navigation/ipfs-logo.svg`, `src/navigation/ipfs-logo-text-vert.svg`, `src/navigation/ipfs-logo-text-horiz.svg` | Removed with the IPFS brand marks; the NavBar renders `src/promethity/brand-wordmark.js` and `src/promethity/brand-p-icon.js` instead (token-filled, theme-adaptive, one mark per surface). | If upstream re-adds a logo import, drop it and keep the Promethity marks. |
 | `src/navigation/NavBar.css` | Styles for the rail restyle. | Fork-owned presentation; prefer the fork side, re-check upstream additions. |
 | `src/components/box/Box.js` | `Box` white sheets become `surface` panels on tokens; fills, no borders, no shadows. | Presentation-only change; take the fork side. |
 | `src/settings/Title.js` | `ttu tracked` teal section titles (line 5) replaced by the type scale (Syne titles, Hanken UI text per DESIGN.md). | One-line class change; reapply after merge. |
@@ -27,6 +28,10 @@ Non-goals (recorded so a merger does not "fix" them): no React 19 / Vite / Tailw
 | `src/status/NodeBandwidthChart.js` | Same chart reskin; gradients (line ~121) become flat fills from tokens. | Same note. |
 | `public/index.html` | Two `theme-color` metas, title, description and generator for Promethity; font preloads for the bundled woff2 set. | Reapply meta/title changes onto upstream's HTML shell changes. |
 | `public/manifest.json` | Promethity name, icon set (192, 512, maskable) and theme colours. | Fork-owned; prefer the fork side unless upstream adds required manifest keys. |
+| `public/favicon.ico`, `public/favicon.svg`, `public/apple-touch-icon.png`, `public/icon-192.png`, `public/icon-512.png`, `public/maskable-512.png` | Promethity p-icon set copied from the brand (`branding/logo/p-icon` web and pwa exports), replacing the IPFS favicon; `public/ipfs-logo-512-ice.png` is removed with it. | Fork-owned; prefer the fork side.
+| `src/index.js` | Imports the Promethity override layer (`src/promethity/fonts.css`, `tokens.css`, then `theme-overrides.css` last) after the upstream CSS imports so the cascade order holds, and bootstraps the D16 theme store (`initTheme()` from `src/promethity/theme.js`) before first render. | One-line import additions and the bootstrap call; keep them after upstream's imports when merging. |
+| `config-overrides.js` (+ `strip-ipfs-css-fonts-loader.cjs`) | Build-time removal of the ipfs-css Inter/Montserrat `@font-face` blocks so the ~100 unused font files never enter the bundle; the fork's faces come from `src/promethity/fonts.css`. | Upstream rarely touches the webpack override; keep the rule, take upstream's other changes. |
+| `src/index.css` | The React Joyride tooltip override moved off `font-family: 'Montserrat'` (dropped with ipfs-css's fonts) onto the Hanken Grotesk stack. | One-property change; prefer the fork side. |
 
 ## Everything else
 

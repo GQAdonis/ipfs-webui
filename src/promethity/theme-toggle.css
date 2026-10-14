@@ -1,0 +1,60 @@
+/* D16 theme toggle: a segmented radio group on Promethity tokens. The 1px
+   text-muted edge is the D7 form-control exception (WCAG 2.2 1.4.11); the
+   focus ring is the brand's 2px accent outline. Every value is a var()
+   reference, so both themes resolve from tokens.css without touching this
+   file. The checked segment follows the active-tab rule: accent-text at
+   weight 600 on a raised fill, never a pill or underline. */
+
+.pm-theme-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--control);
+  border-radius: var(--radius-sm);
+  /* D7 edge, drawn inset so it never shifts layout */
+  box-shadow: inset 0 0 0 1px var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+}
+
+.pm-theme-toggle-option {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Visually hidden but focusable native input; the span is the visible segment */
+.pm-theme-toggle-option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pm-theme-toggle-option span {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: color var(--motion-duration) var(--motion-ease), background-color var(--motion-duration) var(--motion-ease);
+  pointer-events: none;
+}
+
+.pm-theme-toggle-option span[data-checked] {
+  background: var(--raised);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.pm-theme-toggle-option input:focus-visible + span {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-theme-toggle-option span {
+    transition: none;
+  }
+}

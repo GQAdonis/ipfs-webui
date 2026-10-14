@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'redux-bundler-react'
 import './index.css'
 import 'react-virtualized/styles.css'
+import './promethity/fonts.css'
+import './promethity/tokens.css'
+import './promethity/theme-overrides.css'
 import App from './App.js'
 import getStore from './bundles/index.js'
 import bundleCache from './lib/bundle-cache.js'
@@ -12,6 +15,10 @@ import { DndProvider } from 'react-dnd'
 import DndBackend from './lib/dnd-backend.js'
 import { HeliaProvider, ExploreProvider } from 'ipld-explorer-components/providers'
 import { ContextBridgeProvider } from './helpers/context-bridge.jsx'
+import { initTheme } from './promethity/theme.js'
+
+// Apply the persisted Promethity theme (D16) before first render.
+initTheme()
 
 const appVersion = process.env.REACT_APP_VERSION
 const gitRevision = process.env.REACT_APP_GIT_REV

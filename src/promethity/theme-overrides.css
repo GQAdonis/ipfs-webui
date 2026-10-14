@@ -1,0 +1,202 @@
+/* Promethity theme overrides: remaps the ipfs-css/Tachyons colour classes onto
+   the Promethity tokens from tokens.css, so the ~163 files using these classes
+   recolour with zero markup edits. Imported last in src/index.js, after
+   ipfs-css, so equal-specificity rules here win by cascade order. Every value
+   is a var() reference: light and dark themes follow the data-theme attribute
+   without touching this file.
+
+   Mapping rationale:
+   - The old IPFS accent family (aqua, teal, link) maps to --accent-text for
+     text and --accent for fills: it was the action/link colour, and ember is
+     the Promethity action colour. Accent-family SVG fills map to --text-muted
+     instead: icons read as muted glyphs, and the one accent per view comes
+     from the structural edits (NavBar, buttons), keeping accent near the
+     brand's two-percent rule.
+   - Neutral darks (navy, charcoal) become --text / --surface, their muted
+     variants --text-muted / --raised. Light neutrals (snow, washed-blue)
+     become --text / --ground, so old light-on-dark and dark-on-light pairings
+     both land on theme-aware text on theme-aware surfaces.
+   - State hues keep their meaning: red/yellow/green map to --err/--warn/--ok,
+     muted variants to the matching --*-tint. White text paired with solid
+     state fills (old buttons, toasts) is a known seam owned by the
+     shell-redesign change (button.tsx, Notify); the pairings that use
+     remapped text classes hold WCAG AA in both themes.
+   - All borders map to --control (a receding 1px edge, the D7 philosophy);
+     state-coloured borders keep their state colour.
+   - .ipfs-gradient-0 becomes a flat --ground fill: the brand forbids
+     gradients. */
+
+/* ---- text ---- */
+
+.navy, .charcoal, .snow, .washed-blue { color: var(--text); }
+
+.navy-muted, .charcoal-muted, .gray, .gray-muted, .snow-muted { color: var(--text-muted); }
+
+.aqua, .aqua-muted, .teal, .teal-muted, .link { color: var(--accent-text); }
+
+.red, .red-muted { color: var(--err); }
+
+.yellow, .yellow-muted { color: var(--warn); }
+
+.green, .green-muted { color: var(--ok); }
+
+/* ---- backgrounds ---- */
+
+.bg-navy, .bg-charcoal { background-color: var(--surface); }
+
+.bg-navy-muted, .bg-charcoal-muted, .bg-gray-muted, .bg-snow-muted { background-color: var(--raised); }
+
+.bg-gray { background-color: var(--control); }
+
+.bg-aqua, .bg-teal, .bg-link { background-color: var(--accent); }
+
+.bg-aqua-muted, .bg-teal-muted { background-color: var(--accent-tint); }
+
+.bg-snow, .bg-washed-blue { background-color: var(--ground); }
+
+.bg-red { background-color: var(--err); }
+
+.bg-red-muted { background-color: var(--err-tint); }
+
+.bg-yellow { background-color: var(--warn); }
+
+.bg-yellow-muted { background-color: var(--warn-tint); }
+
+.bg-green { background-color: var(--ok); }
+
+.bg-green-muted { background-color: var(--ok-tint); }
+
+/* ---- hover text ---- */
+
+.hover-navy:hover, .hover-navy:focus,
+.hover-charcoal:hover, .hover-charcoal:focus,
+.hover-snow:hover, .hover-snow:focus,
+.hover-washed-blue:hover, .hover-washed-blue:focus { color: var(--text); }
+
+.hover-navy-muted:hover, .hover-navy-muted:focus,
+.hover-charcoal-muted:hover, .hover-charcoal-muted:focus,
+.hover-gray:hover, .hover-gray:focus,
+.hover-gray-muted:hover, .hover-gray-muted:focus,
+.hover-snow-muted:hover, .hover-snow-muted:focus { color: var(--text-muted); }
+
+.hover-aqua:hover, .hover-aqua:focus,
+.hover-aqua-muted:hover, .hover-aqua-muted:focus,
+.hover-teal:hover, .hover-teal:focus,
+.hover-teal-muted:hover, .hover-teal-muted:focus,
+.hover-link:hover, .hover-link:focus { color: var(--accent-text); }
+
+.hover-red:hover, .hover-red:focus,
+.hover-red-muted:hover, .hover-red-muted:focus { color: var(--err); }
+
+.hover-yellow:hover, .hover-yellow:focus,
+.hover-yellow-muted:hover, .hover-yellow-muted:focus { color: var(--warn); }
+
+.hover-green:hover, .hover-green:focus,
+.hover-green-muted:hover, .hover-green-muted:focus { color: var(--ok); }
+
+/* ---- hover backgrounds ---- */
+
+.hover-bg-navy:hover, .hover-bg-navy:focus,
+.hover-bg-charcoal:hover, .hover-bg-charcoal:focus { background-color: var(--surface); }
+
+.hover-bg-navy-muted:hover, .hover-bg-navy-muted:focus,
+.hover-bg-charcoal-muted:hover, .hover-bg-charcoal-muted:focus,
+.hover-bg-gray-muted:hover, .hover-bg-gray-muted:focus,
+.hover-bg-snow:hover, .hover-bg-snow:focus,
+.hover-bg-snow-muted:hover, .hover-bg-snow-muted:focus { background-color: var(--raised); }
+
+.hover-bg-gray:hover, .hover-bg-gray:focus { background-color: var(--control); }
+
+.hover-bg-aqua:hover, .hover-bg-aqua:focus,
+.hover-bg-teal:hover, .hover-bg-teal:focus,
+.hover-bg-link:hover, .hover-bg-link:focus { background-color: var(--accent); }
+
+.hover-bg-aqua-muted:hover, .hover-bg-aqua-muted:focus,
+.hover-bg-teal-muted:hover, .hover-bg-teal-muted:focus { background-color: var(--accent-tint); }
+
+.hover-bg-washed-blue:hover, .hover-bg-washed-blue:focus { background-color: var(--ground); }
+
+.hover-bg-red:hover, .hover-bg-red:focus { background-color: var(--err); }
+
+.hover-bg-red-muted:hover, .hover-bg-red-muted:focus { background-color: var(--err-tint); }
+
+.hover-bg-yellow:hover, .hover-bg-yellow:focus { background-color: var(--warn); }
+
+.hover-bg-yellow-muted:hover, .hover-bg-yellow-muted:focus { background-color: var(--warn-tint); }
+
+.hover-bg-green:hover, .hover-bg-green:focus { background-color: var(--ok); }
+
+.hover-bg-green-muted:hover, .hover-bg-green-muted:focus { background-color: var(--ok-tint); }
+
+/* ---- SVG fills ---- */
+
+.fill-navy, .fill-charcoal, .fill-snow, .fill-washed-blue { fill: var(--text); }
+
+.fill-navy-muted, .fill-charcoal-muted, .fill-gray, .fill-gray-muted, .fill-snow-muted,
+.fill-aqua, .fill-aqua-muted, .fill-teal, .fill-teal-muted, .fill-link { fill: var(--text-muted); }
+
+.fill-red, .fill-red-muted { fill: var(--err); }
+
+.fill-yellow, .fill-yellow-muted { fill: var(--warn); }
+
+.fill-green, .fill-green-muted { fill: var(--ok); }
+
+.hover-fill-navy:hover, .hover-fill-navy:focus,
+.hover-fill-charcoal:hover, .hover-fill-charcoal:focus,
+.hover-fill-snow:hover, .hover-fill-snow:focus,
+.hover-fill-washed-blue:hover, .hover-fill-washed-blue:focus { fill: var(--text); }
+
+.hover-fill-navy-muted:hover, .hover-fill-navy-muted:focus,
+.hover-fill-charcoal-muted:hover, .hover-fill-charcoal-muted:focus,
+.hover-fill-gray:hover, .hover-fill-gray:focus,
+.hover-fill-gray-muted:hover, .hover-fill-gray-muted:focus,
+.hover-fill-snow-muted:hover, .hover-fill-snow-muted:focus,
+.hover-fill-aqua:hover, .hover-fill-aqua:focus,
+.hover-fill-aqua-muted:hover, .hover-fill-aqua-muted:focus,
+.hover-fill-teal:hover, .hover-fill-teal:focus,
+.hover-fill-teal-muted:hover, .hover-fill-teal-muted:focus,
+.hover-fill-link:hover, .hover-fill-link:focus { fill: var(--text-muted); }
+
+.hover-fill-red:hover, .hover-fill-red:focus,
+.hover-fill-red-muted:hover, .hover-fill-red-muted:focus { fill: var(--err); }
+
+.hover-fill-yellow:hover, .hover-fill-yellow:focus,
+.hover-fill-yellow-muted:hover, .hover-fill-yellow-muted:focus { fill: var(--warn); }
+
+.hover-fill-green:hover, .hover-fill-green:focus,
+.hover-fill-green-muted:hover, .hover-fill-green-muted:focus { fill: var(--ok); }
+
+/* ---- borders ----
+   Neutral and accent-family borders recede to --control; state hues keep
+   their state colour so validation edges stay readable. */
+
+.border-navy, .b--navy,
+.border-navy-muted, .b--navy-muted,
+.border-aqua, .b--aqua,
+.border-aqua-muted, .b--aqua-muted,
+.border-gray, .b--gray,
+.border-gray-muted, .b--gray-muted,
+.border-charcoal, .b--charcoal,
+.border-charcoal-muted, .b--charcoal-muted,
+.border-teal, .b--teal,
+.border-teal-muted, .b--teal-muted,
+.border-snow, .b--snow,
+.border-snow-muted, .b--snow-muted,
+.border-link, .b--link,
+.border-washed-blue, .b--washed-blue { border-color: var(--control); }
+
+.border-red, .b--red,
+.border-red-muted, .b--red-muted { border-color: var(--err); }
+
+.border-yellow, .b--yellow,
+.border-yellow-muted, .b--yellow-muted { border-color: var(--warn); }
+
+.border-green, .b--green,
+.border-green-muted, .b--green-muted { border-color: var(--ok); }
+
+/* ---- misc ipfs-css ---- */
+
+.ipfs-gradient-0 {
+  background-image: none;
+  background-color: var(--ground);
+}

@@ -36,7 +36,7 @@ html, body, #root {
 
 .react-joyride__tooltip button {
   font-size: 14px !important;
-  font-family: 'Montserrat';
+  font-family: 'Hanken Grotesk', 'Helvetica Neue', Arial, system-ui, sans-serif;
 }
 
 /* =========================
