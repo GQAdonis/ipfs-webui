@@ -6,12 +6,16 @@
    without touching this file.
 
    Mapping rationale:
-   - The old IPFS accent family (aqua, teal, link) maps to --accent-text for
-     text and --accent for fills: it was the action/link colour, and ember is
-     the Promethity action colour. Accent-family SVG fills map to --text-muted
-     instead: icons read as muted glyphs, and the one accent per view comes
-     from the structural edits (NavBar, buttons), keeping accent near the
-     brand's two-percent rule.
+   - The old IPFS accent family (aqua, teal, link, blue) is NOT mapped to the
+     accent. It coloured headings, figures, chart titles, table headers and
+     every in-text link, which put ember on most of every page; DESIGN.md
+     allows about two percent (active nav, the primary action, the focus
+     ring). Text in that family maps to --text, uppercase tracked labels to
+     --text-muted, and links to --text with an underline as the non-colour
+     cue (hover is the one place accent-text appears). Accent-family SVG
+     fills map to --text-muted for the same reason. Accent fills
+     (.bg-aqua, .bg-teal, .bg-link) stay on --accent because they are the
+     Button primary fill that button.css labels with --on-accent.
    - Neutral darks (navy, charcoal) become --text / --surface, their muted
      variants --text-muted / --raised. Light neutrals (snow, washed-blue)
      become --text / --ground, so old light-on-dark and dark-on-light pairings
@@ -26,13 +30,60 @@
    - .ipfs-gradient-0 becomes a flat --ground fill: the brand forbids
      gradients. */
 
+/* ---- fonts (H1) ----
+   ipfs-css loaded Montserrat, Inter and its mono face; config-overrides.js
+   strips those @font-face blocks, so the helper classes that named them fell
+   back to the browser default (Verdana for headings). They remap here to the
+   bundled stacks: body text in Hanken Grotesk, headings in Syne at 600, code
+   and identifiers in JetBrains Mono. */
+
+.sans-serif, .montserrat { font-family: var(--font-body); }
+
+:is(h1, h2, h3, h4, h5, h6).montserrat,
+:is(h1, h2, h3, h4, h5, h6).sans-serif { font-family: var(--font-heading); font-weight: 600; }
+
+.monospace, .code { font-family: var(--font-mono); }
+
 /* ---- text ---- */
 
-.navy, .charcoal, .snow, .washed-blue { color: var(--text); }
+/* .link first: it is also a Tachyons reset class, so state and neutral colour
+   classes that follow (.red, .charcoal, .gray) win over it at equal specificity. */
+.link { color: var(--text); }
+
+.navy, .charcoal, .snow, .washed-blue,
+.aqua, .aqua-muted, .teal, .teal-muted { color: var(--text); }
 
 .navy-muted, .charcoal-muted, .gray, .gray-muted, .snow-muted { color: var(--text-muted); }
 
-.aqua, .aqua-muted, .teal, .teal-muted, .link { color: var(--accent-text); }
+/* Uppercase tracked labels (chart titles, section eyebrows, table headers)
+   are secondary text, not primary. */
+.tracked.aqua, .tracked.aqua-muted, .tracked.teal, .tracked.teal-muted { color: var(--text-muted); }
+
+/* In-text links: primary text with an underline as the non-colour cue
+   (WCAG 1.4.1); hover is the one sanctioned accent-text use. */
+a.blue, a.link.aqua, a.link.teal, a.link.blue, summary.blue, button.blue {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+a.blue:hover, a.blue:focus-visible, a.link.aqua:hover, a.link.teal:hover,
+summary.blue:hover, button.blue:hover { color: var(--accent-text); }
+
+.blue, .light-blue { color: var(--text); }
+
+/* Tachyons neutrals the ipfs-css family does not cover. */
+.black, .black-90, .black-80, .dark-gray { color: var(--text); }
+
+.black-70, .black-60, .black-50, .black-40, .mid-gray, .silver, .moon-gray,
+.light-silver { color: var(--text-muted); }
+
+.white, .white-90, .white-80, .white-70, .near-white { color: var(--text); }
+
+.light-gray { color: var(--text-muted); }
+
+.dark-red { color: var(--err); }
 
 .red, .red-muted { color: var(--err); }
 
@@ -65,6 +116,46 @@
 .bg-green { background-color: var(--ok); }
 
 .bg-green-muted { background-color: var(--ok-tint); }
+
+/* ---- backgrounds: Tachyons neutrals and tints the ipfs-css family omits ---- */
+
+.bg-white, .bg-white-90, .bg-white-80, .bg-white-70, .bg-white-60 { background-color: var(--surface); }
+
+.bg-white-50, .bg-white-40, .bg-white-30, .bg-white-20, .bg-white-10 { background-color: var(--raised); }
+
+.bg-near-white { background-color: var(--raised); }
+
+.bg-light-gray, .bg-moon-gray, .bg-light-silver { background-color: var(--control); }
+
+.bg-near-black, .bg-black-70, .bg-black-80, .bg-black-90 { background-color: var(--raised); }
+
+.bg-black-50, .bg-black-40, .bg-black-30, .bg-black-20, .bg-black-10, .bg-black-05 { background-color: var(--control); }
+
+/* Solid black is the modal scrim; the theme ground at the element's own
+   opacity (o-50) dims the page without a hex colour. */
+.bg-black { background-color: var(--ground); }
+
+.bg-light-blue, .bg-washed-blue-muted { background-color: var(--raised); }
+
+.bg-blue { background-color: var(--info); }
+
+.bg-washed-red { background-color: var(--err-tint); }
+
+.bg-washed-yellow { background-color: var(--warn-tint); }
+
+.bg-washed-green { background-color: var(--ok-tint); }
+
+.bg-orange { background-color: var(--accent); }
+
+.hover-bg-light-gray:hover, .hover-bg-light-gray:focus { background-color: var(--control); }
+
+.hover-bg-near-white:hover, .hover-bg-near-white:focus { background-color: var(--raised); }
+
+/* Labels that callers write as .white sit on a solid fill: the neutral fills
+   (navy, charcoal, gray, near-black) take --text, the solid accent, state and
+   info fills take --on-accent so the pairing holds in both themes. */
+.bg-teal.white, .bg-aqua.white, .bg-link.white, .bg-red.white, .bg-green.white,
+.bg-blue.white, .bg-orange.white, .bg-yellow.white { color: var(--on-accent); }
 
 /* ---- hover text ---- */
 
@@ -185,6 +276,11 @@
 .border-link, .b--link,
 .border-washed-blue, .b--washed-blue { border-color: var(--control); }
 
+.border-light-gray, .b--light-gray, .border-near-white, .b--near-white,
+.b--black-05, .b--black-10, .b--black-20, .b--black-30, .b--black-40,
+.b--black-50, .b--black-60, .b--black-70, .b--black-80, .b--black-90,
+.b--white-10, .b--white-20, .b--white-30 { border-color: var(--control); }
+
 .border-red, .b--red,
 .border-red-muted, .b--red-muted { border-color: var(--err); }
 
@@ -194,9 +290,98 @@
 .border-green, .b--green,
 .border-green-muted, .b--green-muted { border-color: var(--ok); }
 
+/* Separate by fill, not by rule (DESIGN.md, Layout and shape): the Tachyons
+   border utilities lose their width everywhere except form controls (the D7
+   edge), error-state edges, and the Explore route, whose package markup keeps
+   its borders (the accepted D9 seam, restored below). The colour mapping
+   above stays so a surviving border is never navy. */
+
+:is(.ba, .bt, .bb, .bl, .br):not(input, textarea, select, .input-reset, .b--red, .b--red-muted, .b--yellow, .b--green-muted, .b--maroon) {
+  border-top-width: 0;
+  border-bottom-width: 0;
+  border-left-width: 0;
+  border-right-width: 0;
+}
+
+.prom-explore .ba { border-width: 1px; }
+.prom-explore .bt { border-top-width: 1px; }
+.prom-explore .bb { border-bottom-width: 1px; }
+.prom-explore .bl { border-left-width: 1px; }
+.prom-explore .br { border-right-width: 1px; }
+
+/* ---- form controls (D7) ----
+   Inputs, textareas and selects sit on --control with the 1px inset-equivalent
+   edge in --text-muted (kubo DESIGN.md D7, WCAG 2.2 1.4.11) and the accent
+   focus ring. The upstream green/red validity borders and glow shadows are
+   replaced: valid keeps the neutral edge, invalid takes --err, and the words
+   come from the surrounding message. The :is() list keeps checkbox, radio,
+   file and range inputs on their own skins. */
+
+/* Selector list shared by the rules below, written once per rule because CSS
+   custom selectors are not available: text-like inputs, textarea, select. */
+:is(input:not([type]), input[type='text'], input[type='search'], input[type='url'],
+  input[type='number'], input[type='password'], input[type='email'], textarea, select) {
+  background-color: var(--control);
+  color: var(--text);
+  font-family: inherit;
+  border-radius: var(--radius-sm);
+}
+
+:is(input:not([type]), input[type='text'], input[type='search'], input[type='url'],
+  input[type='number'], input[type='password'], input[type='email'], textarea, select).ba {
+  border-color: var(--text-muted);
+}
+
+:is(input:not([type]), input[type='text'], input[type='search'], input[type='url'],
+  input[type='number'], input[type='password'], input[type='email'], textarea, select).b--red-muted {
+  border-color: var(--err);
+}
+
+input::placeholder, textarea::placeholder, .placeholder-light::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+input:disabled, textarea:disabled, select:disabled { opacity: 0.45; }
+
+/* ipfs-css focus helpers use a coloured box-shadow glow; the system has one
+   focus treatment, the solid accent outline. */
+.focus-outline:focus, .focus-outline-red:focus, .focus-outline-green:focus {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: none;
+}
+
 /* ---- misc ipfs-css ---- */
 
 .ipfs-gradient-0 {
   background-image: none;
   background-color: var(--ground);
+}
+
+/* ---- Explore seam (D9) ----
+   /explore renders ipld-explorer-components, which the fork does not own and
+   does not patch. App.js puts `.prom-explore` on the route's <main> (with a
+   `data-route` attribute), which scopes everything below to that route. Its
+   Box sets an inline #fbfbfb background and its codec badges set inline brand
+   colours, so the only hook is an attribute selector with !important under
+   that wrapper. Panels step to
+   --surface; the badges flatten to --control, because the codec name is the
+   label and colour was never the only carrier. The package's own text uses
+   Tachyons classes, which the rules above already remap. */
+
+.prom-explore [style*='251, 251, 251'] { background: var(--surface) !important; }
+
+.prom-explore span.br-100.flex-none.tc[style*='background'] {
+  background: var(--control) !important;
+  color: var(--text);
+}
+
+.prom-explore span.br-100.flex-none.tc[style*='background'] * { color: var(--text); }
+
+/* Badge (DESIGN.md component vocabulary): the pill is for badges only. */
+.prom-badge {
+  background-color: var(--control);
+  color: var(--text);
+  border-radius: var(--radius-pill);
 }

@@ -14,6 +14,7 @@ import PeersTable from './PeersTable/PeersTable.js'
 import AddConnection from './AddConnection/AddConnection.js'
 import CliTutorMode from '../components/cli-tutor-mode/CliTutorMode.js'
 import { cliCmdKeys, cliCommandList } from '../bundles/files/consts.js'
+import { titleWithBrand } from '../promethity/page-title.js'
 
 const PeersPage = ({ t, toursEnabled, handleJoyrideCallback }) => {
   useEffect(() => {
@@ -33,7 +34,7 @@ const PeersPage = ({ t, toursEnabled, handleJoyrideCallback }) => {
   return (
   <div data-id='PeersPage' className='overflow-hidden'>
     <Helmet>
-      <title>{t('title')} | IPFS</title>
+      <title>{titleWithBrand(t('title'))}</title>
     </Helmet>
 
     <div className='flex justify-end items-center mb3'>

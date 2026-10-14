@@ -8,7 +8,6 @@ import { settingsTour } from '../lib/tours.js'
 import withTour from '../components/tour/withTour.js'
 import { getJoyrideLocales } from '../helpers/i8n.js'
 // Components
-import Tick from '../icons/GlyphSmallTick.js'
 import Box from '../components/box/Box.js'
 import Button from '../components/button/button.tsx'
 import LanguageSelector from '../components/language-selector/LanguageSelector.js'
@@ -22,13 +21,15 @@ import IpfsCheckForm from '../components/ipfs-check-form/IpfsCheckForm.js'
 import { JsonEditor } from './editor/JsonEditor.js'
 import Experiments from '../components/experiments/ExperimentsPanel.js'
 import Title from './Title.js'
+import ThemeSettings from './ThemeSettings.js'
 import { AgentChatSettings } from '../agent-chat/index.js'
 import { WebMcpSettings } from '../webmcp/index.js'
 import CliTutorMode from '../components/cli-tutor-mode/CliTutorMode.js'
 import Checkbox from '../components/checkbox/Checkbox.js'
 import ComponentLoader from '../loader/ComponentLoader.js'
-import StrokeCode from '../icons/StrokeCode.js'
+import { CheckIcon, CodeIcon } from '../promethity/icons.js'
 import { cliCmdKeys, cliCommandList } from '../bundles/files/consts.js'
+import { titleWithBrand } from '../promethity/page-title.js'
 
 const PAUSE_AFTER_SAVE_MS = 3000
 
@@ -42,7 +43,7 @@ export const SettingsPage = ({
 }) => (
   <div data-id='SettingsPage' className='mw9 center'>
     <Helmet>
-      <title>{t('title')} | IPFS</title>
+      <title>{titleWithBrand(t('title'))}</title>
     </Helmet>
 
     {/* Enable a full screen loader after updating to a new Kubo RPC address.
@@ -50,10 +51,14 @@ export const SettingsPage = ({
       */}
     { ipfsPendingFirstConnection
       ? <div className="absolute flex items-center justify-center w-100 h-100"
-        style={{ background: 'rgba(255, 255, 255, 0.5)', zIndex: '10' }}>
+        style={{ background: 'color-mix(in srgb, var(--ground) 60%, transparent)', zIndex: '10' }}>
         <ComponentLoader />
       </div>
       : null }
+
+    <Box className='mb3 pa4-l pa2'>
+      <ThemeSettings t={t} />
+    </Box>
 
     { isIpfsDesktop
       ? null
@@ -71,7 +76,7 @@ export const SettingsPage = ({
       <div className='lh-copy charcoal'>
         <Title>{t('app:terms.localGateway')}</Title>
         <Trans i18nKey='localGatewayDescription' t={t}>
-          <p className='f6'>If you access the WebUI through a reverse proxy, Docker, or a different host, enter the gateway URL your browser can reach. Leave empty to use the first <a className='link blue' href='https://github.com/ipfs/kubo/blob/master/docs/config.md#addressesgateway' target='_blank' rel='noopener noreferrer'>gateway address</a> from your Kubo config.</p>
+          <p className='f6'>If you access the Web UI through a reverse proxy, Docker, or a different host, enter the gateway URL your browser can reach. Leave empty to use the first <a className='link blue' href='https://github.com/ipfs/kubo/blob/master/docs/config.md#addressesgateway' target='_blank' rel='noopener noreferrer'>gateway address</a> from your Kubo config.</p>
         </Trans>
         <LocalGatewayForm/>
       </div>
@@ -151,7 +156,7 @@ export const SettingsPage = ({
         <Checkbox className='dib' onChange={doToggleCliTutorMode} checked={isCliTutorModeEnabled}
           label={<span className='f5 lh-copy'>{t('cliToggle.label')}</span>}/>
         <Trans i18nKey='cliDescription' t={t}>
-          <p className='f6 mv2'>Enable this option to display a "view code" <StrokeCode className='dib v-mid icon mh1 fill-charcoal' viewBox='14 20 70 66' style={{ height: 24 }} /> icon next to common IPFS commands. Clicking it opens a modal with that command's CLI code, so you can paste it into the IPFS command-line interface in your terminal.</p>
+          <p className='f6 mv2'>Enable this option to display a "view code" <CodeIcon className='dib v-mid mh1' /> icon next to common IPFS commands. Clicking it opens a modal with that command's CLI code, so you can paste it into the IPFS command-line interface in your terminal.</p>
         </Trans>
       </div>
     </Box>
@@ -239,7 +244,7 @@ const SaveButton = ({ t, hasErrors, hasSaveFailed, hasSaveSucceded, isSaving, ha
       onClick={onClick}>
       { hasSaveSucceded && !hasSaveFailed
         ? (
-        <Tick height={16} className='fill-snow' style={{ transform: 'scale(3)' }} />
+        <CheckIcon />
           )
         : (
             isSaving ? t('app:actions.saving') : t('app:actions.save')

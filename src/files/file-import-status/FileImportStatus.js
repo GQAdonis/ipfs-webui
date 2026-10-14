@@ -162,7 +162,7 @@ export const FileImportStatus = ({ filesFinished, filesPending, filesErrors, doF
           role="button"
           className="fileImportStatusButton pv2 ph3 relative flex items-center no-select pointer charcoal w-100 justify-between"
           aria-expanded={expanded}
-          style={{ background: '#F0F6FA' }}
+          style={{ background: 'var(--raised)' }}
         >
           <span>
             { filesPending.length

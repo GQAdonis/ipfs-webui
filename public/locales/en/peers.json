@@ -10,7 +10,7 @@
   "plusPeers": "+ {number} more peers",
   "connectionDirectionInbound": "inbound",
   "connectionDirectionOutbound": "outbound",
-  "copyFeedback": "Copied!",
+  "copyFeedback": "Copied",
   "tour": {
     "step1": {
       "title": "Peers page",

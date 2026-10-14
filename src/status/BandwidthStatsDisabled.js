@@ -6,7 +6,7 @@ import Box from '../components/box/Box.js'
 const StatusNotConnected = ({ t }) => {
   return (
     <Box className='mt3 pa3' >
-      <h2 className='ttu yellow tracked f6 fw4 aqua mt0 mb4'>{t('bandwidthStats')}</h2>
+      <h2 className='prom-title mt0 mb4'>{t('bandwidthStats')}</h2>
 
       <p className='mw6 mr2 lh-copy charcoal f6'>
         <Trans i18nKey='bandwidthStatsDisabled' t={t}>

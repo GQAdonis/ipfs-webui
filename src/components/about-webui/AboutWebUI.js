@@ -1,6 +1,7 @@
 import React from 'react'
 import { withTranslation, Trans } from 'react-i18next'
 import Box from '../box/Box.js'
+import { BRAND } from '../../promethity/brand.js'
 
 /**
  * @param {Object} props
@@ -27,9 +28,15 @@ export const AboutWebUI = ({ t }) => {
           <li className='mb2'><a href='#/settings' className='link blue b'>Review or edit your node settings</a> &mdash; no command line required</li>
         </Trans>
         <Trans i18nKey='welcomeInfo.paragraph6' t={t}>
-          <li className='f5'><a href='https://github.com/ipfs-shipyard/ipfs-webui' className='link blue b' target='_blank' rel='noopener noreferrer'>Check this app's source code</a> to <a href='https://github.com/ipfs-shipyard/ipfs-webui/issues' className='link blue' target='_blank' rel='noopener noreferrer'>report a bug</a> or make a contribution, and make IPFS better for everyone!</li>
+          <li className='f5'><a href={BRAND.forkRepo} className='link blue b' target='_blank' rel='noopener noreferrer'>Check this app's source code</a> to <a href={`${BRAND.forkRepo}/issues`} className='link blue' target='_blank' rel='noopener noreferrer'>report a bug</a> or make a contribution, and help improve it.</li>
         </Trans>
       </ul>
+      <p className='f6 mb1 mt3 prom-attribution'>
+        <Trans i18nKey='attribution.built' t={t}>
+          Built on the <a href={BRAND.upstreamRepo} className='link blue' target='_blank' rel='noopener noreferrer'>IPFS Web UI</a> (MIT license, Protocol Labs).
+        </Trans>
+      </p>
+      <p className='f6 ma0 prom-attribution'>{t('attribution.independent', { brand: BRAND.name })}</p>
     </Box>
   )
 }

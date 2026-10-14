@@ -3,8 +3,10 @@ import { withTranslation } from 'react-i18next'
 import { Title } from './Commons.js'
 import { Pie } from 'react-chartjs-2'
 import { connect } from 'redux-bundler-react'
+import { useChartPalette } from '../promethity/tokens.js'
 
 const CountryChart = ({ t, peerLocations, className }) => {
+  const palette = useChartPalette()
   const countryLabels = {}
   const countsByCountry = {}
 
@@ -35,7 +37,11 @@ const CountryChart = ({ t, peerLocations, className }) => {
 
   const datasets = [{
     data,
-    backgroundColor: ['#69c4cd', '#f39031', '#ea5037', '#3e9096'],
+    // Slices are separated by a surface-coloured gap (a fill, not a rule);
+    // every slice is named in the legend, so colour never carries meaning alone.
+    backgroundColor: [...palette.categorical, palette.other],
+    borderColor: palette.surface,
+    borderWidth: 2,
     label: 'Peer Countries'
   }]
 
@@ -43,7 +49,11 @@ const CountryChart = ({ t, peerLocations, className }) => {
     responsive: true,
     legend: {
       display: true,
-      position: 'bottom'
+      position: 'bottom',
+      labels: {
+        fontColor: palette.text,
+        fontFamily: palette.fontBody
+      }
     },
     tooltips: {
       displayColors: false,

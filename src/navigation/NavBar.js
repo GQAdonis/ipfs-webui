@@ -4,12 +4,17 @@ import { withTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import BrandWordmark from '../promethity/brand-wordmark.js'
 import BrandPIcon from '../promethity/brand-p-icon.js'
-import StrokeMarketing from '../icons/StrokeMarketing.js'
-import StrokeWeb from '../icons/StrokeWeb.js'
-import StrokeCube from '../icons/StrokeCube.js'
-import StrokeSettings from '../icons/StrokeSettings.js'
-import StrokeIpld from '../icons/StrokeIpld.js'
-import StrokeLab from '../icons/StrokeLab.js'
+import { BRAND } from '../promethity/brand.js'
+// Nav icons come from the fork's single icon module only
+// (src/promethity/icons.js; webui-shell-redesign 1.3).
+import {
+  StatusIcon,
+  FilesIcon,
+  ExploreIcon,
+  PeersIcon,
+  SettingsIcon,
+  DiagnosticsIcon
+} from '../promethity/icons.js'
 
 // Styles
 import './NavBar.css'
@@ -17,7 +22,7 @@ import './NavBar.css'
 /**
  * @param {Object} props
  * @param {string} props.to
- * @param {React.ComponentType<React.SVGProps<SVGSVGElement>>} props.icon
+ * @param {React.ComponentType<import('lucide-react').LucideProps>} props.icon
  * @param {string} [props.alternative]
  * @param {boolean} [props.disabled]
  * @param {string} props.children
@@ -29,29 +34,25 @@ const NavLink = ({
   disabled,
   children
 }) => {
-  const Svg = icon
+  const Icon = icon
   const { hash } = window.location
   const href = `#${to}`
   const active = alternative
     ? hash === href || hash.startsWith(`${href}${alternative}`)
     : hash === href || hash.startsWith(`${href}/`)
   const anchorClass = classnames({
-    'bg-white-10 navbar-item-active': active,
+    'navbar-item-active': active,
     'o-50 no-pointer-events': disabled
-  }, ['navbar-item dib db-l pt2 pb3 pv1-l white no-underline f5 hover-bg-white-10 tc bb bw2 bw0-l b--navy'])
-  const svgClass = classnames({
-    'o-100': active,
-    'o-50': !active
-  }, ['fill-current-color'])
+  }, ['navbar-item dib db-l pt2 pb3 pv1-l no-underline f5 tc'])
 
   return (
     // eslint-disable-next-line jsx-a11y/anchor-is-valid
     <a href={disabled ? undefined : href} onClick={(e) => e.currentTarget.blur()} className={anchorClass} role='menuitem' title={children}>
       <div className='db ph2 pv1'>
         <div className='db'>
-          <Svg width='46' role='presentation' className={svgClass} />
+          <Icon />
         </div>
-        <div className={`${active ? 'o-100' : 'o-50'} db f6 tc montserrat ttu fw1 navbar-item-label`}>
+        <div className='db f6 tc navbar-item-label'>
           {children}
         </div>
       </div>
@@ -64,14 +65,14 @@ const NavLink = ({
  * @param {import('i18next').TFunction} props.t
  */
 export const NavBar = ({ t }) => {
-  const codeUrl = 'https://github.com/ipfs/ipfs-webui'
+  const codeUrl = BRAND.forkRepo
   const bugsUrl = `${codeUrl}/issues`
   const gitRevision = process.env.REACT_APP_GIT_REV
   const revisionUrl = `${codeUrl}/commit/${gitRevision}`
   return (
     <div className='h-100 fixed-l flex flex-column justify-between' style={{ overflowY: 'auto', width: 'inherit' }}>
       <div className='flex flex-column'>
-        <a href="#/welcome" role='menuitem' title={t('welcome:description')}>
+        <a href="#/welcome" role='menuitem' title={t('welcome:description')} className='navbar-brand'>
           <div className='pt3 pb1 pb2-l'>
             {/* One mark per surface: the wordmark on the expanded rail, the
                 p-icon on the collapsed bar — never side by side. */}
@@ -80,23 +81,26 @@ export const NavBar = ({ t }) => {
           </div>
         </a>
         <div className='db overflow-x-scroll overflow-x-hidden-l nowrap tc' role='menubar'>
-          <NavLink to='/' alternative="status" icon={StrokeMarketing}>{t('status:title')}</NavLink>
-          <NavLink to='/files' icon={StrokeWeb}>{t('files:title')}</NavLink>
-          <NavLink to='/explore' icon={StrokeIpld}>{t('explore:tabName')}</NavLink>
-          <NavLink to='/peers' icon={StrokeCube}>{t('peers:title')}</NavLink>
-          <NavLink to='/settings' icon={StrokeSettings}>{t('settings:title')}</NavLink>
-          <NavLink to='/diagnostics' icon={StrokeLab}>{t('diagnostics:title')}</NavLink>
+          <NavLink to='/' alternative="status" icon={StatusIcon}>{t('status:title')}</NavLink>
+          <NavLink to='/files' icon={FilesIcon}>{t('files:title')}</NavLink>
+          <NavLink to='/explore' icon={ExploreIcon}>{t('explore:tabName')}</NavLink>
+          <NavLink to='/peers' icon={PeersIcon}>{t('peers:title')}</NavLink>
+          <NavLink to='/settings' icon={SettingsIcon}>{t('settings:title')}</NavLink>
+          <NavLink to='/diagnostics' icon={DiagnosticsIcon}>{t('diagnostics:title')}</NavLink>
         </div>
       </div>
-      <div className='dn db-l navbar-footer mb2 tc center f7 o-80 glow'>
+      <div className='dn db-l navbar-footer mb2 tc center f7'>
         { gitRevision && <div className='mb1'>
-          <a className='link white' href={revisionUrl} target='_blank' rel='noopener noreferrer'>{t('app:terms.revision')} {gitRevision}</a>
+          <a className='navbar-footer-link' href={revisionUrl} target='_blank' rel='noopener noreferrer'>{t('app:terms.revision')} {gitRevision}</a>
         </div> }
         <div className='mb1'>
-          <a className='link white' href={codeUrl} target='_blank' rel='noopener noreferrer'>{t('app:nav.codeLink')}</a>
+          <a className='navbar-footer-link' href={codeUrl} target='_blank' rel='noopener noreferrer'>{t('app:nav.codeLink')}</a>
         </div>
-        <div>
-          <a className='link white' href={bugsUrl} target='_blank' rel='noopener noreferrer'>{t('app:nav.bugsLink')}</a>
+        <div className='mb2'>
+          <a className='navbar-footer-link' href={bugsUrl} target='_blank' rel='noopener noreferrer'>{t('app:nav.bugsLink')}</a>
+        </div>
+        <div className='ph2'>
+          <a className='navbar-footer-link navbar-footer-attribution' href={BRAND.upstreamRepo} target='_blank' rel='noopener noreferrer'>{t('app:nav.attribution')}</a>
         </div>
       </div>
     </div>

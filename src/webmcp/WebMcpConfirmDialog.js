@@ -92,8 +92,8 @@ function ItemRow ({ item, t }) {
   const shown = showFull && item.full ? item.full : item.value
   return (
     <div className='webmcp-row'>
-      <dt className='f6 fw6 navy'>{t(`labels.${item.label}`, { defaultValue: item.label })}</dt>
-      <dd className={`ma0 f6 ${plain ? '' : 'monospace webmcp-value'}`}>
+      <dt className='webmcp-label'>{t(`labels.${item.label}`, { defaultValue: item.label })}</dt>
+      <dd className={`ma0 f6 ${plain ? '' : 'webmcp-value'}`}>
         {isFlag ? t(`values.${item.value}`) : (plain ? shown : `"${shown}"`)}
         {item.full && (
           <button
@@ -104,7 +104,7 @@ function ItemRow ({ item, t }) {
             {showFull ? t('dialog.showShort') : t('dialog.showFull')}
           </button>
         )}
-        {item.nonAscii && <span className='db f6 mt1 navy'>{t('dialog.nonAscii')}</span>}
+        {item.nonAscii && <span className='db f6 mt1'>{t('dialog.nonAscii')}</span>}
       </dd>
     </div>
   )
@@ -241,11 +241,11 @@ const WebMcpConfirmDialog = () => {
           aria-modal='true'
           aria-labelledby={titleId}
           aria-describedby={descId}
-          className='webmcp-dialog bg-white charcoal sans-serif br2 pa4 w-90'
+          className='webmcp-dialog w-90'
           data-testid='webmcp-confirm'
           onKeyDown={onKeyDown}>
-          <h2 id={titleId} className='f4 fw6 navy mt0 mb2 lh-title'>{t('dialog.title', { title: request.title })}</h2>
-          <p className='mt0 mb3'><span className='webmcp-state f6 fw6 navy'>{t('dialog.state')}</span></p>
+          <h2 id={titleId} className='webmcp-title'>{t('dialog.title', { title: request.title })}</h2>
+          <p className='mt0 mb3'><span className='webmcp-state'>{t('dialog.state')}</span></p>
           <p id={descId} className='f5 lh-copy mt0 mb2'>{t(`effects.${request.tool}`, { defaultValue: request.effect })}</p>
           <p className='f6 lh-copy mt0 mb3'>{t('dialog.source')}</p>
 
@@ -253,7 +253,7 @@ const WebMcpConfirmDialog = () => {
           {details.length > 0 && <dl className='webmcp-list ma0 mb3' aria-label={t('dialog.details')}>{details.map((item) => <ItemRow key={`${item.label}:${item.value}`} item={item} t={t} />)}</dl>}
           {preview && (
             <div className='webmcp-preview mb3'>
-              <p className='f6 fw6 navy mt0 mb1'>{t('dialog.previewLabel')}</p>
+              <p className='webmcp-label mt0 mb1'>{t('dialog.previewLabel')}</p>
               <dl className='webmcp-list ma0'><ItemRow item={preview} t={t} /></dl>
             </div>
           )}
@@ -263,6 +263,7 @@ const WebMcpConfirmDialog = () => {
           <p className='f6 lh-copy mt0 mb2'>{t('dialog.denyIsFinal')}</p>
           <p className='f6 lh-copy mt0 mb3'>{t('dialog.notALock')}</p>
 
+          <div className='webmcp-footer'>
           <div className='flex flex-wrap justify-end items-center'>
             <button
               type='button'
@@ -288,6 +289,7 @@ const WebMcpConfirmDialog = () => {
             </button>
           </div>
           <p id={hintId} className='f6 lh-copy tr mt2 mb0'>{armed ? t('dialog.armed') : t('dialog.arming')}</p>
+          </div>
         </div>
       </div>
     </>,

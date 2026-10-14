@@ -45,8 +45,8 @@
   font-variant-numeric: tabular-nums;
 
   /* custom variables */
-  --icon-zone: 1.5rem; /* use to buffer text from appearing under icons */
-  --light-gray: #eee; /* Tachyons light-gray */
+  --icon-zone: 1rem;
+  --light-gray: var(--control); /* Tachyons light-gray, on the token */
 }
 
 
@@ -110,5 +110,53 @@
   /* message full-width below, still wraps aggressively */
   .logs > .row > .msg{
     grid-column: 1 / -1;
+  }
+}
+
+/* Toolbar (L6): the controls are real buttons in a row above the log, not an
+   absolutely positioned column over it, so they never overlap the empty state
+   or the log text at any width. 44px targets, text-muted icons at full
+   opacity, accent focus ring. */
+.log-toolbar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  padding-bottom: var(--space-2);
+}
+
+.prom-log-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.prom-log-btn:hover {
+  background-color: var(--raised);
+  color: var(--text);
+}
+
+.prom-log-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.prom-log-btn-nudge {
+  color: var(--accent-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulsate,
+  .breathe {
+    animation: none;
   }
 }

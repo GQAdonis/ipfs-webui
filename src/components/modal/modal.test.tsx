@@ -85,7 +85,9 @@ describe('Modal', () => {
       const { container } = render(<ModalActions />)
       const actionsElement = container.firstChild as HTMLElement
       expect(actionsElement).toHaveClass('flex', 'justify-between', 'pa2')
-      expect(actionsElement).toHaveStyle({ backgroundColor: '#f4f6f8' })
+      // The bar sits on the raised token fill (var(--raised)), which jsdom cannot
+      // resolve; the check is that the old hard-coded hex is gone.
+      expect(actionsElement).not.toHaveStyle({ backgroundColor: '#f4f6f8' })
     })
 
     it('renders with custom justify prop', () => {

@@ -1,9 +1,78 @@
-.ExploreFormButton,
-.ExploreFormButton:hover + .ExploreFormButton  {
-  max-width: 3.3em
+/* Top-bar CID form (Promethity). Input and buttons sit on tokens: control
+   fill, the D7 text-muted edge on the input, the accent focus ring from the
+   shared Button skin. The buttons never shrink: below 600px the labels hide
+   and the 44px icon buttons stay (each keeps its title and aria-label), so
+   nothing is clipped at any width. */
+
+.ExploreForm {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
 }
 
-.ExploreFormButton:last-of-type,
-.ExploreFormButton:hover {
-  max-width: 200px;
+.ExploreFormInputWrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ExploreFormInput {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--radius-sm);
+  background-color: var(--control);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+}
+
+.ExploreFormInput.b--red-muted {
+  border-color: var(--err);
+}
+
+.ExploreFormButtons {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+}
+
+.ExploreFormButton {
+  flex: none;
+  min-width: 44px;
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+  font-size: var(--text-small);
+  white-space: nowrap;
+}
+
+.ExploreFormButton svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 599px) {
+  .ExploreFormLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Visible helper under the field (M1): the Browse and Inspect buttons are
+   disabled until the path is valid, and this line says what to enter. */
+.ExploreFormHint {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.3;
 }

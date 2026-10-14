@@ -55,7 +55,8 @@ const ContextMenu = ({ className, children, target, visible, arrowAlign, arrowMa
         <DropdownMenu
           open={ visible }
           className='sans-serif br2 charcoal'
-          boxShadow='rgba(105, 196, 205, 0.5) 0px 1px 10px 0px'
+          boxShadow='none'
+          background='var(--raised)'
           width='auto'
           arrowAlign={arrowAlign || 'center'}
           arrowMarginRight={`${arrowMarginRight}px`}

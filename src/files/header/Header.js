@@ -8,14 +8,13 @@ import Breadcrumbs from '../breadcrumbs/Breadcrumbs.js'
 import FileInput from '../file-input/FileInput.js'
 import Button from '../../components/button/button.tsx'
 // Icons
-import GlyphDots from '../../icons/GlyphDots.js'
-import GlyphPinCloud from '../../icons/GlyphPinCloud.js'
+import { MoreIcon, PinQueueIcon } from '../../promethity/icons.js'
 import '../PendingAnimation.css'
 
 const BarOption = ({ children, text, isLink = false, className = '', ...etc }) => (
   <div className={classNames(className, 'tc pa3', etc.onClick && 'pointer')} {...etc}>
     <span className='nowrap db f4 charcoal'>{children}</span>
-    <span className={`nowrap db ttu f6 montserrat fw4 ${isLink ? 'link' : 'charcoal-muted'}`}>{text}</span>
+    <span className={`nowrap db f6 fw4 ${isLink ? 'link' : 'charcoal-muted'}`}>{text}</span>
   </div>
 )
 
@@ -68,11 +67,9 @@ class Header extends React.Component {
         </div>
         { children }
         </div>
-        <div className='flex justify-between items-center bg-snow-muted joyride-files-add'>
+        <div className='files-header-bar flex justify-between items-center bg-snow-muted joyride-files-add'>
           { pinsInQueue > 0 && <a href='#/pins' alt={t('pinningQueue')} title={t('pinningQueue')} className='ml3'>
-            <GlyphPinCloud
-              style={{ width: '3rem' }}
-              className='fill-teal PendingAnimation' />
+            <PinQueueIcon size={32} className='PendingAnimation' />
           </a> }
 
           <BarOption title={t('currentLocationDescription')} text={hasUpperDirectory ? t('currentLocation') : t('currentLocationRoot')}>
@@ -89,7 +86,7 @@ class Header extends React.Component {
             { size(repoSize) }
           </BarOption>
 
-          <div className='pa3'>
+          <div className='files-header-action pa3'>
             <div className='ml-auto flex items-center'>
               { (files && files.type === 'directory' && filesPathInfo.isMfs)
                 ? <FileInput
@@ -108,7 +105,7 @@ class Header extends React.Component {
                     minWidth='100px'
                     disabled={!files || filesPathInfo.isRoot || files.type === 'unknown'}
                     onClick={this.handleContextMenu}>
-                    <GlyphDots className='w1 mr2' />
+                    <MoreIcon size={16} className='mr2' />
                     { t('app:actions.more') }
                   </Button>
                 </div>

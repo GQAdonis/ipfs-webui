@@ -14,6 +14,7 @@ import AboutIpfs from '../components/about-ipfs/AboutIpfs.js'
 import AboutWebUI from '../components/about-webui/AboutWebUI.js'
 import ComponentLoader from '../loader/ComponentLoader.js'
 import { useBridgeSelector } from '../helpers/context-bridge'
+import { titleWithBrand } from '../promethity/page-title.js'
 
 /**
  * @param {Object} props
@@ -34,7 +35,7 @@ const WelcomePage = ({ t, ipfsInitFailed, ipfsConnected, ipfsReady, toursEnabled
   return (
     <div>
       <Helmet>
-        <title>{t('title')}</title>
+        <title>{titleWithBrand(t('title'))}</title>
       </Helmet>
       <div className='lh-copy charcoal'>
         <ConnectionStatus connected={ipfsConnected} sameOrigin={isSameOrigin} t={t} />

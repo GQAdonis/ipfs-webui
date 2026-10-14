@@ -1,3 +1,11 @@
+.worldMapLand {
+    position: absolute;
+    inset: 0;
+    background-color: var(--control);
+    -webkit-mask: url('./StaticMap.svg') center / auto 100% no-repeat;
+    mask: url('./StaticMap.svg') center / auto 100% no-repeat;
+}
+
 .mapFooter {
     pointer-events: none;
 }

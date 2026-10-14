@@ -1,29 +1,34 @@
 import React from 'react'
 import { connect } from 'redux-bundler-react'
 import { withTranslation } from 'react-i18next'
+import { ConnectedIcon, DisconnectedIcon, ConnectingIcon } from '../../promethity/icons.js'
 
-const pickColor = (ipfsReady, ipfsConnected) => {
-  if (ipfsReady && ipfsConnected) return 'teal'
-  if (ipfsReady) return 'red'
-  return 'gray'
+// Node connection state: an icon plus a state word, never colour alone. The
+// icon and word sit at full opacity on `text-muted` (ok/err hues come from the
+// tokens through the colour classes), so the 3:1 non-text and 4.5:1 text
+// pairings hold in light and dark (WCAG 1.4.3, 1.4.11).
+const pickState = (ipfsReady, ipfsConnected) => {
+  if (ipfsReady && ipfsConnected) {
+    return { color: 'green', Icon: ConnectedIcon, wordKey: 'app:status.connectedShort', titleKey: 'app:status.connectedToIpfs' }
+  }
+  if (ipfsReady) {
+    return { color: 'red', Icon: DisconnectedIcon, wordKey: 'app:status.disconnectedShort', titleKey: 'ipfsApiRequestFailed' }
+  }
+  return { color: 'charcoal-muted', Icon: ConnectingIcon, wordKey: 'app:status.connectingShort', titleKey: 'app:status.connectingToIpfs' }
 }
 
-const pickTitleKey = (ipfsReady, ipfsConnected) => {
-  if (ipfsReady && ipfsConnected) return 'app:status.connectedToIpfs'
-  if (ipfsReady) return 'ipfsApiRequestFailed'
-  return 'app:status.connectingToIpfs'
-}
-
-export const Connected = ({ t, className, size = 28, ipfsReady, ipfsConnected, doSetIsNodeInfoOpen }) => {
-  const title = t(pickTitleKey(ipfsReady, ipfsConnected))
-  const fill = pickColor(ipfsReady, ipfsConnected)
-  const opacity = ipfsConnected ? 'o-60' : 'o-100'
-
+export const Connected = ({ t, className = '', size = 20, ipfsReady, ipfsConnected, doSetIsNodeInfoOpen }) => {
+  const { color, Icon, wordKey, titleKey } = pickState(ipfsReady, ipfsConnected)
+  const description = t(titleKey)
   return (
-    <a title={title} className={`dib ${className}`} href='#/status' onClick={() => doSetIsNodeInfoOpen(true)}>
-      <svg className={`${fill} ${opacity} fill-current-color transition-all glow`} viewBox='0 0 24 24' width={size} height={size} aria-hidden="true">
-        <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM6.5 9L10 5.5 13.5 9H11v4H9V9H6.5zm11 6L14 18.5 10.5 15H13v-4h2v4h2.5z ' />
-      </svg>
+    <a
+      title={description}
+      aria-label={`${t(wordKey)}. ${description}`}
+      className={`inline-flex items-center prom-icon-link prom-status-link ${color} ${className}`}
+      href='#/status'
+      onClick={() => doSetIsNodeInfoOpen(true)}>
+      <Icon size={size} />
+      <span className='prom-status-word f6 fw6'>{t(wordKey)}</span>
     </a>
   )
 }

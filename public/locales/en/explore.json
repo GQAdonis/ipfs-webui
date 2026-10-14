@@ -45,7 +45,7 @@
     "explorer": {
       "step1": {
         "title": "IPLD Explorer",
-        "paragraph1": "Your journey with IPLD Explorer starts here. Click \"Next\" to learn more."
+        "paragraph1": "This tour walks through IPLD Explorer. Click \"Next\" to begin."
       },
       "step2": {
         "title": "Breadcrumbs",

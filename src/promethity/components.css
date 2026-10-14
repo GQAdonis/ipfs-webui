@@ -1,0 +1,194 @@
+/* Promethity component skins (webui-shell-redesign 1.2) for the shared
+   upstream components that carry no stylesheets of their own: settings/Title,
+   notify/Toast, connected/Connected, tour/TourHelper and the react-joyride
+   tour content (lib/tours.js). Every value is a var() reference, so light and
+   dark both resolve through the data-theme attribute in tokens.css. Fills
+   only: no borders, no shadows (kubo DESIGN.md). */
+
+/* Section titles: Syne at the product h4 scale, sentence case, primary text.
+   Replaces the old uppercase tracked teal eyebrow (DESIGN.md, Typography). */
+.prom-title {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: normal;
+  color: var(--text);
+}
+
+/* Tour step titles inside the react-joyride tooltips. */
+.prom-tour-title {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+  color: var(--text);
+}
+
+/* Notify toast: the state colour on its own tint, worded by the message
+   itself (DESIGN.md: state is words first). */
+.prom-toast {
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+}
+
+.prom-toast-ok {
+  background-color: var(--ok-tint);
+  color: var(--ok);
+}
+
+.prom-toast-warn {
+  background-color: var(--warn-tint);
+  color: var(--warn);
+}
+
+.prom-toast-dismiss {
+  color: inherit;
+  opacity: 0.8;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--motion-duration) var(--motion-ease);
+}
+
+.prom-toast-dismiss:hover,
+.prom-toast-dismiss:focus-visible {
+  opacity: 1;
+}
+
+.prom-toast-dismiss:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Icon-only affordances in the top bar (Connected status, tour helper): the
+   only outline in the system is the focus ring. */
+.prom-icon-link {
+  border-radius: var(--radius-sm);
+}
+
+.prom-icon-link:focus {
+  outline: none;
+}
+
+.prom-icon-link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Attribution lines in About (D8): muted body text at a reading width. */
+.prom-attribution {
+  max-width: 66ch;
+  color: var(--text-muted);
+}
+
+/* Bandwidth chart hover tooltip (status/NodeBandwidthChart.js,
+   webui-dataviz-reskin 1.1): a `raised` fill with a caret in the same fill.
+   It renders into a body-level node, so it relies on the :root tokens only. */
+.prom-chart-tooltip {
+  background-color: var(--raised);
+  color: var(--text);
+  border-radius: var(--radius-md);
+  pointer-events: none;
+}
+
+.prom-chart-tooltip-caret {
+  position: absolute;
+  bottom: -14px;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  background-color: var(--raised);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.prom-chart-tooltip-label {
+  color: var(--text-muted);
+}
+
+.prom-chart-tooltip-value {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prom-toast-dismiss {
+    transition: none;
+  }
+}
+
+/* Top bar icon controls (H5): the help button and the connection link are 44px
+   targets with full-opacity Lucide strokes. The help glyph is text-muted
+   (>= 3:1 on ground in both themes); the connection link is icon plus a state
+   word, coloured by state through the remapped .green / .red classes. */
+.prom-icon-btn {
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--text-muted);
+}
+
+.prom-icon-btn:hover {
+  color: var(--text);
+  background-color: var(--raised);
+}
+
+.prom-status-link {
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.prom-status-link:hover {
+  background-color: var(--raised);
+}
+
+.prom-status-word {
+  color: var(--text);
+}
+
+/* Files header bar (H2): the totals and the Import action wrap instead of
+   overflowing; below 30em the action takes its own full-width row. */
+.files-header-bar {
+  flex-wrap: wrap;
+  border-radius: var(--radius-md);
+}
+
+.files-header-action {
+  flex: none;
+}
+
+@media (max-width: 30em) {
+  .files-header-bar {
+    justify-content: flex-start;
+  }
+
+  .files-header-action {
+    flex: 1 1 100%;
+  }
+
+  .files-header-action > div,
+  .files-header-action .Button {
+    width: 100%;
+  }
+}
+
+/* Peers table (M2): its own horizontal scroll frame with a floor width below
+   60em, so header labels and cells keep their size instead of truncating. */
+.peers-table-frame {
+  overflow-x: auto;
+}
+
+@media (max-width: 60em) {
+  .peers-table-inner {
+    min-width: 1100px;
+  }
+}
+
+/* react-virtualized uppercases table headers; titles and column labels are
+   sentence case (DESIGN.md, Typography). */
+.ReactVirtualized__Table__headerColumn {
+  text-transform: none;
+}

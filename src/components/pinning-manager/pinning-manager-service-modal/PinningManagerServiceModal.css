@@ -12,5 +12,5 @@
 }
 
 .pinningManagerServiceModalContainer .white::placeholder {
-    color: #fff;
+    color: var(--on-accent);
 }

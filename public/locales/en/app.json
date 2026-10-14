@@ -34,10 +34,14 @@
     "description": "Paste the following into your terminal to do this task in Kubo via the command line. Remember that you'll need to replace placeholders with your specific parameters."
   },
   "nav": {
+    "attribution": "Built on the IPFS Web UI (MIT, Protocol Labs)",
     "bugsLink": "Report a bug",
     "codeLink": "See the code"
   },
   "status": {
+    "connectedShort": "Connected",
+    "disconnectedShort": "Disconnected",
+    "connectingShort": "Connecting",
     "connectedToIpfs": "Connected to IPFS",
     "connectingToIpfs": "Connecting to IPFS…",
     "couldNotConnect": "Could not connect to the Kubo RPC"
@@ -87,11 +91,11 @@
     "peers": "Peers",
     "pinNoun": "Pin",
     "pins": "Pins",
-    "pinStatus": "Pin Status",
+    "pinStatus": "Pin status",
     "publicKey": "Public key",
-    "publicGateway": "Public Gateway",
-    "publicSubdomainGateway": "Public Subdomain Gateway",
-    "localGateway": "Local HTTP Gateway",
+    "publicGateway": "Public gateway",
+    "publicSubdomainGateway": "Public subdomain gateway",
+    "localGateway": "Local HTTP gateway",
     "rateIn": "Rate in",
     "rateOut": "Rate out",
     "repo": "Repo",

@@ -4,28 +4,35 @@
   "saving": "Saving…",
   "reset": "Reset",
   "learnMoreLink": "Learn more.",
+  "theme": {
+    "title": "Theme",
+    "description": "Choose how the Web UI looks. System follows your device setting and falls back to dark.",
+    "system": "System",
+    "dark": "Dark",
+    "light": "Light"
+  },
   "showOptions": "Show options",
   "pinningServices": {
-    "title": "Pinning Services",
+    "title": "Pinning services",
     "description": "Use local pinning when you want to ensure an item on your node is never garbage-collected, even if you remove it from Files. You can also link your accounts with other remote pinning services to automatically or selectively persist files with those providers, enabling you to keep backup copies of your files and/or make them available to others when your local node is offline.",
     "noPinRemoteDescription": "Support for third-party remote pinning services is missing. Update your IPFS node to Kubo 0.8.0 or later, and you'll be able to add and configure them here.",
     "addAutoUpload": "Enable auto upload",
-    "removeAutoUpload": "Disable Auto Upload"
+    "removeAutoUpload": "Disable auto upload"
   },
   "language": "Language",
   "analytics": "Analytics",
-  "cliTutorMode": "CLI Tutor Mode",
-  "config": "Kubo Config",
+  "cliTutorMode": "CLI tutor mode",
+  "config": "Kubo config",
   "languageModal": {
     "title": "Change language",
     "description": "Pick your preferred language.",
-    "translationProjectIntro": "Add or improve translations and make IPFS better for everyone!",
-    "translationProjectLink": "Join the IPFS Translation Project"
+    "translationProjectIntro": "Add or improve translations to make IPFS available in more languages.",
+    "translationProjectLink": "Join the IPFS translation project"
   },
   "apiDescription": "<0>If your node is configured with a <1>custom Kubo RPC API address</1>, including a port other than the default 5001, enter it here.</0>",
-  "localGatewayDescription": "<0>If you access the WebUI through a reverse proxy, Docker, or a different host, enter the gateway URL your browser can reach. Leave empty to use the first <1>gateway address</1> from your Kubo config.</0>",
+  "localGatewayDescription": "<0>If you access the Web UI through a reverse proxy, Docker, or a different host, enter the gateway URL your browser can reach. Leave empty to use the first <1>gateway address</1> from your Kubo config.</0>",
   "shareLink": {
-    "title": "Sharing IPFS Links",
+    "title": "Sharing IPFS links",
     "intro": "This controls the link you copy with Share Link or Publish to IPNS. Each option fits a specific need, so pick the one that matches how the link will be opened.",
     "pathVsSubdomain": "Gateway links come in two shapes: <0>path</0> and <1>subdomain</1>. A path link puts everything from that gateway on one origin, the boundary your browser uses for cache, cookies, and saved logins, so one page can see what another left behind. A subdomain link gives each item its own origin, so your browser keeps them apart. Use a subdomain link for opening or hosting web pages, and a path link for non-browser apps.",
     "recommendedBadge": "Recommended",
@@ -54,11 +61,11 @@
     },
     "publicSubdomain": {
       "label": "Public gateway, subdomain link",
-      "description": "Like the option above, but the safer choice for opening or hosting web pages and apps that require origin isolation."
+      "description": "Like the option above, but every site gets its own browser origin. Use it to open or host web pages and apps that require origin isolation."
     }
   },
   "retrievalDiagnosticService": {
-    "title": "Retrieval Diagnostic Service",
+    "title": "Retrieval diagnostic service",
     "description": "Configure the URL of the <0>ipfs-check</0> service used for <1>retrieval diagnostics</1>. This service checks if content can be successfully fetched from your node and other nodes hosting a specific CID, helping you troubleshoot sharing issues."
   },
   "cliDescription": "<0>Enable this option to display a \"view code\" <1></1> icon next to common IPFS commands. Clicking it opens a modal with that command's CLI code, so you can paste it into the IPFS command-line interface in your terminal.</0>",
@@ -178,20 +185,20 @@
     },
     "step4": {
       "title": "Language selector",
-      "paragraph1": "<0>You can change the language of the Web UI. If your preferred language isn't available, head over our project page in <1>Transifex</1> to help us translate!</0>"
+      "paragraph1": "<0>You can change the language of the Web UI. If your preferred language isn't available, head over our project page in <1>Transifex</1> to help us translate.</0>"
     },
     "step5": {
       "title": "Anonymous usage analytics",
       "paragraph1": "If you opt-in, you can help us make the Web UI better by sending anonymous usage analytics.",
-      "paragraph2": "You're able to choose what data you send us and we won't be able to identify you, we value privacy above all else."
+      "paragraph2": "You choose what data you send us. The data is anonymous: we cannot identify you from it."
     },
     "step6": {
       "title": "CLI tutor mode",
       "paragraph1": "Enable CLI tutor mode to see shortcuts to the command-line version of common IPFS commands — helpful if you're learning to use IPFS from the terminal, or if you just need a refresher."
     },
     "step7": {
-      "title": "Kubo Config",
-      "paragraph1": "You can change the config of your Kubo node right from Web UI!",
+      "title": "Kubo config",
+      "paragraph1": "You can change the config of your Kubo node right from the Web UI.",
       "paragraph2": "Don't forget to restart the daemon to apply the changes."
     }
   },
@@ -202,19 +209,19 @@
     "readMoreUrl": "Read More"
   },
   "ipnsPublishingKeys": {
-    "title": "IPNS Publishing Keys",
+    "title": "IPNS publishing keys",
     "description": "The InterPlanetary Name System (IPNS) provides cryptographic addresses for publishing updates to content that is expected to change over time. This feature requires your node to be online at least once a day to ensure IPNS records are kept alive on the public DHT."
   },
   "generateKeyModal": {
-    "title": "Generate New IPNS Key",
+    "title": "Generate new IPNS key",
     "description": "Enter a nickname for this key to generate:"
   },
   "renameKeyModal": {
-    "title": "Rename Key",
+    "title": "Rename key",
     "description": "Enter a new nickname for the IPNS key <1>{name}</1>."
   },
   "removeKeyModal": {
-    "title": "Confirm IPNS Key Removal",
+    "title": "Confirm IPNS key removal",
     "description": "Are you sure you want to delete the IPNS key <1>{name}</1>? This operation can't be undone, and the IPNS address managed by this key will be lost FOREVER. Consider backing it up first: ipfs key export --help"
   }
 }

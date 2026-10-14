@@ -6,14 +6,13 @@ import * as d3 from 'd3'
 import CountryFlag from 'react-country-flag'
 import { debounce } from 'redux-bundler'
 
-import staticMapSrc from './StaticMap.svg'
-
 import Address from '../../components/address/Address.js'
 import Popover from '../../components/popover/Popover.js'
 
 // Styles
 import './WorldMap.css'
 import Cid from '../../components/cid/Cid.js'
+import { useChartPalette } from '../../promethity/tokens.js'
 
 const calculateWidth = (windowWidth) => {
   // the d3 generated svg width includes a lot of ocean, that we crop for now, as it looks weird.
@@ -49,6 +48,8 @@ const WorldMap = ({ t, className, selectedPeers, doSetSelectedPeers }) => {
   const [width, setWidth] = useState(calculateWidth(window.innerWidth))
   const [height, setHeight] = useState(calculateHeight(width))
   const selectedTimeoutRef = useRef(null)
+  // Dot colour comes from the tokens and follows the theme (webui-dataviz-reskin 1.2).
+  const { dot } = useChartPalette()
 
   useEffect(() => {
     const debouncedHandleResize = debounce(() => {
@@ -82,10 +83,12 @@ const WorldMap = ({ t, className, selectedPeers, doSetSelectedPeers }) => {
     <div className="flex flex-column">
       <div className={`relative ${className}`}>
         <div className='mb1 flex flex-column items-center'>
-          <div className="relative no-events" style={{ width, height, background: `transparent url(${staticMapSrc}) center no-repeat`, backgroundSize: 'auto 100%' }}>
+          <div className="relative no-events" style={{ width, height }}>
+            {/* Land: the static dot-grid map as a mask over a flat token fill (WorldMap.css). */}
+            <div className='worldMapLand' aria-hidden='true' />
             <GeoPath width={width} height={height}>
               { ({ path }) => (
-                <MapPins width={width} height={height} path={path} handleMouseEnter={ handleMapPinMouseEnter } handleMouseLeave= { handleMapPinMouseLeave } />
+                <MapPins width={width} height={height} path={path} dot={dot} handleMouseEnter={ handleMapPinMouseEnter } handleMouseLeave= { handleMapPinMouseLeave } />
               )}
             </GeoPath>
             { selectedPeers?.peerIds && (
@@ -99,16 +102,16 @@ const WorldMap = ({ t, className, selectedPeers, doSetSelectedPeers }) => {
         <div className='no-events absolute bottom-0 left-0 right-0'>
           <div className='flex flex-auto flex-column items-center self-end pb5-ns no-select'>
             <div className='f1 fw5 black'><PeersCount /></div>
-            <div className='f4 b ttu charcoal-muted'>{t('app:terms.peers')}</div>
+            <div className='f4 b charcoal-muted'>{t('app:terms.peers')}</div>
           </div>
         </div>
       </div>
       <div className='relative flex justify-end pt2 pb4'>
         <div className='f6 p2 no-select flex items-center'>
           <span className='f6 charcoal-muted pr3'>{t('app:terms.peers')}: </span>
-          <i className='mapDotExplanation mr1' style={{ width: getDotsSize(1) * 2, height: getDotsSize(1) * 2, backgroundColor: getDotsColor(1) }}></i>1-10
-          <i className='mapDotExplanation ml3 mr1' style={{ width: getDotsSize(50) * 2, height: getDotsSize(50) * 2, backgroundColor: getDotsColor(50) }}></i> 10-100
-          <i className='mapDotExplanation ml3 mr1' style={{ width: getDotsSize(110) * 2, height: getDotsSize(110) * 2, backgroundColor: getDotsColor(110) }}></i>100+
+          <i className='mapDotExplanation mr1' style={{ width: getDotsSize(1) * 2, height: getDotsSize(1) * 2, backgroundColor: dot, opacity: getDotsOpacity(1) }}></i>1-10
+          <i className='mapDotExplanation ml3 mr1' style={{ width: getDotsSize(50) * 2, height: getDotsSize(50) * 2, backgroundColor: dot, opacity: getDotsOpacity(50) }}></i> 10-100
+          <i className='mapDotExplanation ml3 mr1' style={{ width: getDotsSize(110) * 2, height: getDotsSize(110) * 2, backgroundColor: dot, opacity: getDotsOpacity(110) }}></i>100+
         </div>
       </div>
     </div>
@@ -137,14 +140,15 @@ const getDotsSize = (numberOfDots) => {
   return 10
 }
 
-const getDotsColor = (numberOfDots) => {
-  if (numberOfDots < 10) return 'rgba(150, 204, 255, 0.6)'
-  if (numberOfDots < 100) return 'rgba(53, 126, 221, 0.6)'
-  return 'rgba(53, 126, 221, 0.8)'
+// One flat token fill; peer density reads from size and from opacity steps.
+const getDotsOpacity = (numberOfDots) => {
+  if (numberOfDots < 10) return 0.6
+  if (numberOfDots < 100) return 0.8
+  return 1
 }
 
 // Just the dots on the map, this gets called a lot.
-const MapPins = connect('selectPeersCoordinates', ({ width, height, path, peersCoordinates, handleMouseEnter, handleMouseLeave }) => {
+const MapPins = connect('selectPeersCoordinates', ({ width, height, path, dot, peersCoordinates, handleMouseEnter, handleMouseLeave }) => {
   const coords = peersCoordinates || []
   const el = d3.select(ReactFauxDOM.createElement('svg'))
     .attr('width', width)
@@ -158,7 +162,8 @@ const MapPins = connect('selectPeersCoordinates', ({ width, height, path, peersC
         coordinates
       })
       .attr('d', path.pointRadius(() => getDotsSize(peerIds.length)))
-      .attr('fill', () => getDotsColor(peerIds.length))
+      .attr('fill', dot)
+      .style('fill-opacity', getDotsOpacity(peerIds.length))
       .attr('class', 'mapDot')
       .on('mouseenter', () => handleMouseEnter(peerIds, d3.event.relatedTarget))
       .on('mouseleave', () => handleMouseLeave())

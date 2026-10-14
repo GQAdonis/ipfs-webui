@@ -27,6 +27,7 @@ import Header from './header/Header.js'
 import FileImportStatus from './file-import-status/FileImportStatus.js'
 import { useExplore } from 'ipld-explorer-components/providers'
 import SelectedActions from './selected-actions/SelectedActions.js'
+import { titleWithBrand } from '../promethity/page-title.js'
 
 const FilesPage = ({
   doFetchPinningServices, doFilesFetch, doPinsFetch, doFilesSizeGet, doFilesDownloadLink, doFilesDownloadCarLink, doFilesWrite, doAddCarFile, doFilesBulkCidImport, doFilesAddPath, doUpdateHash,
@@ -324,8 +325,7 @@ const FilesPage = ({
       parts.push(t('app:terms.files'))
     }
 
-    parts.push('IPFS')
-    return parts.join(' | ')
+    return titleWithBrand(...parts)
   }
 
   return (

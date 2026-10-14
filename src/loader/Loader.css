@@ -13,10 +13,10 @@
 .la-ball-triangle-path {
     display: block;
     font-size: 0;
-    color: #fff;
+    color: var(--text);
 }
 .la-ball-triangle-path.la-dark {
-    color: #333;
+    color: var(--text);
 }
 .la-ball-triangle-path > div {
     display: inline-block;

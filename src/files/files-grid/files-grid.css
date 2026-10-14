@@ -9,8 +9,8 @@
 }
 
 .files-grid--drop-target {
-  background-color: rgba(117, 189, 255, 0.1);
-  border: 2px dashed #75bdff;
+  background-color: var(--info-tint);
+  border: 2px dashed var(--info);
   border-radius: 8px;
 }
 

@@ -39,14 +39,15 @@ const TabButton = ({ tabKey, label, active }: TabButtonProps) => (
     href={`#/diagnostics/${tabKey}`}
     className={`pv2 ph3 mr2 br2 pointer fw5 no-underline transition-all ${
       active
-        ? 'bg-teal white'
+        ? 'bg-transparent'
         : 'bg-transparent charcoal-muted hover-bg-gray-muted hover-charcoal'
     }`}
     style={{
-      transition: 'all 0.2s ease',
+      transition: 'background-color 0.2s ease, color 0.2s ease',
+      // DESIGN.md: the active tab is accent-text at weight 600, no pill.
       ...(active && {
-        backgroundColor: '#378085',
-        color: 'white'
+        color: 'var(--accent-text)',
+        fontWeight: 600
       })
     }}
   >
@@ -101,7 +102,7 @@ const DiagnosticsContent: React.FC = () => {
   return (
     <div>
       {/* Tab Navigation */}
-      <div className='mb4 pb2' style={{ borderBottom: '1px solid #e1e5eb' }}>
+      <div className='mb4 pb2'>
         <nav className='flex items-center'>
           <TabButton tabKey='logs' label={t('tabs.logs')} active={activeTab === 'logs'} />
           <TabButton tabKey='retrieval' label={t('tabs.retrieval-check')} active={activeTab === 'retrieval'} />

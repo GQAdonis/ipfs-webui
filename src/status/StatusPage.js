@@ -16,6 +16,7 @@ import AnalyticsBanner from '../components/analytics-banner/AnalyticsBanner.js'
 import { statusTour } from '../lib/tours.js'
 import { getJoyrideLocales } from '../helpers/i8n.js'
 import withTour from '../components/tour/withTour.js'
+import { titleWithBrand } from '../promethity/page-title.js'
 
 const StatusPage = ({
   t,
@@ -32,7 +33,7 @@ const StatusPage = ({
   return (
     <div data-id='StatusPage' className='mw9 center'>
       <Helmet>
-        <title>{t('title')} | IPFS</title>
+        <title>{titleWithBrand(t('title'))}</title>
       </Helmet>
       <Box className='pa3 joyride-status-node' style={{ minHeight: 0 }}>
         <div className='flex'>

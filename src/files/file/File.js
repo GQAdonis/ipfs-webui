@@ -82,16 +82,19 @@ const File = ({
   const styles = { height: 55, overflow: 'visible' }
 
   if (focused || (selected && !translucent) || coloured || (isOver && canDrop)) {
-    styles.backgroundColor = '#F0F6FA'
+    styles.backgroundColor = 'var(--raised)'
   } else if (translucent) {
     className += ' o-70'
   }
 
   if (focused) {
-    styles.border = '1px dashed #9ad4db'
+    // The one outline in the system is the accent focus ring (DESIGN.md).
+    styles.border = '1px solid transparent'
+    styles.outline = 'var(--focus-ring)'
+    styles.outlineOffset = '-2px'
   } else {
     styles.border = '1px solid transparent'
-    styles.borderTop = '1px solid #eee'
+    styles.borderTop = '1px solid var(--control)'
   }
 
   size = humanSize(size, { round: 0 })

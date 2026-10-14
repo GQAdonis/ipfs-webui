@@ -55,7 +55,7 @@ const DropableBreadcrumb = ({ index, link, immutable, onAddFiles, onMove, onClic
       <button ref={buttonRef} title={link.realName}
         className={classNames('BreadcrumbsButton relative',
           index !== 0 && 'navy',
-          index === 0 && 'f7 pa1 br2 mr2',
+          index === 0 && 'BreadcrumbsRoot f7 pa1 br2 mr2',
           index === 0 && (immutable ? 'bg-charcoal-muted white' : 'bg-navy white'),
           immutable && (link.last || index === 0) && 'no-events',
           link.last && 'b', isOver && 'dragging')}
@@ -87,8 +87,6 @@ const Breadcrumbs = ({ t, tReady, path, onClick, className, onContextMenuHandle,
   return (
     <nav aria-label={t('breadcrumbs')} className={classNames('Breadcrumbs flex items-center sans-serif overflow-hidden sticky top-0', className)} {...props}>
       <div className='nowrap overflow-hidden relative flex flex-wrap' ref={ anchors }>
-        <div className={`absolute left-0 top-0 h-100 w1 ${overflows ? '' : 'dn'}`} style={{ background: 'linear-gradient(to right, #ffffff 0%, transparent 100%)' }} />
-
         { bread.map((link, index) => (
           <div key={`${index}link`}>
             <DropableBreadcrumb index={index} link={link} immutable={isImmutable}

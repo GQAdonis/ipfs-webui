@@ -4,11 +4,7 @@ import PropTypes from 'prop-types'
 import { withTranslation } from 'react-i18next'
 import { normalizeFiles } from '../../lib/files.js'
 // Icons
-import DocumentIcon from '../../icons/StrokeDocument.js'
-import FolderIcon from '../../icons/StrokeFolder.js'
-import NewFolderIcon from '../../icons/StrokeNewFolder.js'
-import DecentralizationIcon from '../../icons/StrokeDecentralization.js'
-import DataIcon from '../../icons/StrokeData.js'
+import { DocumentIcon, FolderIcon, NewFolderIcon, AddByPathIcon, CarFileIcon, PlusIcon } from '../../promethity/icons.js'
 // Components
 import { Dropdown, DropdownMenu, Option } from '../dropdown/Dropdown.js'
 import Button from '../../components/button/button.tsx'
@@ -16,8 +12,8 @@ import { cliCmdKeys } from '../../bundles/files/consts.js'
 
 const AddButton = withTranslation('app')(
   ({ t, onClick }) => (
-    <Button id='import-button' bg='bg-navy' color='white' className='f6 flex justify-center items-center' minWidth='100px' onClick={onClick}>
-      <span><span className='aqua'>+</span> {t('actions.import')}</span>
+    <Button id='import-button' bg='bg-teal' className='f6 flex justify-center items-center' minWidth='100px' onClick={onClick}>
+      <span className='inline-flex items-center'><PlusIcon size={16} className='mr1' />{t('actions.import')}</span>
     </Button>
   )
 )
@@ -85,31 +81,31 @@ class FileInput extends React.Component {
             onDismiss={this.toggleDropdown} >
             <Option onClick={this.onAddFile} id='add-file' onCliTutorMode={() => this.onCliTutorMode(cliCmdKeys.ADD_FILE)}
               isCliTutorModeEnabled={isCliTutorModeEnabled}>
-              <DocumentIcon className='fill-aqua w2 mr1' />
+              <DocumentIcon className='mr2' />
               {t('app:terms.file')}
             </Option>
             <Option onClick={this.onAddFolder} id='add-folder' onCliTutorMode={() => this.onCliTutorMode(cliCmdKeys.ADD_DIRECTORY)}
               isCliTutorModeEnabled={isCliTutorModeEnabled}>
-              <FolderIcon className='fill-aqua w2 mr1' />
+              <FolderIcon className='mr2' />
               {t('app:terms.folder')}
             </Option>
             <Option onClick={this.onNewFolder} id='add-new-folder' onCliTutorMode={() => this.onCliTutorMode(cliCmdKeys.CREATE_NEW_DIRECTORY)}
               isCliTutorModeEnabled={isCliTutorModeEnabled}>
-              <NewFolderIcon className='fill-aqua w2 h2 mr1' />
+              <NewFolderIcon className='mr2' />
               {t('newFolder')}
             </Option>
             <Option onClick={this.onAddByPath} id='add-by-path' onCliTutorMode={() => this.onCliTutorMode(cliCmdKeys.FROM_IPFS)}
               isCliTutorModeEnabled={isCliTutorModeEnabled}>
-              <DecentralizationIcon className='fill-aqua w2 mr1' />
+              <AddByPathIcon className='mr2' />
               {t('addByPath')}
             </Option>
             <Option onClick={this.onAddByCar} id='add-by-car' onCliTutorMode={() => this.onCliTutorMode(cliCmdKeys.FROM_CAR)}
               isCliTutorModeEnabled={isCliTutorModeEnabled}>
-              <DataIcon className='fill-aqua w2 mr1' />
+              <CarFileIcon className='mr2' />
               {t('addByCar')}
             </Option>
             <Option onClick={this.onBulkCidImport} id='bulk-cid-import'>
-              <DocumentIcon className='fill-aqua w2 mr1' />
+              <DocumentIcon className='mr2' />
               {t('bulkImport')}
             </Option>
           </DropdownMenu>

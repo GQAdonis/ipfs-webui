@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet'
 import IsNotConnected from '../components/is-not-connected/is-not-connected'
 import DiagnosticsContent from './diagnostics-content'
 import { useBridgeSelector } from '../helpers/context-bridge'
+import { titleWithBrand } from '../promethity/page-title.js'
 
 const DiagnosticsPage: React.FC = () => {
   const { t } = useTranslation('diagnostics')
@@ -19,7 +20,7 @@ const DiagnosticsPage: React.FC = () => {
   return (
     <div data-id='DiagnosticsPage' className='mw9 center'>
       <Helmet>
-        <title>{t('title')} | IPFS</title>
+        <title>{titleWithBrand(t('title'))}</title>
       </Helmet>
       <div className='flex'>
         <div className='flex-auto'>

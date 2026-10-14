@@ -2,8 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import * as isIPFS from 'is-ipfs'
 import { useTranslation } from 'react-i18next'
 import { isValidIpfsPath, normalizeToPath } from '../../lib/ipfs-path.js'
-import StrokeFolder from '../../icons/StrokeFolder.js'
-import StrokeIpld from '../../icons/StrokeIpld.js'
+import { BrowseIcon, InspectIcon } from '../../promethity/icons.js'
 import Button from '../../components/button/button'
 import './files-explore-form.css'
 // @ts-expect-error - need to fix types for ipfs-webui since we are a CJS consumer...
@@ -114,42 +113,37 @@ const FilesExploreForm: React.FC<FilesExploreFormProps> = ({ onBrowse: onBrowseP
   }, [isValid, trimmedPath, onBrowseProp])
 
   return (
-      <div data-id='FilesExploreForm' className='sans-serif black-80'>
-        <div className='flex'>
-          <div className='flex-auto'>
-            <div className='relative'>
-              <input id='ipfs-path' className={`input-reset bn pa2 mb2 db w-100 f6 br-0 placeholder-light ${inputClass}`} style={{ borderRadius: '3px 0 0 3px' }} type='text' placeholder='cid, ipfs://cid, or /ipfs/cid' aria-describedby='ipfs-path-desc' onChange={onChange} onKeyDown={onKeyDown} value={path} />
-              <small id='ipfs-path-desc' className='o-0 absolute f6 black-60 db mb2'>Paste in a CID or IPFS path</small>
-            </div>
+      <div data-id='FilesExploreForm' className='sans-serif'>
+        <div className='ExploreForm'>
+          <div className='ExploreFormInputWrap'>
+            <input id='ipfs-path' className={`input-reset ExploreFormInput placeholder-light ${inputClass}`} type='text' placeholder='cid, ipfs://cid, or /ipfs/cid' aria-describedby='ipfs-path-desc' onChange={onChange} onKeyDown={onKeyDown} value={path} />
+            <small id='ipfs-path-desc' className='ExploreFormHint'>Paste in a CID or IPFS path</small>
           </div>
-          <div className='flex flex-row-reverse mb2'>
-            <Button
-              minWidth={0}
-              disabled={!isValid || isResolving}
-              danger={!isValid}
-              title={t('app:actions.inspect')}
-              style={{ borderRadius: '0 3px 3px 0' }}
-              onClick={onInspect}
-              bg='bg-teal'
-              className={`ExploreFormButton button-reset pv1 ph2 ba f7 fw4 white overflow-hidden tc ${isResolving ? 'o-50' : ''}`} >
-              <StrokeIpld style={{ height: '2em' }} className='dib fill-current-color v-mid' />
-              <span className='ml2'>{isResolving ? t('app:actions.inspectResolving') : t('app:actions.inspect')}</span>
-            </Button>
+          <div className='ExploreFormButtons'>
             <Button
               minWidth={0}
               disabled={!isValid}
-              danger={!isValid}
-              style={{ borderRadius: '0' }}
               title={t('app:actions.browse')}
               onClick={onBrowse}
-              className='ExploreFormButton button-reset pv1 ph2 ba f7 fw4 white bg-gray overflow-hidden tc' >
-              <StrokeFolder style={{ height: '2em' }} className='dib fill-current-color v-mid' />
-              <span className='ml2'>{t('app:actions.browse')}</span>
+              bg='bg-gray'
+              className='ExploreFormButton button-reset f7 fw4 overflow-hidden tc' >
+              <BrowseIcon className='dib v-mid' />
+              <span className='ExploreFormLabel'>{t('app:actions.browse')}</span>
+            </Button>
+            <Button
+              minWidth={0}
+              disabled={!isValid || isResolving}
+              title={t('app:actions.inspect')}
+              onClick={onInspect}
+              bg='bg-gray'
+              className={`ExploreFormButton button-reset f7 fw4 overflow-hidden tc ${isResolving ? 'o-50' : ''}`} >
+              <InspectIcon className='dib v-mid' />
+              <span className='ExploreFormLabel'>{isResolving ? t('app:actions.inspectResolving') : t('app:actions.inspect')}</span>
             </Button>
           </div>
         </div>
         {resolveError != null && (
-          <div className='f6 red db mb2'>{resolveError}</div>
+          <div className='f6 red db mt2'>{resolveError}</div>
         )}
       </div>
   )
