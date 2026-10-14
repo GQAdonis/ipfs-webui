@@ -6,6 +6,7 @@
  */
 import webpack from 'webpack'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
+import { fileURLToPath } from 'node:url'
 
 const PURE_ESM_MODULES = [
   'ipfs-geoip',
@@ -107,6 +108,45 @@ function webpackOverride (config) {
   }
 
   config.module.rules = modifyBabelLoaderRuleForBuild(config.module.rules)
+
+  // Strip the Inter/Montserrat @font-face blocks from ipfs-css/ipfs.css before
+  // css-loader runs, so the ~100 unused font files never enter the bundle.
+  // css-loader pulls @import-ed css in through requests that carry the remaining
+  // loaders of the importing rule inline, so a standalone rule never sees
+  // ipfs.css; appending to the plain-css rule's `use` (after css-loader and
+  // postcss-loader, so it runs on the raw source first) puts the loader in that
+  // inline chain instead, and raising css-loader's `importLoaders` from 1 to 2
+  // makes imported css go through both postcss-loader and this loader (the CRA
+  // default of 1 would stop at postcss-loader). This needs its own traversal:
+  // modifyBabelLoaderRules recurses into `rule.use`, so the modifier there sees
+  // loaders, never the rule carrying `test`. The css-module rule is excluded by
+  // its test source (`/\.css$/` itself matches "x.module.css", so testing
+  // strings does not separate the two). The loader itself no-ops for every file
+  // except ipfs-css/ipfs.css.
+  const stripIpfsCssFontsLoader = fileURLToPath(new URL('./strip-ipfs-css-fonts-loader.cjs', import.meta.url))
+  let plainCssRulesPatched = 0
+  const appendToPlainCssRule = (rules) => {
+    for (const rule of rules) {
+      if (rule.oneOf) {
+        appendToPlainCssRule(rule.oneOf)
+      } else if (rule.test instanceof RegExp && !rule.test.source.includes('module') && rule.test.test('ipfs.css') && !rule.test.test('x.scss') && Array.isArray(rule.use)) {
+        rule.use = rule.use.map(entry => {
+          if (typeof entry === 'object' && entry !== null && typeof entry.loader === 'string' && entry.loader.includes('/css-loader/')) {
+            return { ...entry, options: { ...entry.options, importLoaders: (entry.options?.importLoaders ?? 0) + 1 } }
+          }
+          return entry
+        })
+        rule.use = [...rule.use, stripIpfsCssFontsLoader]
+        plainCssRulesPatched++
+      }
+    }
+    return rules
+  }
+  config.module.rules = appendToPlainCssRule(config.module.rules)
+  if (plainCssRulesPatched !== 1) {
+    throw new Error(`config-overrides: expected to patch exactly one plain-css rule for strip-ipfs-css-fonts-loader, patched ${plainCssRulesPatched}`)
+  }
+
   config.module.rules.push({
     test: /\.jsx?$/,
     exclude: /(node_modules|bower_components)/,
