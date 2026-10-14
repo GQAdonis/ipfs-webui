@@ -1,0 +1,139 @@
+/*
+ * WebMCP confirmation dialog and Settings controls. Colors are the Web UI's own palette
+ * (ipfs-css): navy #0b3a53, charcoal #34373f, teal #378085, snow #edf0f4, on white.
+ * Every text pairing used here is at least 4.5:1 (white on teal 4.58, white on charcoal
+ * 11.9, white on the unarmed grey #5c6670 5.85, navy on white 12.0, navy on snow 10.5, navy on #d9dbe2 8.7). The dialog sets its own background and
+ * text colors, so it reads the same whatever the browser color scheme is. No transitions
+ * or animation, so prefers-reduced-motion needs no special case.
+ */
+
+.webmcp-backdrop {
+  background: rgba(11, 58, 83, 0.72);
+}
+
+.webmcp-dialog {
+  max-width: 34em;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: #fff;
+  color: #34373f;
+}
+
+.webmcp-state {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  background: #edf0f4;
+  border-left: 4px solid #f39021;
+}
+
+.webmcp-list {
+  padding: 0;
+}
+
+.webmcp-row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 30%) 1fr;
+  gap: 0.25rem 0.75rem;
+  padding: 0.25rem 0;
+}
+
+.webmcp-value {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.webmcp-preview {
+  padding: 0.75rem;
+  background: #edf0f4;
+  color: #34373f;
+}
+
+.webmcp-btn {
+  min-width: 7rem;
+  min-height: 2.75rem;
+  margin: 0.25rem 0 0 0.75rem;
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-radius: 0.25rem;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
+.webmcp-btn-deny {
+  background: #34373f;
+}
+
+.webmcp-btn-deny:hover {
+  background: #1f1f24;
+}
+
+.webmcp-btn-approve {
+  background: #378085;
+}
+
+.webmcp-btn-approve:hover {
+  background: #2c6a6e;
+}
+
+/* Not armed yet: the label stays readable (contrast holds), the cursor says it will not act. */
+.webmcp-btn-approve[aria-disabled='true'] {
+  background: #5c6670;
+  cursor: not-allowed;
+}
+
+.webmcp-btn-secondary {
+  background: #edf0f4;
+  color: #0b3a53;
+}
+
+.webmcp-btn-secondary:hover {
+  background: #d9dbe2;
+}
+
+.webmcp-link {
+  min-height: 1.5rem;
+  padding: 0.125rem 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  color: #0b3a53;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.webmcp-dialog button:focus-visible,
+.webmcp-settings input:focus-visible {
+  outline: 3px solid #0b3a53;
+  outline-offset: 2px;
+}
+
+/* White ring so the focus indicator also holds on the navy-tinted backdrop. */
+.webmcp-dialog button:focus-visible {
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.webmcp-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (forced-colors: active) {
+  .webmcp-state {
+    border: 1px solid CanvasText;
+  }
+
+  .webmcp-btn {
+    border: 1px solid ButtonText;
+  }
+}
