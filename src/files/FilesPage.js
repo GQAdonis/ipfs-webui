@@ -14,8 +14,7 @@ import InfoBoxes from './info-boxes/InfoBoxes.js'
 import FilePreview from './file-preview/FilePreview.js'
 import FilesList from './files-list/FilesList.js'
 import FilesGrid from './files-grid/files-grid.js'
-import { ViewList, ViewModule } from '../icons/stroke-icons.js'
-import GlyphSearch from '../icons/GlyphSearch.tsx'
+import { ListViewIcon as ViewList, GridViewIcon as ViewModule, SearchIcon as GlyphSearch } from '../promethity/icons.js'
 import FileNotFound from './file-not-found/index.tsx'
 import { getJoyrideLocales } from '../helpers/i8n.js'
 import SortDropdown from './sort-dropdown/SortDropdown.js'
@@ -399,7 +398,7 @@ const FilesPage = ({
             aria-pressed={showSearch}
             style={{ height: '24px' }}
           >
-            <GlyphSearch width="24" height="24" fill="currentColor" aria-hidden="true" />
+            <GlyphSearch width="24" height="24" aria-hidden="true" />
           </button>
         </div>
       </Header>

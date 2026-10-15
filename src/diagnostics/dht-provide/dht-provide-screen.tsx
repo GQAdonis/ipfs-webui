@@ -11,7 +11,7 @@ import { Schedule } from './Schedule'
 import { Operations } from './Operations'
 import { Network } from './Network'
 import { Workers } from './Workers'
-import { GlyphAttention } from '../../icons'
+import { AttentionIcon } from '../../promethity/icons.js'
 
 const DhtProvideScreen: React.FC = () => {
   const { t } = useTranslation('diagnostics')
@@ -109,7 +109,7 @@ const DhtProvideScreen: React.FC = () => {
         </p>
 
         <button
-          className={`btn monospace f6 ph3 pv2 ba br2 ${autoRefreshEnabled ? 'dht-provide__btn-auto-on' : 'dht-provide__btn-auto-off'}`}
+          className={`btn monospace f6 ph3 pv2 br2 ${autoRefreshEnabled ? 'dht-provide__btn-auto-on' : 'dht-provide__btn-auto-off'}`}
           onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
         >
           {autoRefreshEnabled
@@ -134,9 +134,9 @@ const DhtProvideScreen: React.FC = () => {
 
       {workerUtilization >= 0.75 && (
         <div className='mt3 pa3 br2 bg-washed-yellow dark-gray flex items-start f6'>
-          <GlyphAttention
+          <AttentionIcon
             className='mr2 flex-shrink-0'
-            style={{ width: 16, height: 16 }}
+            size={16}
           />
           <div>
             {t('dhtProvide.screen.workersWarning', {

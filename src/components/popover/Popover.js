@@ -5,7 +5,7 @@ import './Popover.css'
 
 const Popover = ({ show, children, top, right, bottom, left, align, handleMouseEnter, handleMouseLeave }) => {
   return (
-    <div className={ classNames('popover absolute bg-white shadow-3', align && `popover--align-${align}`) }
+    <div className={ classNames('popover absolute bg-near-white', align && `popover--align-${align}`) }
       aria-hidden={ show ? 'false' : 'true' } style={{
         ...(top && { top }),
         ...(right && { right }),

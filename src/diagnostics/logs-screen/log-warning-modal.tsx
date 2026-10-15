@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal, ModalBody, ModalActions } from '../../components/modal/modal'
 import Overlay from '../../components/overlay/overlay'
 import Button from '../../components/button/button.js'
+import { AttentionIcon } from '../../promethity/icons.js'
 
 export type WarningModalTypes = 'debug-global' | 'high-rate' | 'auto-disable' | null
 
@@ -87,7 +88,7 @@ const LogWarningModal: React.FC<LogWarningModalProps> = ({
       <Modal onCancel={onClose} className="outline-0">
         <ModalBody>
           <div className="flex items-center mb3">
-            <span className="mr2 f3">⚠️</span>
+            <AttentionIcon className="mr2" size={24} />
             <h3 className="montserrat fw4 charcoal ma0 f4">
               {content.title}
             </h3>

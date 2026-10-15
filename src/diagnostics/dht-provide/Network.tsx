@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import IconTooltip from '../../components/tooltip/icon-tooltip'
-import { GlyphInfo, GlyphTick, GlyphCancel } from '../../icons'
+import { InfoIcon, OkIcon, WarnIcon } from '../../promethity/icons.js'
 import type { SweepProvideStats } from '../../contexts/ProvideStat/types'
 import {
   Card,
@@ -33,7 +33,7 @@ export const Network: React.FC<Props> = ({ sweep, fullRT }) => {
       <CardHeader className='flex justify-between items-center'>
         <CardTitle>{t('dhtProvide.network.title')}</CardTitle>
         <IconTooltip text={t('dhtProvide.network.tooltip')} position='top'>
-          <GlyphInfo className='fill-charcoal-muted o-50 pointer' style={{ width: 22, height: 22 }} />
+          <InfoIcon className='fill-charcoal-muted pointer' size={22} />
         </IconTooltip>
       </CardHeader>
 
@@ -78,13 +78,13 @@ export const Network: React.FC<Props> = ({ sweep, fullRT }) => {
             {sweep.network?.complete_keyspace_coverage
               ? (
                 <>
-                  <GlyphTick className='fill-green mr1' style={{ width: 14, height: 14 }} />
+                  <OkIcon className='fill-green mr1' size={14} />
                   <span className='green fw5'>true</span>
                 </>
                 )
               : (
                 <>
-                  <GlyphCancel className='fill-yellow mr1' style={{ width: 14, height: 14 }} />
+                  <WarnIcon className='fill-yellow mr1' size={14} />
                   <span className='yellow fw5'>false</span>
                 </>
                 )}

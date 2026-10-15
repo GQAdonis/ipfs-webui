@@ -290,8 +290,8 @@ test.describe('Files screen', () => {
     // expect the path to be displayed in the error message area (below the heading)
     await expect(page.locator('p.truncate').filter({ hasText: 'bafyaabakaieac/404' })).toBeVisible()
 
-    // expect the "Go to Files" button to be present and working
-    const goToFilesButton = page.getByRole('link', { name: 'Go to Files' })
+    // expect the "Go to files" button to be present and working
+    const goToFilesButton = page.getByRole('link', { name: 'Go to files' })
     await expect(goToFilesButton).toBeVisible()
     await goToFilesButton.click()
 

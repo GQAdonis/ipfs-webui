@@ -5,6 +5,9 @@ import { ELEMENT_TAG, loadIsland as defaultLoadIsland } from './island-loader.js
 import { validateEndpoint } from './endpoint.js'
 import { useAgentChatSettings } from './use-agent-chat-settings.js'
 import { getBridge } from './bridge.js'
+import { StatusLine } from '../promethity/components/index.js'
+import { useTheme } from '../promethity/use-theme.js'
+import './launcher.css'
 
 const OPEN_CHANGE_EVENT = 'ipfs-agent-chat-openchange'
 
@@ -18,6 +21,8 @@ const OPEN_CHANGE_EVENT = 'ipfs-agent-chat-openchange'
 const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
   const { t } = useTranslation('agentChat')
   const { settings, token } = useAgentChatSettings()
+  // The island follows the shell: dark or light, as the theme store resolved it (system, dark or light).
+  const { resolvedTheme } = useTheme()
   // Under IPFS Desktop the bridge owns the connection: "enabled" follows its presence and
   // the endpoint comes from it, never from Settings. Without it, behaviour is unchanged.
   const [bridge] = useState(getBridge)
@@ -78,6 +83,11 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
     applyToken(el)
   }, [available, endpointValue, applyToken])
 
+  // A theme change reaches a live element at once.
+  useEffect(() => {
+    elementRef.current?.setAttribute('theme', resolvedTheme)
+  }, [resolvedTheme])
+
   const press = useCallback(async () => {
     const existing = elementRef.current
     if (existing) {
@@ -94,26 +104,40 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
     }
     const el = document.createElement(ELEMENT_TAG)
     el.setAttribute('endpoint', endpointValue)
+    el.setAttribute('theme', resolvedTheme)
     applyToken(el)
     el.addEventListener(OPEN_CHANGE_EVENT, (event) => setOpen(Boolean(/** @type {CustomEvent} */(event).detail?.open)))
     document.body.append(el)
     elementRef.current = el
     setStatus('idle')
     el.open = true
-  }, [endpointValue, loadIsland, status, applyToken])
+  }, [endpointValue, loadIsland, status, applyToken, resolvedTheme])
+
+  // The launcher is fixed at the bottom right. A sticky Apply bar (or any bottom action area)
+  // must sit above it, so its height is published as --ac-launcher-clearance while it shows.
+  const launcherRef = useRef(/** @type {HTMLDivElement | null} */ (null))
+  useEffect(() => {
+    const el = launcherRef.current
+    const root = globalThis.document?.documentElement
+    if (!available || !el || !root) return undefined
+    const publish = () => root.style.setProperty('--ac-launcher-clearance', `${Math.ceil(el.getBoundingClientRect().height)}px`)
+    publish()
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(publish)
+    observer?.observe(el)
+    return () => {
+      observer?.disconnect()
+      root.style.removeProperty('--ac-launcher-clearance')
+    }
+  }, [available, status])
 
   if (!available) return null
 
   return (
-    <div className='fixed right-0 bottom-0 pa3' style={{ zIndex: 900 }}>
-      {status === 'error' && (
-        <p role='alert' className='ma0 mb2 pa2 br1 f6 lh-copy bg-white maroon ba b--maroon tr'>
-          {t('launcher.loadError')}
-        </p>
-      )}
+    <div className='ac-launcher' ref={launcherRef}>
+      {status === 'error' && <StatusLine tone='err' word={t('launcher.errorWord')}>{t('launcher.loadError')}</StatusLine>}
       <button
         type='button'
-        className='Button transition-all sans-serif dib v-mid fw5 nowrap lh-copy bn br1 pv2 ph3 pointer focus-outline white bg-navy'
+        className='ac-launcher-button'
         aria-expanded={open}
         aria-busy={status === 'loading'}
         onClick={press}>

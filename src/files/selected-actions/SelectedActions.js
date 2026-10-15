@@ -3,13 +3,7 @@ import classNames from 'classnames'
 import PropTypes from 'prop-types'
 import { humanSize } from '../../lib/files.js'
 import { withTranslation } from 'react-i18next'
-import StrokePin from '../../icons/StrokePin.js'
-import GlyphSmallCancel from '../../icons/GlyphSmallCancel.js'
-import StrokeShare from '../../icons/StrokeShare.js'
-import StrokePencil from '../../icons/StrokePencil.js'
-import StrokeIpld from '../../icons/StrokeIpld.js'
-import StrokeTrash from '../../icons/StrokeTrash.js'
-import StrokeDownload from '../../icons/StrokeDownload.js'
+import { PinnedIcon as StrokePin, CloseIcon as GlyphSmallCancel, ShareIcon as StrokeShare, PencilIcon as StrokePencil, IpldIcon as StrokeIpld, TrashIcon as StrokeTrash, DownloadIcon as StrokeDownload } from '../../promethity/icons.js'
 import './SelectedActions.css'
 
 const styles = {
@@ -85,7 +79,7 @@ class SelectedActions extends React.Component {
     }
 
     return (
-      <div className={classNames('sans-serif bt w-100 pa3 ph4-l selectedActions', className, animateOnStart && 'selectedActionsAnimated')} style={{ ...styles.bar, ...style }} {...props}>
+      <div className={classNames('sans-serif w-100 pa3 ph4-l selectedActions', className, animateOnStart && 'selectedActionsAnimated')} style={{ ...styles.bar, ...style }} {...props}>
         <div className='flex items-center justify-between'>
           <div className='w5-l'>
             <div className='flex items-center'>

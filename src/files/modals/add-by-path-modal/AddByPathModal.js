@@ -4,7 +4,7 @@ import Button from '../../../components/button/button.tsx'
 import { Modal, ModalActions, ModalBody } from '../../../components/modal/modal'
 import { withTranslation } from 'react-i18next'
 import { isValidIpfsPath, normalizeToPath } from '../../../lib/ipfs-path.js'
-import Icon from '../../../icons/StrokeDecentralization.js'
+import { NetworkIcon as Icon } from '../../../promethity/icons.js'
 
 class AddByPathModal extends React.Component {
   static propTypes = {
@@ -90,7 +90,7 @@ class AddByPathModal extends React.Component {
             name='path'
             required
             placeholder={t('addByPathModal.importPathPlaceholder')}
-            className={`input-reset charcoal ba b--black-20 br1 pa2 mb2 db w-90 center focus-outline ${this.inputClass}`}
+            className={`input-reset charcoal ba br1 pa2 mb2 db w-90 center focus-outline ${this.inputClass}`}
             type='text' />
 
           <input
@@ -99,7 +99,7 @@ class AddByPathModal extends React.Component {
             value={this.state.name}
             placeholder={t('addByPathModal.namePlaceholder')}
             name='name'
-            className='input-reset charcoal ba b--black-20 br1 pa2 mb2 db w-90 center focus-outline'
+            className='input-reset charcoal ba br1 pa2 mb2 db w-90 center focus-outline'
             type='text' />
 
           <div className='mt3 mb3 flex flex-column items-center'>

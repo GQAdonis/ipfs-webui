@@ -431,7 +431,7 @@
 
 .pm-apply-bar {
   position: sticky;
-  bottom: 0;
+  bottom: var(--ac-bar-lift, 0px);
   z-index: 5;
   display: flex;
   flex-wrap: wrap;

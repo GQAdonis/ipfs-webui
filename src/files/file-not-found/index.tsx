@@ -1,7 +1,7 @@
 import React from 'react'
 import Box from '../../components/box/Box.js'
 import Button from '../../components/button/button.js'
-import GlyphAttention from '../../icons/GlyphAttention.js'
+import { AttentionIcon as GlyphAttention } from '../../promethity/icons.js'
 import { Trans, useTranslation } from 'react-i18next'
 
 export interface FileNotFoundProps {

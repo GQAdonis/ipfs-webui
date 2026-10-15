@@ -7,7 +7,7 @@ import { normalizeFiles, humanSize } from '../../lib/files.js'
 // React DnD
 import { useDrag, useDrop } from 'react-dnd'
 // Components
-import GlyphDots from '../../icons/GlyphDots.js'
+import { DotsIcon as GlyphDots } from '../../promethity/icons.js'
 import Tooltip from '../../components/tooltip/Tooltip.tsx'
 import Checkbox from '../../components/checkbox/Checkbox.js'
 import FileIcon from '../file-icon/FileIcon.js'
@@ -73,7 +73,7 @@ const File = ({
     })
   })
 
-  let className = 'File b--light-gray relative flex items-center bt'
+  let className = 'File relative flex items-center'
 
   if (selected) {
     className += ' selected'
@@ -89,12 +89,8 @@ const File = ({
 
   if (focused) {
     // The one outline in the system is the accent focus ring (DESIGN.md).
-    styles.border = '1px solid transparent'
     styles.outline = 'var(--focus-ring)'
     styles.outlineOffset = '-2px'
-  } else {
-    styles.border = '1px solid transparent'
-    styles.borderTop = '1px solid var(--control)'
   }
 
   size = humanSize(size, { round: 0 })
@@ -111,7 +107,7 @@ const File = ({
     <div ref={drop}>
       <div className={className} style={styles} onContextMenu={handleCtxRightClick} ref={drag} data-testid="file-row" data-type={type}>
         <div className={checkBoxCls}>
-          <Checkbox disabled={cantSelect} checked={selected} onChange={select} aria-label={ t('checkboxLabel', { name })} />
+          <Checkbox disabled={cantSelect} checked={selected} onChange={select} aria-label={ t('selectLabel', { name })} />
         </div>
 
         <button ref={preview} onClick={onNavigate} className='relative pointer flex items-center flex-grow-1 ph2 pv1 w-40' aria-label={ name === '..' ? t('previousFolder') : t('fileLabel', { name, type, size }) }>
@@ -129,14 +125,14 @@ const File = ({
         </button>
 
         <div className='ph2 pv1 flex-none hide-child dn db-l tr mw3 w-20 transition-all'>
-          <button className='ph2 db button-inside-focus' style={{ width: '2.5rem', height: '2rem' }} onClick={isFailedPin ? onDismissFailedPin : () => onSetPinning([{ cid, pinned }])}>
+          <button className='ph2 db button-inside-focus' style={{ width: '2.5rem', height: '2rem' }} aria-label={isFailedPin ? t('dismissFailedPinLabel', { name }) : (pinned || isRemotePin || isPendingPin) ? t('unpinLabel', { name }) : t('pinLabel', { name })} onClick={isFailedPin ? onDismissFailedPin : () => onSetPinning([{ cid, pinned }])}>
             <PinIcon isFailedPin={isFailedPin} isPendingPin={isPendingPin} isRemotePin={isRemotePin} pinned={pinned} />
           </button>
         </div>
         <div className='size pl2 pr4 pv1 flex-none f6 dn db-l tr charcoal-muted w-10 mw4'>
           {size}
         </div>
-        <button ref={dotsWrapper} className='ph2 db button-inside-focus file-context-menu' style={{ width: '2.5rem' }} onClick={handleCtxLeftClick} aria-label={ t('checkboxLabel', { name })} >
+        <button ref={dotsWrapper} className='ph2 db button-inside-focus file-context-menu' style={{ width: '2.5rem' }} onClick={handleCtxLeftClick} aria-label={ t('optionsLabel', { name })} >
           <GlyphDots className='fill-gray-muted pointer hover-fill-gray transition-all'/>
         </button>
       </div>

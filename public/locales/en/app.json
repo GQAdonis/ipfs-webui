@@ -28,7 +28,7 @@
     "publish": "Publish",
     "downloadCar": "Export CAR",
     "done": "Done",
-    "checkRetrieval": "Check Retrieval"
+    "checkRetrieval": "Check retrieval"
   },
   "cliModal": {
     "description": "Paste the following into your terminal to do this task in Kubo via the command line. Remember that you'll need to replace placeholders with your specific parameters."
@@ -59,7 +59,7 @@
     "placeholder": "Enter an HTTP URL (https://subdomain-gw.example.net)"
   },
   "ipfsCheckForm": {
-    "label": "Retrieval Check Service URL",
+    "label": "Retrieval check service URL",
     "placeholder": "Enter a URL (https://check.ipfs.network)"
   },
   "terms": {

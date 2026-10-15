@@ -16,7 +16,7 @@ const Overlay: React.FC<OverlayProps> = ({ children, show, onLeave, hidden }) =>
       backdrop={true}
       onHide={onLeave}
       renderBackdrop={(props) => (
-        <div className='fixed top-0 left-0 right-0 bottom-0 bg-black o-50 z-max' hidden={hidden} {...props} />
+        <div className='prom-scrim fixed top-0 left-0 right-0 bottom-0 z-max' hidden={hidden} {...props} />
       )}
       renderDialog={(dialogProps) => (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events

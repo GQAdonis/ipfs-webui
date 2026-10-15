@@ -87,7 +87,7 @@
     "secretApiKey": "Secret access token",
     "secretApiKeyHowToLink": "How to generate a new token",
     "autoUpload": "Auto upload",
-    "complianceLabel": "🔍 {nickname} pinning compliance report"
+    "complianceLabel": "{nickname} pinning compliance report"
   },
   "autoUploadModal": {
     "title": "Change upload policy for {name}",
@@ -102,8 +102,8 @@
     "failedToFetchTitle": "Unable to fetch pin count from this remote service. Make sure it is online and that you entered correct credentials. If this is a newly added service, try removing and adding it again."
   },
   "actions": {
-    "addService": "Add Service",
-    "generateKey": "Generate Key",
+    "addService": "Add service",
+    "generateKey": "Generate key",
     "edit": "Change",
     "close": "Close",
     "save": "Save",
@@ -114,11 +114,11 @@
   "edit": "Edit",
   "visitService": "Visit service",
   "remove": "Remove",
-  "localPinning": "Local Pinning",
+  "localPinning": "Local pinning",
   "service": "Service",
   "size": "Size",
   "pins": "Pins",
-  "autoUpload": "Auto Upload",
+  "autoUpload": "Auto upload",
   "autoUploadPolicy": {
     "true": "All files",
     "false": "Off"
@@ -205,8 +205,8 @@
   "Experiments": {
     "description": "Here you can get an early preview into new IPFS features by enabling options below. We are testing these ideas, and they may not be perfect yet so we'd love to hear your feedback.",
     "issueUrl": "Open an issue",
-    "feedbackUrl": "💌Leave feedback",
-    "readMoreUrl": "Read More"
+    "feedbackUrl": "Leave feedback",
+    "readMoreUrl": "Read more"
   },
   "ipnsPublishingKeys": {
     "title": "IPNS publishing keys",

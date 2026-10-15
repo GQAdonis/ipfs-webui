@@ -273,14 +273,14 @@ export const FilesList = ({
 
   const emptyRowsRenderer = () => {
     if (filter) {
-      return <div className='pv3 b--light-gray bt tc charcoal-muted f6'>{t('noFilesMatchFilter')}</div>
+      return <div className='pv3 tc charcoal-muted f6'>{t('noFilesMatchFilter')}</div>
     }
     if (filesPathInfo.isRoot) {
       return null
     }
     return (
       <Trans i18nKey='filesList.noFiles' t={t}>
-        <div className='pv3 b--light-gray bt tc gray f6'>No files in this directory. Click the &quot;Import&quot; button to add some.</div>
+        <div className='pv3 tc gray f6'>No files in this directory. Click the &quot;Import&quot; button to add some.</div>
       </Trans>
     )
   }

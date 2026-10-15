@@ -68,7 +68,7 @@ const ShareModal = ({ t, tReady, onLeave, link, type, localLink, subdomainLocalL
           <input
             value={activeLink}
             readOnly
-            className={'input-reset flex-grow-1 charcoal-muted ba b--black-20 br1 pa2 mr2 focus-outline'}
+            className={'input-reset flex-grow-1 charcoal-muted ba br1 pa2 mr2 focus-outline'}
             type='text' />
         </div>
         {offerLocalLink && (

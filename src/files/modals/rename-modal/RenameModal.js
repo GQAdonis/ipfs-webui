@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import PencilIcon from '../../../icons/StrokePencil.js'
+import { PencilIcon } from '../../../promethity/icons.js'
 import TextInputModal from '../../../components/text-input-modal/TextInputModal.js'
 import { withTranslation } from 'react-i18next'
 

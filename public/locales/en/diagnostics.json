@@ -8,10 +8,10 @@
   "logs": {
     "title": "Node logs",
     "streaming": {
-      "statusActive": "Streaming Active",
-      "statusStopped": "Streaming Stopped",
+      "statusActive": "Streaming active",
+      "statusStopped": "Streaming stopped",
       "rate": "{rate} logs/sec",
-      "highRate": "High Rate",
+      "highRate": "High rate",
       "autoDisabled": "Auto-disabled"
     },
     "entries": {
@@ -28,17 +28,17 @@
     },
     "storage": {
       "title": "Storage statistics",
-      "totalEntries": "Total Entries",
-      "estimatedSize": "Estimated Size",
-      "memoryBuffer": "Memory Buffer",
+      "totalEntries": "Total entries",
+      "estimatedSize": "Estimated size",
+      "memoryBuffer": "Memory buffer",
       "trashTooltip": "Clear all logs"
     },
     "config": {
       "title": "Buffer configuration",
-      "memoryBuffer": "Memory Buffer (entries)",
-      "persistentBuffer": "Persistent Buffer (entries)",
-      "warnThreshold": "Warning Threshold (logs/sec)",
-      "autoDisableThreshold": "Auto-disable Threshold (logs/sec)"
+      "memoryBuffer": "Memory buffer (entries)",
+      "persistentBuffer": "Persistent buffer (entries)",
+      "warnThreshold": "Warning threshold (logs/sec)",
+      "autoDisableThreshold": "Auto-disable threshold (logs/sec)"
     },
     "gologLevel": {
       "title": "Log level configuration",
@@ -55,7 +55,7 @@
       "invalidInput": "Input cannot be empty"
     },
     "warnings": {
-      "potentialIssues": "Potential Issues:",
+      "potentialIssues": "Potential issues:",
       "recommendations": "Recommendations:",
       "cancel": "Cancel",
       "debugGlobal": {
@@ -101,7 +101,7 @@
     "node": "Node",
     "unknown": "Unknown",
     "cidLabel": "CID to provide",
-    "provideButton": "Trigger Provide",
+    "provideButton": "Trigger provide",
     "clear": "Clear",
     "provideTriggered": "Provide triggered for {cid}",
     "noCid": "Please enter a CID",
@@ -112,7 +112,7 @@
       "notEnabled": "DHT Sweep provider is not enabled on this node.",
       "failedToLoad": "Failed to load provide stats: {message}",
       "refreshCountdown": "Refresh: {seconds}s",
-      "refreshOff": "Refresh: OFF",
+      "refreshOff": "Refresh: off",
       "lastUpdated": "Last updated at {time}",
       "workersWarning": "Workers at {percent}% capacity. If the queue grows, consider increasing Provide.DHT.MaxWorkers (current: {max})."
     },

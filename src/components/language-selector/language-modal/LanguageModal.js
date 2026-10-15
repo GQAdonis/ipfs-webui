@@ -5,7 +5,7 @@ import i18n, { localesList } from '../../../i18n.js'
 
 // Components
 import { Modal, ModalBody, ModalActions } from '../../modal/modal'
-import SpeakerIcon from '../../../icons/StrokeSpeaker.js'
+import { PublishIcon as SpeakerIcon } from '../../../promethity/icons.js'
 import Button from '../../button/button.tsx'
 
 const LanguageModal = ({ t, tReady, onLeave, link, className, isIpfsDesktop, doDesktopUpdateLanguage, ...props }) => {

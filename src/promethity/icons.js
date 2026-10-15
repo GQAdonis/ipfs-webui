@@ -32,7 +32,28 @@ import {
   FolderPlus,
   Link2,
   Database,
-  Pin
+  Pin,
+  X,
+  Ellipsis,
+  Pencil,
+  Download,
+  Megaphone,
+  Cloud,
+  ExternalLink,
+  Copy,
+  Share2,
+  FlaskConical,
+  Waypoints,
+  Network,
+  Globe,
+  Box,
+  File,
+  FileVideo,
+  FileSpreadsheet,
+  FileAudio,
+  FileImage,
+  List,
+  LayoutGrid
 } from 'lucide-react'
 
 // The fork's single icon module (webui-shell-redesign 1.3): nav and settings
@@ -54,8 +75,8 @@ const DEFAULT_SIZE = 20
  */
 const promIcon = (LucideIcon, displayName) => {
   /** @type {React.FC<import('lucide-react').LucideProps>} */
-  const PromIcon = ({ size = DEFAULT_SIZE, strokeWidth = STROKE_WIDTH, ...props }) => (
-    <LucideIcon size={size} strokeWidth={strokeWidth} aria-hidden='true' focusable='false' {...props} />
+  const PromIcon = ({ size = DEFAULT_SIZE, strokeWidth = STROKE_WIDTH, className = '', ...props }) => (
+    <LucideIcon size={size} strokeWidth={strokeWidth} className={`prom-icon ${className}`.trim()} aria-hidden='true' focusable='false' {...props} />
   )
   PromIcon.displayName = displayName
   return PromIcon
@@ -109,3 +130,53 @@ export const NewFolderIcon = promIcon(FolderPlus, 'NewFolderIcon')
 export const AddByPathIcon = promIcon(Link2, 'AddByPathIcon')
 export const CarFileIcon = promIcon(Database, 'CarFileIcon')
 export const PinQueueIcon = promIcon(Pin, 'PinQueueIcon')
+
+// Glyph replacements (webui-shell-redesign 1.4, M11). Call sites that used the
+// upstream `Glyph*`/`Stroke*` SVG components (`src/icons/**`) now import these
+// under the old local names, so their JSX is unchanged. The upstream glyphs
+// were filled shapes coloured by Tachyons `fill-*` classes; Lucide icons are
+// strokes, so `legacyIcon` pins `fill: none` (via `.prom-icon` in
+// theme-overrides.css, which also maps the `fill-*` classes onto `color`) and
+// drops the `viewBox`/`fill` props some call sites pass for the old artwork.
+
+/**
+ * @param {import('lucide-react').LucideIcon} LucideIcon
+ * @param {string} displayName
+ * @returns {React.FC<import('lucide-react').LucideProps>}
+ */
+const legacyIcon = (LucideIcon, displayName) => {
+  /** @type {React.FC<import('lucide-react').LucideProps>} */
+  const LegacyIcon = ({ size = DEFAULT_SIZE, strokeWidth = STROKE_WIDTH, className = '', viewBox: _viewBox, fill: _fill, ...props }) => (
+    <LucideIcon size={size} strokeWidth={strokeWidth} className={`prom-icon ${className}`.trim()} aria-hidden='true' focusable='false' {...props} />
+  )
+  LegacyIcon.displayName = displayName
+  return LegacyIcon
+}
+
+export const CloseIcon = legacyIcon(X, 'CloseIcon')
+export const DotsIcon = legacyIcon(Ellipsis, 'DotsIcon')
+export const PencilIcon = legacyIcon(Pencil, 'PencilIcon')
+export const DownloadIcon = legacyIcon(Download, 'DownloadIcon')
+export const PublishIcon = legacyIcon(Megaphone, 'PublishIcon')
+export const TrashIcon = legacyIcon(Trash2, 'TrashIcon')
+export const CloudIcon = legacyIcon(Cloud, 'CloudIcon')
+export const PinCloudIcon = legacyIcon(Cloud, 'PinCloudIcon')
+export const PinnedIcon = legacyIcon(Pin, 'PinnedIcon')
+export const ExternalLinkIcon = legacyIcon(ExternalLink, 'ExternalLinkIcon')
+export const CopyIcon = legacyIcon(Copy, 'CopyIcon')
+export const ShareIcon = legacyIcon(Share2, 'ShareIcon')
+export const LabIcon = legacyIcon(FlaskConical, 'LabIcon')
+export const IpldIcon = legacyIcon(Waypoints, 'IpldIcon')
+export const NetworkIcon = legacyIcon(Network, 'NetworkIcon')
+export const GlobeIcon = legacyIcon(Globe, 'GlobeIcon')
+export const CubeIcon = legacyIcon(Box, 'CubeIcon')
+export const AttentionIcon = legacyIcon(TriangleAlert, 'AttentionIcon')
+export const GenericFileIcon = legacyIcon(File, 'GenericFileIcon')
+export const VideoFileIcon = legacyIcon(FileVideo, 'VideoFileIcon')
+export const SpreadsheetFileIcon = legacyIcon(FileSpreadsheet, 'SpreadsheetFileIcon')
+export const AudioFileIcon = legacyIcon(FileAudio, 'AudioFileIcon')
+export const ImageFileIcon = legacyIcon(FileImage, 'ImageFileIcon')
+export const TextFileIcon = legacyIcon(FileText, 'TextFileIcon')
+export const ListViewIcon = legacyIcon(List, 'ListViewIcon')
+export const GridViewIcon = legacyIcon(LayoutGrid, 'GridViewIcon')
+export const ExpandChevronIcon = legacyIcon(ChevronDown, 'ExpandChevronIcon')

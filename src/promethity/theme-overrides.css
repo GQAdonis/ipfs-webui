@@ -257,6 +257,32 @@ summary.blue:hover, button.blue:hover { color: var(--accent-text); }
 .hover-fill-green:hover, .hover-fill-green:focus,
 .hover-fill-green-muted:hover, .hover-fill-green-muted:focus { fill: var(--ok); }
 
+/* Lucide replacements for the upstream glyphs (promethity/icons.js legacyIcon,
+   class `prom-icon`): they are strokes, so the shape is never filled (the
+   Tachyons fill-* and hover-fill-* classes would otherwise paint solid
+   blobs); the same classes drive `color`, which the stroke inherits. */
+.prom-icon { fill: none !important; }
+
+.prom-icon.fill-navy, .prom-icon.fill-charcoal, .prom-icon.fill-snow, .prom-icon.fill-washed-blue { color: var(--text); }
+
+.prom-icon.fill-navy-muted, .prom-icon.fill-charcoal-muted, .prom-icon.fill-gray, .prom-icon.fill-gray-muted,
+.prom-icon.fill-snow-muted, .prom-icon.fill-aqua, .prom-icon.fill-aqua-muted, .prom-icon.fill-teal,
+.prom-icon.fill-teal-muted, .prom-icon.fill-link { color: var(--text-muted); }
+
+.prom-icon.fill-red, .prom-icon.fill-red-muted { color: var(--err); }
+
+.prom-icon.fill-yellow, .prom-icon.fill-yellow-muted { color: var(--warn); }
+
+.prom-icon.fill-green, .prom-icon.fill-green-muted { color: var(--ok); }
+
+.prom-icon.hover-fill-navy:hover, .prom-icon.hover-fill-charcoal:hover, .prom-icon.hover-fill-snow:hover,
+.prom-icon.hover-fill-gray:hover, .prom-icon.hover-fill-gray-muted:hover, .prom-icon.hover-fill-aqua:hover,
+.prom-icon.hover-fill-teal:hover, .prom-icon.hover-fill-link:hover { color: var(--text); }
+
+.prom-icon.hover-fill-red:hover { color: var(--err); }
+
+.prom-icon.hover-fill-green:hover { color: var(--ok); }
+
 /* ---- borders ----
    Neutral and accent-family borders recede to --control; state hues keep
    their state colour so validation edges stay readable. */
@@ -370,14 +396,14 @@ input:disabled, textarea:disabled, select:disabled { opacity: 0.45; }
    label and colour was never the only carrier. The package's own text uses
    Tachyons classes, which the rules above already remap. */
 
-.prom-explore [style*='251, 251, 251'] { background: var(--surface) !important; }
+.prom-explore [style*='251, 251, 251'] { background: var(--explore-panel, var(--surface)) !important; }
 
 .prom-explore span.br-100.flex-none.tc[style*='background'] {
-  background: var(--control) !important;
-  color: var(--text);
+  background: var(--explore-badge, var(--control)) !important;
+  color: var(--explore-text, var(--text));
 }
 
-.prom-explore span.br-100.flex-none.tc[style*='background'] * { color: var(--text); }
+.prom-explore span.br-100.flex-none.tc[style*='background'] * { color: var(--explore-text, var(--text)); }
 
 /* Badge (DESIGN.md component vocabulary): the pill is for badges only. */
 .prom-badge {

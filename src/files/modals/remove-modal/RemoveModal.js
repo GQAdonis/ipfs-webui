@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { withTranslation } from 'react-i18next'
-import TrashIcon from '../../../icons/StrokeTrash.js'
+import { TrashIcon } from '../../../promethity/icons.js'
 import Button from '../../../components/button/button.tsx'
 import Checkbox from '../../../components/checkbox/Checkbox.js'
 import { Modal, ModalActions, ModalBody } from '../../../components/modal/modal'

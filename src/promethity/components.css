@@ -149,10 +149,11 @@
   color: var(--text);
 }
 
-/* Files header bar (H2): the totals and the Import action wrap instead of
-   overflowing; below 30em the action takes its own full-width row. */
+/* Files header bar (H2, N4): the totals and the Import action stay on one row
+   from 30em up; at phone width they wrap and the action takes its own
+   full-width row. */
 .files-header-bar {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   border-radius: var(--radius-md);
 }
 
@@ -161,7 +162,16 @@
 }
 
 @media (max-width: 30em) {
+  /* The breadcrumb and the sort, view and search controls wrap onto two rows
+     instead of the sort control overlapping the root chip at 320. */
+  .files-header-row {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
   .files-header-bar {
+    flex-wrap: wrap;
     justify-content: flex-start;
   }
 
@@ -172,6 +182,79 @@
   .files-header-action > div,
   .files-header-action .Button {
     width: 100%;
+  }
+}
+
+/* Files rows (N5): rows are separated by spacing and fill, not by a rule. The
+   transparent bottom edge is a gap the background never paints into
+   (background-clip), so the hover and selected `raised` fills read as separate
+   chips inside the fixed 55px virtualized row. */
+.File {
+  border-bottom: 4px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-sm);
+}
+
+.File:hover {
+  background-color: var(--raised);
+}
+
+/* Modals (N2, N6, N9): the shared sheet is a `raised` fill on a theme scrim,
+   no shadow. The close control is a 44px button. At phone width the action
+   buttons stack full width, so nothing is wider than the sheet. */
+.prom-scrim {
+  background-color: color-mix(in srgb, var(--ground) 82%, transparent);
+}
+
+.prom-modal {
+  width: min(34em, calc(100vw - 2 * var(--space-4)));
+  background-color: var(--raised);
+  color: var(--text);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.prom-modal-close {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+}
+
+.prom-modal-close:hover {
+  color: var(--text);
+  background-color: var(--control);
+}
+
+.prom-modal-close:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.prom-modal-actions {
+  gap: var(--space-2);
+  background-color: var(--raised);
+}
+
+@media (max-width: 30em) {
+  .prom-modal-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .prom-modal-actions .Button {
+    width: 100%;
+    min-width: 0 !important; /* beats the inline minWidth the Button sets */
+  }
+}
+
+@media (forced-colors: active) {
+  .prom-modal {
+    border: 1px solid CanvasText;
   }
 }
 
@@ -191,4 +274,55 @@
    sentence case (DESIGN.md, Typography). */
 .ReactVirtualized__Table__headerColumn {
   text-transform: none;
+}
+
+/* Diagnostics tabs (N7): the colour change is a short transition that
+   prefers-reduced-motion switches off. */
+.diagnostics-tab {
+  transition: background-color var(--motion-duration) var(--motion-ease), color var(--motion-duration) var(--motion-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diagnostics-tab {
+    transition: none;
+  }
+}
+
+/* Welcome state mark (webui-route-polish 1.2): the large upstream tick and
+   warning illustrations are replaced by a state icon on its tint, always
+   beside the state heading that carries the words. */
+.prom-state-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+}
+
+.prom-state-mark-ok {
+  background-color: var(--ok-tint);
+  color: var(--ok);
+}
+
+.prom-state-mark-err {
+  background-color: var(--err-tint);
+  color: var(--err);
+}
+
+/* The state word above the heading, in the state colour at body weight; the
+   heading itself stays in the text colour. Same word as the top bar. */
+.prom-state-word {
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.prom-state-word-ok {
+  color: var(--ok);
+}
+
+.prom-state-word-err {
+  color: var(--err);
 }

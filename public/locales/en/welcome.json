@@ -1,6 +1,6 @@
 {
   "title": "Welcome",
-  "description": "Welcome Page",
+  "description": "Welcome page",
   "connected": {
     "paragraph1": "Your node is connected to the IPFS network. It can fetch and serve content by CID."
   },

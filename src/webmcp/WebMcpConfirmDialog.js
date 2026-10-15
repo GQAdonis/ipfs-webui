@@ -249,6 +249,15 @@ const WebMcpConfirmDialog = () => {
           <p id={descId} className='f5 lh-copy mt0 mb2'>{t(`effects.${request.tool}`, { defaultValue: request.effect })}</p>
           <p className='f6 lh-copy mt0 mb3'>{t('dialog.source')}</p>
 
+          {/* N1: the deadline and both safety disclosures sit above the details, so
+              they are in view at scrollTop 0 on a phone however long the details are. */}
+          <div className='webmcp-notes mb3' data-testid='webmcp-notes'>
+            <p className='webmcp-note'>{t('dialog.expiry', { seconds })}</p>
+            {pending.length > 1 && <p className='webmcp-note' role='status'>{t('dialog.queued', { count: pending.length - 1 })}</p>}
+            <p className='webmcp-note'>{t('dialog.denyIsFinal')}</p>
+            <p className='webmcp-note'>{t('dialog.notALock')}</p>
+          </div>
+
           {targets.length > 0 && <dl className='webmcp-list ma0 mb3' aria-label={t('dialog.targets')}>{targets.map((item) => <ItemRow key={`${item.label}:${item.value}`} item={item} t={t} />)}</dl>}
           {details.length > 0 && <dl className='webmcp-list ma0 mb3' aria-label={t('dialog.details')}>{details.map((item) => <ItemRow key={`${item.label}:${item.value}`} item={item} t={t} />)}</dl>}
           {preview && (
@@ -258,13 +267,8 @@ const WebMcpConfirmDialog = () => {
             </div>
           )}
 
-          <p className='f6 lh-copy mt0 mb2'>{t('dialog.expiry', { seconds })}</p>
-          {pending.length > 1 && <p className='f6 lh-copy mt0 mb2' role='status'>{t('dialog.queued', { count: pending.length - 1 })}</p>}
-          <p className='f6 lh-copy mt0 mb2'>{t('dialog.denyIsFinal')}</p>
-          <p className='f6 lh-copy mt0 mb3'>{t('dialog.notALock')}</p>
-
           <div className='webmcp-footer'>
-          <div className='flex flex-wrap justify-end items-center'>
+          <div className='webmcp-actions flex flex-wrap justify-end items-center'>
             <button
               type='button'
               className='webmcp-btn webmcp-btn-secondary'
@@ -288,7 +292,7 @@ const WebMcpConfirmDialog = () => {
               {t('dialog.approve', { title: request.title })}
             </button>
           </div>
-          <p id={hintId} className='f6 lh-copy tr mt2 mb0'>{armed ? t('dialog.armed') : t('dialog.arming')}</p>
+          <p id={hintId} className='webmcp-hint f6 lh-copy tr mt2 mb0'>{armed ? t('dialog.armed') : t('dialog.arming')}</p>
           </div>
         </div>
       </div>

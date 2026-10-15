@@ -18,7 +18,7 @@ const PinningManagerServiceModal = ({ t, onLeave, onSuccess, className, service,
       secretApiKey: null
     }
   })
-  const inputClass = 'w-100 lh-copy f5 ph2 pv1 input-reset ba b--black-20 br1 focus-outline'
+  const inputClass = 'w-100 lh-copy f5 ph2 pv1 input-reset ba br1 focus-outline'
   const onSubmit = async data => {
     try {
       await doAddPinningService(data)

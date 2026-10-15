@@ -72,7 +72,7 @@ const GologLevelSection: React.FC = () => {
         <div className='mb2'>
           <h3 className='montserrat fw4 charcoal ma0 f5 mb2'>{t('logs.gologLevel.title')}</h3>
           <p className='charcoal f6 mb3'>{t('logs.gologLevel.placeholder')}</p>
-          <div className='input-reset ba b--black-20 pa2 bg-light-gray f6 charcoal'>
+          <div className='input-reset pa2 bg-light-gray f6 charcoal'>
             {t('logs.entries.loading')}...
           </div>
         </div>

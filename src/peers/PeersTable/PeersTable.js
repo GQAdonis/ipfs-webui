@@ -8,6 +8,7 @@ import CountryFlag from 'react-country-flag'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import Cid from '../../components/cid/Cid.js'
 import { sortByProperty } from '../../lib/sort.js'
+import { GlobeIcon, NetworkIcon } from '../../promethity/icons.js'
 
 import './PeersTable.css'
 
@@ -17,7 +18,7 @@ const flagRenderer = (flagCode, isPrivate) => {
   const isWindows = window.navigator.appVersion.indexOf('Win') !== -1
   return (
       <span className='f4 pr2'>
-        {isPrivate ? '🤝' : flagCode ? <CountryFlag code={flagCode} svg={isWindows} /> : '🌐'}
+        {isPrivate ? <NetworkIcon size={18} /> : flagCode ? <CountryFlag code={flagCode} svg={isWindows} /> : <GlobeIcon size={18} />}
       </span>
   )
 }
@@ -69,7 +70,7 @@ const protocolsCellRenderer = (t) => ({ rowData }) => {
           ref={ref}
           className='copyable'
           title={title}>
-          { protocols.replaceAll('[unnamed]', '🤔') }
+          { protocols.replaceAll('[unnamed]', '(unnamed)') }
         </span>
       </CopyToClipboard>
   )
@@ -114,29 +115,37 @@ const connectionCellRenderer = (t) => ({ rowData }) => {
 const rowClassRenderer = ({ index }, peers = [], selectedPeers) => {
   const shouldAddHoverEffect = selectedPeers?.peerIds?.includes(peers[index]?.peerId)
 
-  return classNames('bb b--near-white peersTableItem', index === -1 && 'bg-near-white', shouldAddHoverEffect && 'bg-light-gray')
+  return classNames('peersTableItem', index === -1 && 'bg-near-white', shouldAddHoverEffect && 'bg-light-gray')
 }
 
-const FilterInput = ({ filter, setFilter, t, filteredCount }) => {
+export const FilterInput = ({ filter, setFilter, t, filteredCount }) => {
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       setFilter('')
     }
   }
 
+  // N3: a labelled field with its count beside it in normal flow (the count
+  // used to be an unlabelled absolute-positioned number with no positioned
+  // ancestor). The label is visible, so it does not vanish once something is
+  // typed. The count is plain text the field is described by: a live region
+  // would announce on every peer that connects or leaves.
   return (
-    <div className='flex items-center justify-between pa2'>
+    <div className='peers-filter relative flex flex-wrap items-center pa2'>
+      <label htmlFor='peers-filter-input' className='peers-filter-label f6 charcoal-muted mr3'>{t('filterLabel')}</label>
       <input
         id='peers-filter-input'
-        className='input-reset ba b--black-20 pa2 mb2 db w-100'
+        aria-describedby='peers-filter-count'
+        className='input-reset ba pa2 db flex-auto'
         type='text'
-        placeholder='Filter peers'
+        placeholder={t('filterPlaceholder')}
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
         onKeyDown={handleKeyDown}
       />
-      {/* Now to display the total number of peers filtered out on the right side of the inside of the input */}
-      <div className='f4 charcoal-muted absolute top-1 right-1'>{filteredCount}</div>
+      <span id='peers-filter-count' className='peers-filter-count f6 charcoal-muted ml3 nowrap' data-testid='peers-count'>
+        {t('peerCount', { count: filteredCount })}
+      </span>
     </div>
   )
 }
@@ -204,6 +213,7 @@ export const PeersTable = ({ className, t, peerLocationsForSwarm, selectedPeers 
                 headerHeight={32}
                 rowHeight={36}
                 rowCount={sortedList.length}
+                noRowsRenderer={() => <p className='peers-empty ma0 pa3 f6 charcoal-muted'>{filter ? t('noPeersMatch') : t('noPeers')}</p>}
                 rowGetter={({ index }) => sortedList[index]}
                 sort={sort}
                 sortBy={sortBy}

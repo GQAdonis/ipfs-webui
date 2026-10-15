@@ -59,7 +59,7 @@ class Header extends React.Component {
     const filefound = files && files.type !== 'not-found'
     return (
       <div className='db flex-l justify-between items-center mb3'>
-        <div className='flex items-center w-100 justify-between mr3'>
+        <div className='files-header-row flex items-center w-100 justify-between mr3'>
           <div className='breadheader overflow-hidden mr1'>
             <Breadcrumbs className="joyride-files-breadcrumbs" path={filefound ? files.path : '/404'}
             onClick={onNavigate} onContextMenuHandle={(...args) => this.handleBreadCrumbsContextMenu(...args)}

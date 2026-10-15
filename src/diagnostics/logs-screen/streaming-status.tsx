@@ -16,7 +16,8 @@ export const StreamingStatus: React.FC<{ className?: string }> = ({ className })
 
   const streamingColorClass = useMemo(() => {
     if (!isStreaming) {
-      return 'red-muted'
+      // N8: stopped is a state to read, not an error; the word carries it.
+      return 'charcoal-muted'
     }
     return 'green'
   }, [isStreaming])

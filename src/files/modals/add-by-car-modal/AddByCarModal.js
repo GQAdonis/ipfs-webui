@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { withTranslation } from 'react-i18next'
 import Modal, { ModalActions, ModalBody } from '../../../components/modal/modal'
-import Icon from '../../../icons/StrokeData.js'
+import { CarFileIcon as Icon } from '../../../promethity/icons.js'
 import Button from '../../../components/button/button'
 import { normalizeFiles } from '../../../lib/files.js'
 
@@ -68,7 +68,7 @@ const AddByCarModal = ({ t, className, onCancel, onSubmit, ...props }) => {
           value={name}
           name='name'
           placeholder={t('addByCarModal.namePlaceholder')}
-          className={`input-reset charcoal ba b--black-20 br1 pa2 db w-90 center focus-outline ${inputClass}`}
+          className={`input-reset charcoal ba br1 pa2 db w-90 center focus-outline ${inputClass}`}
           type='text'
         />
 

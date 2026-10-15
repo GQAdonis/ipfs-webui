@@ -4,9 +4,10 @@ import '@testing-library/jest-dom'
 import { initReactI18next } from 'react-i18next'
 import i18n from 'i18next'
 import agentChatEn from '../../public/locales/en/agentChat.json'
-import { AgentChatLauncher, AgentChatSettings } from './index.js'
+import { AgentChatLauncher } from './index.js'
 import { validateEndpoint } from './endpoint.js'
-import { STORAGE_KEY, TOKEN_STORAGE_KEY, getSettings, getToken, resetForTests, setToken, updateSettings } from './settings-store.js'
+import { setTheme } from '../promethity/theme.js'
+import { TOKEN_STORAGE_KEY, getSettings, getToken, resetForTests, setToken, updateSettings } from './settings-store.js'
 
 i18n.use(initReactI18next).init({
   lng: 'en',
@@ -111,14 +112,6 @@ describe('agent chat switched off (default)', () => {
     expect(loader).not.toHaveBeenCalled()
     expect(fetchSpy).not.toHaveBeenCalled()
   })
-
-  it('the Settings switch is unchecked by default and the page loads nothing', () => {
-    render(<AgentChatSettings />)
-    expect(screen.getByRole('checkbox', { name: /enable agent chat/i })).not.toBeChecked()
-    expect(loader).not.toHaveBeenCalled()
-    expect(fetchSpy).not.toHaveBeenCalled()
-    expect(screen.getByText(/agent\.origin_allowlist/)).toBeInTheDocument()
-  })
 })
 
 describe('agent chat switched on', () => {
@@ -218,56 +211,6 @@ describe('agent chat token storage', () => {
   })
 })
 
-describe('agent chat Settings', () => {
-  it('turns the chat on and keeps the token in its own key, apart from the settings', () => {
-    render(<AgentChatSettings />)
-    fireEvent.click(screen.getByRole('checkbox', { name: /enable agent chat/i }))
-    expect(getSettings().enabled).toBe(true)
-
-    fireEvent.change(screen.getByLabelText(/agent endpoint/i), { target: { value: ENDPOINT } })
-    fireEvent.click(screen.getAllByRole('button', { name: 'Save' })[0])
-    expect(getSettings().endpoint).toBe(ENDPOINT)
-
-    fireEvent.change(screen.getByLabelText(/access token/i), { target: { value: 'sekret' } })
-    expect(screen.getByLabelText(/access token/i)).toHaveAttribute('type', 'password')
-    fireEvent.click(screen.getByRole('button', { name: 'Set token' }))
-    expect(getToken()).toBe('sekret')
-    expect(screen.getByRole('status')).toHaveTextContent(/token is saved/i)
-    expect(screen.getByLabelText(/access token/i)).toHaveValue('')
-
-    const stored = localStorage.getItem(STORAGE_KEY)
-    expect(JSON.parse(stored)).toEqual({ enabled: true, endpoint: ENDPOINT })
-    expect(stored).not.toContain('sekret')
-    expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBe('sekret')
-    expect(JSON.stringify({ ...sessionStorage })).not.toContain('sekret')
-  })
-
-  it('refuses an invalid endpoint with an announced error', () => {
-    render(<AgentChatSettings />)
-    const input = screen.getByLabelText(/agent endpoint/i)
-    fireEvent.change(input, { target: { value: 'http://remote.example/agui' } })
-    fireEvent.click(screen.getAllByRole('button', { name: 'Save' })[0])
-    expect(input).toHaveAttribute('aria-invalid', 'true')
-    expect(screen.getByRole('alert')).toHaveTextContent(/https, or http on localhost/i)
-    expect(getSettings().endpoint).toBe('')
-  })
-
-  it('forgets the stored token on request', () => {
-    setToken('abc')
-    render(<AgentChatSettings />)
-    expect(screen.getByRole('status')).toHaveTextContent(/saved in this browser profile/i)
-    fireEvent.click(screen.getByRole('button', { name: 'Forget token' }))
-    expect(getToken()).toBeUndefined()
-    expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull()
-    expect(screen.getByRole('button', { name: 'Forget token' })).toBeDisabled()
-  })
-
-  it('disables Forget token when no token is stored', () => {
-    render(<AgentChatSettings />)
-    expect(screen.getByRole('button', { name: 'Forget token' })).toBeDisabled()
-  })
-})
-
 describe('agent chat under the IPFS Desktop bridge', () => {
   const BRIDGE_ENDPOINT = 'http://127.0.0.1:50999/agui'
   let bridge
@@ -320,14 +263,6 @@ describe('agent chat under the IPFS Desktop bridge', () => {
     await waitFor(() => expect(bridge.getEndpoint).toHaveBeenCalled())
     expect(screen.queryByRole('button', { name: 'Agent chat' })).toBeNull()
   })
-
-  it('hides the endpoint and token fields in Settings and shows the managed note', () => {
-    render(<AgentChatSettings />)
-    expect(screen.getByText(/IPFS Desktop manages the agent chat connection/)).toBeInTheDocument()
-    expect(screen.queryByLabelText('Agent endpoint (/agui URL)')).toBeNull()
-    expect(document.getElementById('agent-chat-token')).toBeNull()
-    expect(document.getElementById('agent-chat-toggle')).toBeNull()
-  })
 })
 
 describe('agent chat without the bridge (browser)', () => {
@@ -344,10 +279,63 @@ describe('agent chat without the bridge (browser)', () => {
     expect(StubChat.tokens).toContain('t0ken')
     expect(StubChat.providers).toEqual([])
   })
+})
 
-  it('shows the endpoint and token fields in Settings', () => {
-    render(<AgentChatSettings />)
-    expect(screen.getByLabelText('Agent endpoint (/agui URL)')).toBeInTheDocument()
-    expect(document.getElementById('agent-chat-token')).not.toBeNull()
+describe('launcher and the shell theme (agent-chat-island-integration 1.1, 1.3)', () => {
+  beforeEach(() => {
+    document.documentElement.removeAttribute('data-theme')
+    updateSettings({ enabled: true, endpoint: ENDPOINT })
+  })
+  afterEach(() => setTheme('system'))
+
+  it('passes the resolved shell theme to the island on creation and follows a change', async () => {
+    setTheme('light')
+    render(<AgentChatLauncher loadIsland={loader} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Agent chat' }))
+    await waitFor(() => expect(chatElements()).toHaveLength(1))
+    expect(chatElements()[0].getAttribute('theme')).toBe('light')
+    act(() => setTheme('dark'))
+    expect(chatElements()[0].getAttribute('theme')).toBe('dark')
+  })
+
+  it('resolves the system choice the way the shell does (dark with no preference)', async () => {
+    setTheme('system')
+    render(<AgentChatLauncher loadIsland={loader} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Agent chat' }))
+    await waitFor(() => expect(chatElements()).toHaveLength(1))
+    expect(chatElements()[0].getAttribute('theme')).toBe('dark')
+  })
+
+  it('carries no Tachyons class on the launcher, only its own', () => {
+    const { container } = render(<AgentChatLauncher loadIsland={loader} />)
+    const classes = [...container.querySelectorAll('*')].flatMap((el) => [...el.classList])
+    const own = classes.filter((c) => c.startsWith('ac-') || c.startsWith('pm-'))
+    expect(classes.filter((c) => !own.includes(c))).toEqual([])
+  })
+
+  it('reports a load failure as a status line with a word, not a Tachyons box', async () => {
+    loader.mockRejectedValueOnce(new Error('offline'))
+    render(<AgentChatLauncher loadIsland={loader} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Agent chat' }))
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Not loaded')
+    expect(alert).toHaveTextContent(/could not be loaded/i)
+  })
+})
+
+describe('launcher clearance for sticky action areas (round 5 correction H2)', () => {
+  const read = () => document.documentElement.style.getPropertyValue('--ac-launcher-clearance')
+
+  it('publishes its height while it shows and removes it on unmount', () => {
+    updateSettings({ enabled: true, endpoint: ENDPOINT })
+    const view = render(<AgentChatLauncher loadIsland={loader} />)
+    expect(read()).toMatch(/^\d+px$/)
+    view.unmount()
+    expect(read()).toBe('')
+  })
+
+  it('publishes nothing while the chat is off (disabled-state)', () => {
+    render(<AgentChatLauncher loadIsland={loader} />)
+    expect(read()).toBe('')
   })
 })

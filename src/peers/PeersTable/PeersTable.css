@@ -2,10 +2,37 @@
   transition: background-color 0.2s ease-in-out;
 }
 
+.peersTableItem:hover {
+  background-color: var(--raised);
+}
+
+.peers-filter-label {
+  flex: 0 0 auto;
+}
+
+.peers-filter > input {
+  min-width: 10rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peersTableItem {
+    transition: none;
+  }
+}
+
 .copyable {
   cursor: pointer;
   user-select: none;
 }
 abbr.copyable {
   text-decoration: none !important;
+}
+
+/* The empty-table sentence stays in the visible part of the scroll frame
+   (the inner table is wider than a phone), so it is never cut off. */
+.peers-empty {
+  position: sticky;
+  left: 0;
+  box-sizing: border-box;
+  max-width: min(36rem, calc(100vw - 4rem));
 }

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { connect } from 'redux-bundler-react'
 import { ExplorePage } from 'ipld-explorer-components/pages'
 import withTour from '../components/tour/withTour.js'
+import { EXPLORE_TOKEN_VARS } from '../promethity/explore-tokens.js'
 
 const ExploreContainer = ({
   toursEnabled,
@@ -27,7 +28,7 @@ const ExploreContainer = ({
   const publicGatewayUrl = publicSubdomainGateway || publicGateway || null
 
   return (
-    <div className="e2e-explorePage">
+    <div className="e2e-explorePage" style={EXPLORE_TOKEN_VARS}>
       <ExplorePage
         runTour={toursEnabled}
         joyrideCallback={handleJoyrideCallback}

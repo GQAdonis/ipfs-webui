@@ -1,9 +1,9 @@
 {
   "title": "Peers",
-  "localNetwork": "Local Network",
+  "localNetwork": "Local network",
   "nearby": "nearby",
   "protocols": "Open streams",
-  "agentVersion": "Agent Version",
+  "agentVersion": "Agent version",
   "addConnection": "Add connection",
   "insertPeerAddress": "Insert the peer address you want to connect to.",
   "addPermanentPeer": "Add to the permanent peering configuration",
@@ -25,5 +25,10 @@
       "title": "Peers table",
       "paragraph1": "Check the IDs of the connected peers, their address and approximate location."
     }
-  }
+  },
+  "filterLabel": "Filter peers",
+  "filterPlaceholder": "ID, location or protocol",
+  "peerCount": "{count, plural, one {{count} peer} other {{count} peers}}",
+  "noPeers": "No peers yet. Peers you connect to will appear here.",
+  "noPeersMatch": "No peers match this filter."
 }

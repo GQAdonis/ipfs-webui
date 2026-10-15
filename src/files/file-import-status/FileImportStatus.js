@@ -4,19 +4,14 @@ import PropTypes from 'prop-types'
 import { connect } from 'redux-bundler-react'
 import { withTranslation } from 'react-i18next'
 // Icons
-import DocumentIcon from '../../icons/GlyphDocGeneric.tsx'
-import FolderIcon from '../../icons/GlyphFolder.tsx'
+import { GenericFileIcon as DocumentIcon, FolderIcon, ExpandChevronIcon as GlyphSmallArrows, CheckIcon as GlyphTick, CloseIcon as GlyphCancel, CloseIcon as GlyphSmallCancel } from '../../promethity/icons.js'
 import './FileImportStatus.css'
-import GlyphSmallArrows from '../../icons/GlyphSmallArrow.tsx'
-import GlyphTick from '../../icons/GlyphTick.tsx'
-import GlyphCancel from '../../icons/GlyphCancel.tsx'
-import GlyphSmallCancel from '../../icons/GlyphSmallCancel.tsx'
 import ProgressBar from '../../components/progress-bar/ProgressBar.js'
 import { ACTIONS } from '../../bundles/files/consts.js'
 
 const Import = (job, t) =>
   [...groupByPath(job?.message?.entries || new Map()).values()].map(item => (
-    <li className="flex w-100 bb b--light-gray items-center f6 charcoal" key={item.path}>
+    <li className="flex w-100 items-center f6 charcoal" key={item.path}>
       {viewIcon(item)}
       <span className="fileImportStatusName truncate">{item.path}</span>
       <span className='gray mh2'> |
@@ -36,7 +31,7 @@ const FailedImport = (job, t) => {
   const errorMessage = job.error?.message || t('filesImportStatus.unknownError', 'Unknown error')
 
   return (
-    <li className="flex flex-column w-100 bb b--light-gray f6 charcoal" key={job.id?.toString() || path}>
+    <li className="flex flex-column w-100 f6 charcoal" key={job.id?.toString() || path}>
       <div className="flex items-center">
         <DocumentIcon className="fileImportStatusIcon fileImportStatusIconError pa1" />
         <span className="fileImportStatusName truncate">{path}</span>
@@ -154,7 +149,7 @@ export const FileImportStatus = ({ filesFinished, filesPending, filesErrors, doF
 
   return (
     <div className='fileImportStatus fixed bottom-1 w-100 flex justify-center' style={{ zIndex: 14, pointerEvents: 'none' }}>
-      <div className={`relative br1 dark-gray w-40 center ba b--light-gray bg-white ${containerClass}`} style={{ pointerEvents: 'auto' }}>
+      <div className={`relative br1 dark-gray w-40 center bg-near-white ${containerClass}`} style={{ pointerEvents: 'auto' }}>
         <div
           tabIndex="0"
           onClick={() => setExpanded(!expanded)}

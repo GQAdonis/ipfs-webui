@@ -29,7 +29,8 @@
   "launcher": {
     "label": "Agent chat",
     "loading": "Loading chat",
-    "loadError": "The chat could not be loaded. Press the button to try again."
+    "loadError": "The chat could not be loaded. Press the button to try again.",
+    "errorWord": "Not loaded"
   },
   "desktopManaged": "IPFS Desktop manages the agent chat connection. The endpoint and token are set up by the app, so there is nothing to configure here."
 }

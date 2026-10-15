@@ -70,7 +70,7 @@ export const peers = {
   modal: (page) => page.getByTestId('ipfs-modal'),
   multiAddrInput: (page) => page.locator('input[name="maddr"]'),
   successIndicator: (page) => page.locator('.bg-green'),
-  localNetwork: (page) => page.getByText('Local Network'),
+  localNetwork: (page) => page.getByText('Local network'),
   filterInput: (page) => page.locator('#peers-filter-input')
 }
 
@@ -95,7 +95,7 @@ export const status = {
 
 // IPNS related locators
 export const ipns = {
-  generateKeyButton: (page) => page.getByText('Generate Key'),
+  generateKeyButton: (page) => page.getByText('Generate key'),
   publishModalKeys: (page) => page.locator('div[role="dialog"] .publishModalKeys'),
   keyRow: (page, name) => page.getByText(name),
   keyOptionsButton: (page, name, id) => page.locator(`text=${name}${id} >> [aria-label="Show options"]`),

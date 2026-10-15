@@ -1,0 +1,20 @@
+/* The Agent row on /settings. Kept apart from agent-settings.css so the Settings page does not
+   load the Agent page's styles. Tokens only. */
+
+.as-link,
+.as-link:visited {
+  color: var(--accent-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.as-link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+.as-summary > .pm-status {
+  max-width: 66ch;
+}

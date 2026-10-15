@@ -8,14 +8,9 @@ import Button from '../button/button.tsx'
 import Overlay from '../overlay/overlay'
 import PinningModal from './pinning-manager-modal/PinningManagerModal.js'
 import AutoUploadModal from './auto-upload-modal/AutoUploadModal.js'
-import GlyphPin from '../../icons/GlyphPin.js'
+import { PinnedIcon as GlyphPin, DotsIcon as GlyphDots, CloseIcon as StrokeCancel, ExternalLinkIcon as StrokeExternalLink, CloudIcon as StrokeCloud } from '../../promethity/icons.js'
 import ContextMenu from '../context-menu/ContextMenu.js'
 import ContextMenuItem from '../context-menu/ContextMenuItem.js'
-import GlyphDots from '../../icons/GlyphDots.js'
-import StrokeCancel from '../../icons/StrokeCancel.js'
-import StrokeExternalLink from '../../icons/StrokeExternalLink.js'
-import StrokeCloud from '../../icons/StrokeCloud.js'
-
 import './PinningManager.css'
 
 const ROW_HEIGHT = 50
@@ -62,7 +57,7 @@ export const PinningManager = ({ pinningServices, ipfsReady, arePinningServicesS
                 rowHeight={ROW_HEIGHT}
                 rowCount={sortedList.length}
                 rowGetter={({ index }) => sortedList[index]}
-                rowClassName='bb b--light-gray mt2'
+                rowClassName='mt2'
                 sort={(...sortArgs) => setSortSettings(...sortArgs)}
                 sortBy={sortSettings.sortBy}
                 sortDirection={sortSettings.sortDirection}>

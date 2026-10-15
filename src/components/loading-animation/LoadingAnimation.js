@@ -1,7 +1,7 @@
 import React from 'react'
 import { withTranslation } from 'react-i18next'
 // Components
-import GlyphDots from '../../icons/GlyphDots.js'
+import { DotsIcon as GlyphDots } from '../../promethity/icons.js'
 import Checkbox from '../checkbox/Checkbox.js'
 import FileIcon from '../../files/file-icon/FileIcon.js'
 // Styles
@@ -17,7 +17,7 @@ const FakeHeader = ({ t }) => (
 )
 
 const FakeFile = ({ nameWidth }) => (
-  <div className='b--light-gray relative flex items-center bt' style={{ height: 55 }}>
+  <div className='relative flex items-center' style={{ height: 55 }}>
     <div className='pa2 w2'>
       <Checkbox disabled />
     </div>

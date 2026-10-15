@@ -388,7 +388,7 @@ export const GologLevelAutocomplete: React.FC<GologLevelAutocompleteProps> = ({
         onBlur={handleBlur}
         disabled={disabled}
         placeholder={placeholder}
-        className={`input-reset ba pa2 bg-light-gray f6 w-100 code ${errorMessage ? 'b--red-muted focus-outline-red' : 'b--black-20'}`}
+        className={`input-reset ba pa2 bg-light-gray f6 w-100 code ${errorMessage ? 'b--red-muted focus-outline-red' : ''}`}
         style={{
           overflowX: 'auto',
           whiteSpace: 'nowrap'
@@ -398,7 +398,7 @@ export const GologLevelAutocomplete: React.FC<GologLevelAutocompleteProps> = ({
       {isOpen && suggestions.length > 0 && (
         <div
           ref={dropdownRef}
-          className="absolute top-100 left-0 right-0 bg-white ba b--black-20 shadow-2 z-999 max-h5 overflow-auto"
+          className="absolute top-100 left-0 right-0 bg-near-white z-999 max-h5 overflow-auto"
           style={{ maxHeight: '200px' }}
         >
           {suggestions.map((suggestion, index) => (

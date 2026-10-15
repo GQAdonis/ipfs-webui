@@ -5,6 +5,7 @@ import PinsPage from '../pins/LoadablePinsPage.js'
 import PeersPage from '../peers/LoadablePeersPage.js'
 import SettingsPage from '../settings/LoadableSettingsPage.js'
 import AnalyticsPage from '../settings/AnalyticsPage.js'
+import AgentSettingsPage from '../settings/agent/LoadableAgentSettingsPage.js'
 import WelcomePage from '../welcome/LoadableWelcomePage.js'
 import BlankPage from '../blank/BlankPage.js'
 import ExplorePageRenderer from '../explore/explore-page-renderer.jsx'
@@ -19,6 +20,7 @@ export default createRouteBundle({
   '/pins*': PinsPage,
   '/peers': PeersPage,
   '/settings/analytics': AnalyticsPage,
+  '/settings/agent': AgentSettingsPage,
   '/settings*': SettingsPage,
   '/welcome': WelcomePage,
   '/blank': BlankPage,

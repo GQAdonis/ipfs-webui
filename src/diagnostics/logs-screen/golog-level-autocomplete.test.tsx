@@ -491,7 +491,8 @@ describe('GologLevelAutocomplete', () => {
       render(<GologLevelAutocomplete {...defaultProps} value="info" />)
 
       const input = screen.getByRole('textbox')
-      expect(input).toHaveClass('b--black-20')
+      // The neutral D7 edge comes from `ba` (theme-overrides.css), not a b-- class.
+      expect(input).toHaveClass('ba')
       expect(input).not.toHaveClass('b--red-muted')
       expect(input).not.toHaveClass('focus-outline-red')
     })
