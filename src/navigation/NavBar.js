@@ -5,6 +5,7 @@ import classnames from 'classnames'
 import BrandWordmark from '../promethity/brand-wordmark.js'
 import BrandPIcon from '../promethity/brand-p-icon.js'
 import { BRAND } from '../promethity/brand.js'
+import { useSearchAvailability } from '../search/use-availability.js'
 // Nav icons come from the fork's single icon module only
 // (src/promethity/icons.js; webui-shell-redesign 1.3).
 import {
@@ -13,7 +14,8 @@ import {
   ExploreIcon,
   PeersIcon,
   SettingsIcon,
-  DiagnosticsIcon
+  DiagnosticsIcon,
+  SearchIcon
 } from '../promethity/icons.js'
 
 // Styles
@@ -68,6 +70,9 @@ export const NavBar = ({ t }) => {
   const codeUrl = BRAND.forkRepo
   const bugsUrl = `${codeUrl}/issues`
   const gitRevision = process.env.REACT_APP_GIT_REV
+  // Shown only when the node answers GET /index/status with a configured index and the
+  // Web UI setting search.enabled is on; while off or unconnected, nothing is requested.
+  const { visible: showSearch } = useSearchAvailability()
   const revisionUrl = `${codeUrl}/commit/${gitRevision}`
   return (
     <div className='h-100 fixed-l flex flex-column justify-between' style={{ overflowY: 'auto', width: 'inherit' }}>
@@ -84,6 +89,7 @@ export const NavBar = ({ t }) => {
           <NavLink to='/' alternative="status" icon={StatusIcon}>{t('status:title')}</NavLink>
           <NavLink to='/files' icon={FilesIcon}>{t('files:title')}</NavLink>
           <NavLink to='/explore' icon={ExploreIcon}>{t('explore:tabName')}</NavLink>
+          {showSearch && <NavLink to='/search' icon={SearchIcon}>{t('search:title')}</NavLink>}
           <NavLink to='/peers' icon={PeersIcon}>{t('peers:title')}</NavLink>
           <NavLink to='/settings' icon={SettingsIcon}>{t('settings:title')}</NavLink>
           <NavLink to='/diagnostics' icon={DiagnosticsIcon}>{t('diagnostics:title')}</NavLink>

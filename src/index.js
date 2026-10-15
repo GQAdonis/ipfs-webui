@@ -17,9 +17,13 @@ import DndBackend from './lib/dnd-backend.js'
 import { HeliaProvider, ExploreProvider } from 'ipld-explorer-components/providers'
 import { ContextBridgeProvider } from './helpers/context-bridge.jsx'
 import { initTheme } from './promethity/theme.js'
+import { migrateAgentDefaults } from './agent-chat/boot.js'
 
 // Apply the persisted Promethity theme (D16) before first render.
 initTheme()
+
+// Agent features ship on: fill only absent `enabled` keys; a stored opt-out stays (D18).
+migrateAgentDefaults()
 
 const appVersion = process.env.REACT_APP_VERSION
 const gitRevision = process.env.REACT_APP_GIT_REV

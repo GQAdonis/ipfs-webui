@@ -17,7 +17,7 @@ import { validateBackendUrl, hostOf } from './url.js'
  * @property {{ state: 'idle' | 'saving' | 'saved' | 'cleared' | 'failed', failure?: Failure, stagedThisSession: boolean }} key
  * @property {{ state: 'idle' | 'testing' | 'ok' | 'failed', url: string, detail?: string, latencyMs?: number, models?: string[], keySent?: boolean }} test
  * @property {string} confirmText
- * @property {{ state: 'idle' | 'applying' | 'applied' | 'failed', at?: string, failure?: Failure, applied?: { kind: string, model: string, host: string, first: boolean } }} apply
+ * @property {{ state: 'idle' | 'applying' | 'applied' | 'failed', at?: string, failure?: Failure, applied?: { kind: string, model: string, host: string, first: boolean, keyNotCarried?: { cleared: boolean } } }} apply
  * @property {boolean} elsewhere a change from another tab or the node arrived while this form has edits
  */
 
@@ -81,6 +81,9 @@ export function reducer (state, action) {
         failure: undefined,
         server: action.server,
         draft: keep ? state.draft : incoming,
+        // Discarded edits take their finished apply message with them: a conflict is history
+        // once the person took the node's values, and Retry has nothing left to retry.
+        apply: keep ? state.apply : settle(state.apply),
         confirmText: keep && !moved ? state.confirmText : '',
         elsewhere: keep && state.server?.revision !== action.server.revision
       }
@@ -129,8 +132,11 @@ export function reducer (state, action) {
         draft: stillSame ? draftFromServer(action.server) : state.draft,
         confirmText: '',
         elsewhere: false,
-        key: state.key.state === 'saved' || state.key.state === 'cleared' ? { ...state.key, state: 'idle' } : state.key,
-        apply: { state: 'applied', at: action.at, applied: { kind: submitted.kind, model: submitted.model.trim(), host: hostOf(submitted.baseUrl.trim()), first: state.server?.backend == null } }
+        keyDraft: '',
+        // Once the node reports the key for the backend, what it says replaces what this
+        // session staged: a move without a new key leaves nothing stored.
+        key: { state: state.key.state === 'saved' || state.key.state === 'cleared' ? 'idle' : state.key.state, failure: state.key.failure, stagedThisSession: action.server.backend?.api_key !== undefined ? false : state.key.stagedThisSession },
+        apply: { state: 'applied', at: action.at, applied: { kind: submitted.kind, model: submitted.model.trim(), host: hostOf(submitted.baseUrl.trim()), first: state.server?.backend == null, ...(action.server.key_not_carried && { keyNotCarried: { cleared: action.server.key_not_carried.cleared } }) } }
       }
     }
     case 'apply-failed':
@@ -188,6 +194,25 @@ export const urlCheck = (state) => validateBackendUrl(state.draft.baseUrl)
  */
 export const testForDraft = (state) => (state.test.url === state.draft.baseUrl.trim() ? state.test : { state: /** @type {const} */ ('idle'), url: '' })
 
+/**
+ * Whether the node holds a key the candidate host could receive: reported by the node, or
+ * saved from this page and not removed since.
+ *
+ * @param {FormState} state
+ */
+export const keyStored = (state) => state.server?.backend?.api_key?.set === true || (state.key.stagedThisSession && state.key.state !== 'cleared')
+
+/**
+ * Whether the key belongs to the server rather than to this page: the node refused keys
+ * through the settings API, or reports a key it reads from an environment variable or a file.
+ *
+ * @param {FormState} state
+ */
+export const keyServerManaged = (state) => {
+  const k = state.server?.backend?.api_key
+  return state.key.failure?.kind === 'secrets_not_accepted' || (k?.set === true && k.source !== undefined && k.source !== 'settings_api')
+}
+
 /** @param {FormState} state */
 export const hostChanged = (state) => {
   const next = urlCheck(state).ok ? hostOf(state.draft.baseUrl.trim()) : ''
@@ -208,14 +233,16 @@ export function confirmation (state) {
   const required = state.draft.kind === 'openai' && isDirty(state) && (hostChanged(state) || kindChanged(state))
   const host = urlCheck(state).ok ? hostOf(state.draft.baseUrl.trim()) : ''
   const matches = required && host !== '' && state.confirmText.trim().toLowerCase() === host
-  // Test connection can send the stored key to the candidate host. It is held back for
-  // any host other than the current backend's until the host has been typed back.
-  const gatesTest = required && hostChanged(state)
+  // Test connection can send the stored key to the candidate host. With a key stored it is
+  // held back for any host other than the current backend's until the host has been typed
+  // back. With no key stored a test has nothing to send, so it is never gated. Apply still
+  // asks for the host and sends the acknowledgement whenever the host changed.
+  const gatesTest = required && hostChanged(state) && keyStored(state)
   return {
     required,
     host,
     matches,
-    sendsEgressConfirmation: gatesTest,
+    sendsEgressConfirmation: required && hostChanged(state),
     gatesTest,
     testAllowed: !gatesTest || matches
   }
@@ -262,6 +289,9 @@ export function buildSetRequest (state) {
   if (state.draft.model.trim() !== was.model) backend.model = state.draft.model.trim()
   if (Object.keys(backend).length === 0) return undefined
   const c = confirmation(state)
+  // ADR-0012: a move without api_key in the same write leaves the new host with no key. A key
+  // typed into the field and not yet saved goes with this write, so it reaches the new host.
+  if (state.keyDraft !== '' && !keyServerManaged(state)) backend.api_key = state.keyDraft
   return {
     revision: state.server.revision,
     backend,

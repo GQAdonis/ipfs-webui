@@ -15,16 +15,25 @@ import { failureText } from './failure-text.js'
  */
 export const ApiKeyField = () => {
   const { t } = useTranslation('agentSettings')
-  const { state, actions } = useAgentSettings()
+  const { state, actions, meta } = useAgentSettings()
   const [replacing, setReplacing] = useState(false)
   const [confirmingRemove, setConfirmingRemove] = useState(false)
   const confirmRef = useRef(/** @type {HTMLDivElement | null} */ (null))
+  const storedRef = useRef(/** @type {HTMLDivElement | null} */ (null))
+  const [refocusRemove, setRefocusRemove] = useState(false)
   // Cancel is the default: focus lands there, so Enter or Space does not remove the key.
   useEffect(() => {
     if (!confirmingRemove) return
     const cancel = confirmRef.current?.querySelector('[data-cancel]')
     if (cancel instanceof HTMLElement) cancel.focus()
   }, [confirmingRemove])
+  // Cancel brings the Remove button back; focus returns to it rather than dropping to the page.
+  useEffect(() => {
+    if (!refocusRemove || confirmingRemove) return
+    setRefocusRemove(false)
+    const remove = storedRef.current?.querySelector('[data-remove]')
+    if (remove instanceof HTMLElement) remove.focus()
+  }, [refocusRemove, confirmingRemove])
   const stored = state.server?.backend?.api_key
   const hasKey = stored?.set === true || (state.key.stagedThisSession && state.key.state !== 'cleared')
   const refused = state.key.failure?.kind === 'secrets_not_accepted'
@@ -56,7 +65,7 @@ export const ApiKeyField = () => {
     <div className='as-key' data-id='AgentSettingsKey'>
       {showInput
         ? (
-          <Field label={t('key.label')} help={t('key.help')}>
+          <Field label={t('key.label')} help={t(meta.keyServerManaged ? 'key.helpServer' : 'key.help')}>
             <div className='as-inline'>
               <FieldInput
                 type='password'
@@ -75,14 +84,14 @@ export const ApiKeyField = () => {
           </Field>
           )
         : (
-          <div className='as-key-stored'>
+          <div ref={storedRef} className='as-key-stored'>
             <p className='pm-label as-key-label'>{t('key.label')}</p>
             <StatusLine tone='ok' word={t('key.stored.word')}>
               {t(`key.stored.source.${stored?.set ? stored.source : 'settings_api'}`)}
             </StatusLine>
             <div className='as-inline'>
               <Button buttonType='button' bg='bg-charcoal' minWidth={120} onClick={() => setReplacing(true)}>{t('key.replace')}</Button>
-              {confirmingRemove ? null : <Button buttonType='button' bg='bg-charcoal' minWidth={120} disabled={saving} onClick={() => setConfirmingRemove(true)}>{t('key.remove')}</Button>}
+              {confirmingRemove ? null : <Button buttonType='button' bg='bg-charcoal' minWidth={120} data-remove='' disabled={saving} onClick={() => setConfirmingRemove(true)}>{t('key.remove')}</Button>}
             </div>
             {confirmingRemove
               ? (
@@ -90,7 +99,7 @@ export const ApiKeyField = () => {
                   <p className='pm-help'>{t('key.removeConfirm.text')}</p>
                   <div className='as-inline'>
                     <Button buttonType='button' bg='bg-charcoal' minWidth={120} disabled={saving} onClick={() => { setConfirmingRemove(false); void actions.clearKey() }}>{t('key.removeConfirm.yes')}</Button>
-                    <Button buttonType='button' type='link' minWidth={80} data-cancel='' onClick={() => setConfirmingRemove(false)}>{t('key.cancel')}</Button>
+                    <Button buttonType='button' type='link' minWidth={80} data-cancel='' onClick={() => { setRefocusRemove(true); setConfirmingRemove(false) }}>{t('key.cancel')}</Button>
                   </div>
                 </div>
                 )

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import Button from '../../components/button/button.tsx'
 import { Combobox, Field, FieldInput, StatusLine } from '../../promethity/components/index.js'
 import { ApiKeyField } from './ApiKeyField.js'
+import { ConfirmHost } from './ConfirmHost.js'
 import { useAgentSettings } from './AgentSettings.js'
 import { failureText } from './failure-text.js'
 
@@ -32,7 +33,9 @@ export const OpenAiBackendForm = () => {
   const testing = test.state === 'testing'
   const gated = !meta.confirmation.testAllowed
   const runTest = () => { setUrlTouched(true); if (!gated) void actions.testConnection() }
-  const keyStored = server?.backend?.api_key?.set === true || state.key.stagedThisSession
+  const keyStored = meta.keyStored
+  const managed = meta.keyServerManaged
+  const noteId = 'as-test-note'
 
   return (
     <div className='as-fields' data-id='AgentSettingsOpenAi'>
@@ -51,18 +54,20 @@ export const OpenAiBackendForm = () => {
 
       <ApiKeyField />
 
+      <ConfirmHost />
+
       <div className='as-test'>
-        <Button buttonType='button' bg='bg-charcoal' minWidth={160} disabled={!meta.urlCheck.ok || testing || gated} aria-busy={testing} onClick={runTest}>
+        <Button buttonType='button' bg='bg-charcoal' minWidth={160} disabled={!meta.urlCheck.ok || testing || gated} aria-describedby={noteId} aria-busy={testing} onClick={runTest}>
           {testing ? t('test.testing') : t('test.button')}
         </Button>
-        <p className='pm-help as-test-note'>{gated ? t('test.gated', { host: meta.confirmation.host }) : t('test.note')}</p>
+        <p id={noteId} className='pm-help as-test-note'>{gated ? t(managed ? 'test.gatedServer' : 'test.gated', { host: meta.confirmation.host }) : meta.confirmation.gatesTest ? t(managed ? 'test.noteNewHostServer' : 'test.noteNewHost') : t('test.note')}</p>
         <div aria-live='polite'>
           {test.state === 'ok'
             ? (
               <StatusLine tone={keyStored && !test.keySent ? 'warn' : 'ok'} word={keyStored && !test.keySent ? t('test.keyNotSent.word') : t('test.ok.word')}>
                 {t('test.ok.text', { host: meta.confirmation.host, ms: test.latencyMs ?? 0 })}{' '}
-                {keyStored ? (test.keySent ? t('test.keySent') : t('test.keyNotSent.text')) : ''}{' '}
-                {test.models ? t('test.ok.models', { count: test.models.length }) : t('test.ok.noModels')}
+                {keyStored ? (test.keySent ? t('test.keySent') : managed ? t('test.keyNotSentServer') : t('test.keyNotSent.text')) : ''}{' '}
+                {test.models ? t('test.ok.models', { count: test.models.length }) : keyStored && !test.keySent ? t('test.ok.noModelsKeyWithheld') : t('test.ok.noModels')}
               </StatusLine>
               )
             : null}

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { INITIAL_STATE, applyBlockers, buildSetRequest, confirmation, isDirty, reducer, testForDraft, urlCheck } from './core/form.js'
+import { INITIAL_STATE, applyBlockers, buildSetRequest, confirmation, isDirty, keyServerManaged, keyStored, reducer, testForDraft, urlCheck } from './core/form.js'
 import { toSettingsError } from './core/errors.js'
 
 // The state, actions and meta of the Agent settings page as one context
@@ -24,6 +24,8 @@ const AgentSettingsContext = createContext(/** @type {AgentSettingsValue | null}
  * @property {ReturnType<typeof urlCheck>} urlCheck
  * @property {ReturnType<typeof testForDraft>} test
  * @property {ReturnType<typeof confirmation>} confirmation
+ * @property {boolean} keyStored
+ * @property {boolean} keyServerManaged
  * @property {ReturnType<typeof applyBlockers>} blockers
  */
 
@@ -222,6 +224,8 @@ export const AgentSettingsProvider = ({ client, connectionKey, managed = false, 
       urlCheck: urlCheck(state),
       test: testForDraft(state),
       confirmation: confirmation(state),
+      keyStored: keyStored(state),
+      keyServerManaged: keyServerManaged(state),
       blockers: applyBlockers(state, caps)
     })
   }, [state, status, uarAvailable, managed])

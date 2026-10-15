@@ -6,6 +6,7 @@ import PeersPage from '../peers/LoadablePeersPage.js'
 import SettingsPage from '../settings/LoadableSettingsPage.js'
 import AnalyticsPage from '../settings/AnalyticsPage.js'
 import AgentSettingsPage from '../settings/agent/LoadableAgentSettingsPage.js'
+import SearchPage from '../search/LoadableSearchPage.js'
 import WelcomePage from '../welcome/LoadableWelcomePage.js'
 import BlankPage from '../blank/BlankPage.js'
 import ExplorePageRenderer from '../explore/explore-page-renderer.jsx'
@@ -19,6 +20,7 @@ export default createRouteBundle({
   '/ipns*': FilesPage,
   '/pins*': PinsPage,
   '/peers': PeersPage,
+  '/search': SearchPage,
   '/settings/analytics': AnalyticsPage,
   '/settings/agent': AgentSettingsPage,
   '/settings*': SettingsPage,

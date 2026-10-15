@@ -1,6 +1,6 @@
 {
   "title": "Agent chat",
-  "description": "A chat sidebar that talks to your node's `ipfs mcp` agent endpoint. It is off by default. While it is off, nothing is loaded and no request is made. There is no default endpoint: you choose the address.",
+  "description": "A chat sidebar that talks to your node's `ipfs mcp` agent endpoint. It is on by default but does nothing until an address is set: there is no default endpoint, you choose it. While it is off, or has no address, nothing is loaded and no request is made.",
   "originAllowlist": "The endpoint refuses browser origins it does not list. Before you turn the chat on, add this Web UI's origin to the node's agent.origin_allowlist setting. The list is empty by default.",
   "originValue": "This Web UI's origin:",
   "toggle": {

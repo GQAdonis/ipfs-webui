@@ -4,7 +4,7 @@ Lets an agent in a WebMCP-capable browser or app (Codex desktop, Kimi desktop) u
 
 ## Off switches
 
-- **Settings, "Agent tools (WebMCP)"**: off by default. Nothing is registered and no dialog exists while it is off.
+- **Settings, "Agent tools (WebMCP)"**: on by default in this fork (read tools only, and only in a browser that has WebMCP); a stored opt-out always wins (see `docs/PROMETHITY-FORK.md`). Nothing is registered and no dialog exists while it is off.
 - **Second switch**: tools that change the node are offered only while it is on, and turning the first switch off turns it off too. Every call from such a tool opens a confirmation dialog first. Tools that delete or remove are never offered.
 - **Operator**: serve this Web UI with the response header `Permissions-Policy: tools=()`. The browser then refuses WebMCP registration for the page.
 - No `exposedTo` is passed to `registerTool`; the tools belong to this top-level page only.

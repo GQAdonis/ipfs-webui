@@ -58,7 +58,7 @@ function Toggle ({ id, checked, disabled = false, label, help, onChange }) {
 }
 
 /**
- * Settings for WebMCP: the switch (off by default), the switch for DNSLink names, the switch
+ * Settings for WebMCP: the switch (on by default), the switch for DNSLink names, the switch
  * for tools that change the node (both off by default, and only available while the first is
  * on), and a status line that reports what was registered. The text says what each risk is
  * before the person turns the switch on.

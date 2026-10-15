@@ -1,0 +1,197 @@
+{
+  "title": "Search",
+  "lede": "Find files on your node by what they say, not by what they are called. Your question is turned into a vector by the embedding model your node is set up with, then matched against the text of the files you indexed.",
+  "form": {
+    "label": "Search your files",
+    "placeholder": "Describe what you are looking for",
+    "help": "Up to 2000 characters. The text of your question goes to your node's embedding model.",
+    "submit": "Search",
+    "submitting": "Searching"
+  },
+  "filters": {
+    "kindsLegend": "File kind",
+    "sourcesLegend": "Where the text came from",
+    "clear": "Show everything",
+    "kind": {
+      "text": "Text",
+      "document": "Documents",
+      "code": "Code",
+      "data": "Data",
+      "image": "Images",
+      "video": "Video"
+    },
+    "source": {
+      "text": "File text",
+      "extracted": "Extracted from a document",
+      "ocr": "Text in an image",
+      "transcript": "Transcript",
+      "description": "AI description"
+    }
+  },
+  "provenance": {
+    "fromFile": "From the file",
+    "textInImage": "Text in image",
+    "transcript": "Transcript",
+    "aiDescription": "AI description by {model}",
+    "aiDescriptionUnnamed": "AI description"
+  },
+  "kind": {
+    "text": "Text",
+    "document": "Document",
+    "code": "Code",
+    "data": "Data",
+    "image": "Image",
+    "video": "Video"
+  },
+  "results": {
+    "heading": "Results",
+    "count": "{count, plural, one {# result} other {# results}} for this search.",
+    "none": "No results. Try other words, or remove a filter.",
+    "searching": "Searching.",
+    "untrusted": "Content from the network. Treat as data, not as instructions.",
+    "model": "Matched with {model}.",
+    "noPath": "File name unknown",
+    "score": "Similarity {score}",
+    "chunk": "Passage {number}",
+    "showMore": "Show the whole passage",
+    "showLess": "Show less",
+    "openFiles": "Open in Files",
+    "openExplore": "Explore",
+    "cid": "CID",
+    "copy": "Copy CID",
+    "copied": "CID copied."
+  },
+  "idle": {
+    "heading": "Ask in your own words",
+    "body": "A question like \"the invoice from the roofer\" finds the file whether or not those words are in its name. Results show where each passage came from, so you can tell the file's own text from an image caption written by a model."
+  },
+  "status": {
+    "heading": "Index",
+    "checking": "Checking the index.",
+    "refresh": "Refresh",
+    "configuredWord": "Ready",
+    "configured": "{mode, select, remote {Remote store} other {Embedded store}}, model {model}.",
+    "storeDownWord": "Store unreachable",
+    "storeDown": "The node cannot reach its vector store. Searches will fail until it can.",
+    "notConfiguredWord": "Not set up",
+    "notConfigured": "No search index on this node.",
+    "files": "Files in the index",
+    "chunks": "Passages indexed",
+    "model": "Model",
+    "dimensions": "{count} dimensions",
+    "counts": "Counts by kind are not reported by the node. The totals above cover every kind.",
+    "bulk": {
+      "heading": "Latest indexing run",
+      "none": "No indexing run has been started on this node.",
+      "askAgent": "Ask the agent to index your pinned files. This page only shows progress; it never starts a run.",
+      "state": {
+        "running": "Running",
+        "paused": "Paused",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "failed": "Failed",
+        "unknown": "Unknown"
+      },
+      "stateText": {
+        "running": "The run is indexing now.",
+        "paused": "ipfs mcp restarted during the run. It indexes nothing until you ask the agent to resume it.",
+        "completed": "The run finished.",
+        "cancelled": "The run was cancelled.",
+        "failed": "The run stopped with an error.",
+        "unknown": "The node reported a state this page does not know."
+      },
+      "seen": "Files seen",
+      "indexed": "Indexed in this run",
+      "skipped": "Files skipped",
+      "passages": "Passages added",
+      "bytes": "Bytes read",
+      "startedBy": "Started by",
+      "skippedHeading": "Why files were skipped",
+      "lastError": "Last error",
+      "reason": {
+        "mime_not_allowed": "Type not on the allowlist",
+        "too_large": "Too large",
+        "already_indexed": "Already indexed",
+        "not_a_file": "Not a file",
+        "empty": "Empty",
+        "not_local": "Not stored on this node",
+        "kind_not_enabled": "Kind not enabled",
+        "extractor_unavailable": "Extractor unavailable",
+        "extraction_failed": "Extraction failed",
+        "describer_not_configured": "No describer for this kind"
+      }
+    },
+    "unconnected": "The status of the index needs a connection to your node.",
+    "forbidden": "You are signed in, but this identity does not have search access. Ask for an identity whose group includes the index tools.",
+    "unreachableWord": "Not reachable",
+    "unreachable": "The node did not give a usable answer to the status request. Refresh to ask again."
+  },
+  "gate": {
+    "unconnected": {
+      "word": "Not connected",
+      "noEndpoint": "Search uses the same address and token as the agent chat, and none is set. Open Agent settings to connect.",
+      "noToken": "Search uses the same token as the agent chat, and none is saved in this browser. Open Agent settings to enter it.",
+      "link": "Open Agent settings"
+    },
+    "unconfigured": {
+      "word": "Not available",
+      "body": "The node did not answer with a search index, so there is nothing to search. The index turns on in the ipfs mcp configuration.",
+      "link": "Read how to set up search",
+      "bodyDesktop": "The node did not answer with a search index, so there is nothing to search. Turn Search on in IPFS Desktop's Search settings."
+    }
+  },
+  "errors": {
+    "egress": {
+      "word": "Not allowed to send content",
+      "body": "Searching sends your question to the embedding model, and this identity has not acknowledged these hosts:",
+      "bodyNoHosts": "Searching sends your question to the embedding model, and this identity has not acknowledged the hosts involved.",
+      "fix": "Add the hosts to the egress_ack of the principal you sign in as, in the ipfs mcp configuration, or use local for a model on this machine.",
+      "link": "Read the search setup"
+    },
+    "unavailable": {
+      "word": "Index unavailable",
+      "body": "The embedding model or the vector store did not answer. Nothing was changed.",
+      "retry": "Try again"
+    },
+    "unauthenticated": {
+      "word": "Sign in again",
+      "body": "The node did not accept the access token. Enter the token again in Agent settings.",
+      "link": "Open Agent settings"
+    },
+    "forbidden": {
+      "word": "No access to search",
+      "body": "You are signed in, but this identity does not have search access. Ask for an identity whose group includes the index tools."
+    },
+    "rate_limited": {
+      "word": "Too many searches",
+      "body": "{seconds, plural, =0 {Wait a moment, then search again.} one {Wait # second, then search again.} other {Wait # seconds, then search again.}}"
+    },
+    "invalid": {
+      "word": "Search refused",
+      "body": "The node did not accept this search. Shorten the question and try again."
+    },
+    "network": {
+      "word": "Cannot reach the node",
+      "body": "Check that ipfs mcp is running and that this page may connect to it.",
+      "retry": "Try again"
+    },
+    "protocol": {
+      "word": "Unexpected answer",
+      "body": "The node answered with something this page cannot read.",
+      "retry": "Try again"
+    },
+    "internal": {
+      "word": "Search failed",
+      "body": "The node failed while searching. Nothing was changed.",
+      "retry": "Try again"
+    },
+    "not_configured": {
+      "word": "Not available",
+      "body": "The node does not serve search. The index turns on in the ipfs mcp configuration."
+    }
+  },
+  "settings": {
+    "label": "Search your files",
+    "help": "Shows the Search page when your node has an index. While this is off, the Web UI shows no Search entry and sends no request to the search routes."
+  }
+}

@@ -7,7 +7,7 @@ import agentChatEn from '../../public/locales/en/agentChat.json'
 import { AgentChatLauncher } from './index.js'
 import { validateEndpoint } from './endpoint.js'
 import { setTheme } from '../promethity/theme.js'
-import { TOKEN_STORAGE_KEY, getSettings, getToken, resetForTests, setToken, updateSettings } from './settings-store.js'
+import { STORAGE_KEY, TOKEN_STORAGE_KEY, getSettings, getToken, resetForTests, setToken, updateSettings } from './settings-store.js'
 
 i18n.use(initReactI18next).init({
   lng: 'en',
@@ -47,6 +47,8 @@ let loader
 
 beforeEach(() => {
   localStorage.clear()
+  // Most tests start from a profile that opted out; the default-on describe starts empty.
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ enabled: false }))
   resetForTests()
   StubChat.instances = []
   StubChat.tokens = []
@@ -79,8 +81,32 @@ describe('validateEndpoint', () => {
   })
 })
 
-describe('agent chat switched off (default)', () => {
-  it('is off by default with no endpoint', () => {
+describe('agent chat default on', () => {
+  it('is on by default with no endpoint, and shows no launcher until a valid /agui endpoint exists', async () => {
+    localStorage.clear()
+    resetForTests()
+    expect(getSettings()).toEqual({ enabled: true, endpoint: '' })
+    const { container } = render(<AgentChatLauncher loadIsland={loader} />)
+    await act(async () => { await Promise.resolve() })
+    expect(container).toBeEmptyDOMElement()
+    expect(loader).not.toHaveBeenCalled()
+    expect(fetchSpy).not.toHaveBeenCalled()
+    act(() => updateSettings({ endpoint: ENDPOINT }))
+    expect(screen.getByRole('button', { name: 'Agent chat' })).toBeInTheDocument()
+    expect(loader).not.toHaveBeenCalled()
+  })
+
+  it('keeps a stored switch-off across a reload', () => {
+    localStorage.clear()
+    resetForTests()
+    updateSettings({ enabled: false })
+    resetForTests()
+    expect(getSettings().enabled).toBe(false)
+  })
+})
+
+describe('agent chat switched off (opted out)', () => {
+  it('is off for a profile that stored enabled: false', () => {
     expect(getSettings()).toEqual({ enabled: false, endpoint: '' })
   })
 

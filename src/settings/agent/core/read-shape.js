@@ -18,13 +18,16 @@ export function readShape (json, etag) {
   const revision = typeof o.revision === 'string' && o.revision !== '' ? o.revision : unquote(etag)
   if (!revision || revision.length > 256) throw new SettingsError('protocol', 'The settings carry no revision.')
   const sp = isObject(o.system_prompt) ? o.system_prompt : {}
+  const knc = o.key_not_carried
   return {
     revision,
     backend: readBackend(o.backend),
     system_prompt: {
       safety_prefix: typeof sp.safety_prefix === 'string' ? sp.safety_prefix : '',
       custom: typeof sp.custom === 'string' ? sp.custom : ''
-    }
+    },
+    // ADR-0012: a write that moved the backend host without a new key says so, once.
+    ...(isObject(knc) && knc.reason === 'host_changed' ? { key_not_carried: { reason: /** @type {const} */ ('host_changed'), cleared: knc.cleared === true } } : {})
   }
 }
 

@@ -3,45 +3,13 @@ import { useTranslation } from 'react-i18next'
 import Box from '../../components/box/Box.js'
 import Button from '../../components/button/button.tsx'
 import Title from '../Title.js'
-import { ApplyBar, ApplyForm, Field, FieldInput, SegmentedControl, StatusLine, useFieldControl } from '../../promethity/components/index.js'
+import { ApplyBar, ApplyForm, SegmentedControl } from '../../promethity/components/index.js'
 import { ApplyStatus } from './ApplyStatus.js'
 import { OpenAiBackendForm } from './OpenAiBackendForm.js'
 import { UarBackendForm } from './UarBackendForm.js'
 import { useAgentSettings } from './AgentSettings.js'
 import { useDocumentScrollPadding } from './use-scroll-padding.js'
 import { useChatOn } from './use-chat-on.js'
-
-/**
- * The typed host. Described by the help and by a match status; the status is
- * announced only once, when the text becomes the host.
- *
- * @param {{ host: string, value: string, matches: boolean, onChange: (v: string) => void }} props
- */
-const HostInput = ({ host, value, matches, onChange }) => {
-  const { t } = useTranslation('agentSettings')
-  const control = useFieldControl()
-  const statusId = `${control.id}-match`
-  const typed = value.trim() !== ''
-  return (
-    <>
-      <FieldInput
-        type='text'
-        autoComplete='off'
-        autoCapitalize='off'
-        spellCheck={false}
-        className='monospace'
-        aria-describedby={`${control['aria-describedby'] ?? ''} ${statusId}`.trim()}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <div id={statusId} className='as-confirm-status'>
-        {matches
-          ? <StatusLine tone='ok' word={t('confirm.matches.word')}>{t('confirm.matches.text', { host })}</StatusLine>
-          : typed ? <p className='pm-help'>{t('confirm.differs')}</p> : null}
-      </div>
-    </>
-  )
-}
 
 /**
  * The backend choice and its field set. No backend is preselected on first
@@ -101,19 +69,6 @@ export const BackendSection = () => {
 
           {draft.kind === 'openai' ? <OpenAiBackendForm /> : null}
           {draft.kind === 'uar' ? <UarBackendForm /> : null}
-
-          {meta.confirmation.required
-            ? (
-              <div className='as-confirm' data-id='AgentSettingsConfirm'>
-                <Field
-                  label={<>{t('confirm.label')} <code className='monospace as-host'>{meta.confirmation.host}</code></>}
-                  help={t('confirm.help')}
-                >
-                  <HostInput host={meta.confirmation.host} value={state.confirmText} matches={meta.confirmation.matches} onChange={actions.setConfirmText} />
-                </Field>
-              </div>
-              )
-            : null}
 
           <ApplyBar label={t('apply.bar')} status={<ApplyStatus />}>
             {state.elsewhere ? <Button buttonType='button' bg='bg-charcoal' minWidth={120} onClick={() => void actions.load({ keepEdits: false })}>{t('apply.reload')}</Button> : null}

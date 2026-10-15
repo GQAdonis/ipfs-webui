@@ -52,9 +52,25 @@ Non-goals (recorded so a merger does not "fix" them): no React 19 / Vite / Tailw
 | `public/index.html` | Two `theme-color` metas, title, description and generator for Promethity; font preloads for the bundled woff2 set. | Reapply meta/title changes onto upstream's HTML shell changes. |
 | `public/manifest.json` | Promethity name, icon set (192, 512, maskable) and theme colours. | Fork-owned; prefer the fork side unless upstream adds required manifest keys. |
 | `public/favicon.ico`, `public/favicon.svg`, `public/apple-touch-icon.png`, `public/icon-192.png`, `public/icon-512.png`, `public/maskable-512.png` | Promethity p-icon set copied from the brand (`branding/logo/p-icon` web and pwa exports), replacing the IPFS favicon; `public/ipfs-logo-512-ice.png` is removed with it. | Fork-owned; prefer the fork side.
-| `src/index.js` | Imports the Promethity override layer (`src/promethity/fonts.css`, `tokens.css`, then `theme-overrides.css` last) after the upstream CSS imports so the cascade order holds, and bootstraps the D16 theme store (`initTheme()` from `src/promethity/theme.js`) before first render. | One-line import additions and the bootstrap call; keep them after upstream's imports when merging. |
+| `src/index.js` | Imports the Promethity override layer (`src/promethity/fonts.css`, `tokens.css`, then `theme-overrides.css` last) after the upstream CSS imports so the cascade order holds, and bootstraps the D16 theme store (`initTheme()` from `src/promethity/theme.js`) and the agent default-on migration (`migrateAgentDefaults()` from `src/agent-chat/boot.js`) before first render. | One-line import additions and the bootstrap call; keep them after upstream's imports when merging. |
 | `config-overrides.js` (+ `strip-ipfs-css-fonts-loader.cjs`) | Build-time removal of the ipfs-css Inter/Montserrat `@font-face` blocks so the ~100 unused font files never enter the bundle; the fork's faces come from `src/promethity/fonts.css`. | Upstream rarely touches the webpack override; keep the rule, take upstream's other changes. |
 | `src/index.css` | The React Joyride tooltip override moved off `font-family: 'Montserrat'` (dropped with ipfs-css's fonts) onto the `--font-body` token stack, with accent focus rings on the tooltip buttons. | One-section change; prefer the fork side. |
+
+## Agent features: defaults and off switches
+
+The fork's agent features ship enabled (kubo `AGENTS.md`, User Agency; change `agent-features-default-on` 1.1). Each keeps an off switch and a disabled-state test.
+
+| Feature | Default | Off switch | Disabled-state test |
+|---|---|---|---|
+| Agent chat launcher | On, but it renders nothing until a valid `/agui` endpoint is set (or IPFS Desktop's bridge supplies one) | Settings, Agent, "Enable agent chat" (stored `ipfs-webui:agent-chat` `enabled: false`) | `src/agent-chat/agent-chat.test.js` (`switched off`, `default on`) |
+| Search page | On, but the Search entry shows only when the node's `ipfs mcp` reports a configured index (`GET /index/status`); while off, no entry, `#/search` redirects and no request goes to `/index/*` | Settings, Agent, "Search your files" (stored `ipfs-webui:search` `enabled: false`; `src/search/SearchSettingsSwitch.js` mounted in `src/settings/agent/FeaturesSection.js`). IPFS Desktop's own `search.enabled` (default off) is a separate setting for its local index | `src/settings/agent/SearchSwitch.test.js`, `src/search/SearchPage.test.js` (`off switch`), `test/e2e/search.test.js` (`disabled state`, driven through the switch) |
+| WebMCP read tools | On; registers only in a browser that has WebMCP | Settings, Agent, "Offer read tools to agents" (stored `ipfs-webui:webmcp` `enabled: false`), or serve `Permissions-Policy: tools=()` | `src/webmcp/webmcp.test.js` (`disabled state`, `registration`) |
+| WebMCP DNSLink resolution | Off | Settings, Agent | `src/webmcp/webmcp.test.js` |
+| WebMCP write tools | Off after every page load; never stored (security R13 L3), each call asks first | The same switch, or leave it off | `src/webmcp/webmcp.test.js` (`settings store`) |
+
+Launcher clearance (review M1): the fixed chat launcher publishes its height as `--ac-launcher-clearance` on the root while it shows. `src/agent-chat/launcher.css` turns it into a page-wide rule instead of a per-page courtesy: `html { scroll-padding-bottom }` so a focused control scrolls clear of the launcher (WCAG 2.2 criterion 2.4.11), a bottom inset on `main[data-route]` so the end of any page can be scrolled above it, and `pointer-events: none` on the launcher's padding band. The Diagnostics logs screen subtracts the clearance from its fixed height so the toolbar and the storage footer stay above the launcher. With the chat off the variable is unset and every value is the one it had before.
+
+Migration (decision D18): `migrateAgentDefaults()` runs once at boot. It writes `enabled: true` only into a stored settings object that has no `enabled` key, never touches a stored boolean, and the stores fall back to the default for an absent key. A stored `enabled: false` survives. `src/agent-chat/boot.test.js` loads `src/index.js` with its collaborators stubbed to prove it through the real startup path. Unreadable storage cannot encode a choice, so the default applies.
 
 ## Everything else
 

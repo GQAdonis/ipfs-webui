@@ -1,4 +1,9 @@
-// Settings for WebMCP tools. All off by default.
+// Settings for WebMCP tools. `enabled` is ON by default (the fork's agent features ship
+// enabled, AGENTS.md User Agency) but only registers the READ tools, and only in a browser
+// that has WebMCP. `dnslink` and `writes` are off by default.
+//
+// A stored `enabled: false` is the person's choice and always wins; only an absent key takes
+// the default (decision D18, see ../agent-chat/boot.js).
 //
 //   enabled  register the read tools with document.modelContext
 //   dnslink  let read tools resolve DNSLink names (domains). IPNS names that are libp2p
@@ -17,7 +22,7 @@ export const STORAGE_KEY = 'ipfs-webui:webmcp'
 /** @typedef {{ enabled: boolean, dnslink: boolean, writes: boolean }} WebMcpSettings */
 
 /** @type {WebMcpSettings} */
-const DEFAULTS = Object.freeze({ enabled: false, dnslink: false, writes: false })
+export const DEFAULTS = Object.freeze({ enabled: true, dnslink: false, writes: false })
 
 /** @type {Set<() => void>} */
 const listeners = new Set()
@@ -28,7 +33,7 @@ function read () {
     const raw = globalThis.localStorage?.getItem(STORAGE_KEY)
     if (!raw) return DEFAULTS
     const parsed = JSON.parse(raw)
-    const enabled = parsed?.enabled === true
+    const enabled = typeof parsed?.enabled === 'boolean' ? parsed.enabled : DEFAULTS.enabled
     return Object.freeze({ enabled, dnslink: enabled && parsed?.dnslink === true, writes: false })
   } catch (_) {
     return DEFAULTS
@@ -65,8 +70,11 @@ export function subscribe (fn) {
   return () => { listeners.delete(fn) }
 }
 
-/** Test seam: drop what is held in memory and re-read storage, as a reload does. */
-export function resetForTests () {
+/** Re-read storage into memory, as a reload does (boot calls it after the migration). */
+export function reload () {
   snapshot = read()
   listeners.forEach((fn) => fn())
 }
+
+/** Test seam. */
+export const resetForTests = reload

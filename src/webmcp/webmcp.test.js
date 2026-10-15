@@ -86,6 +86,8 @@ async function pressApprove () {
 
 beforeEach(() => {
   localStorage.clear()
+  // Most tests start from a profile that opted out; the default-on describe starts empty.
+  localStorage.setItem(store.STORAGE_KEY, JSON.stringify({ enabled: false }))
   store.resetForTests()
   queue.resetForTests()
   status.resetForTests()
@@ -144,8 +146,47 @@ describe('translations use ICU syntax like the rest of the Web UI', () => {
   })
 })
 
+describe('default on', () => {
+  it('registers the read tools on a fresh profile and never the write tools', async () => {
+    localStorage.clear()
+    store.resetForTests()
+    expect(store.getSettings()).toEqual({ enabled: true, dnslink: false, writes: false })
+    const mc = fakeModelContext()
+    const { client } = fakeIpfs()
+    render(<WebMcpController ipfs={client} doc={{ modelContext: mc }} />)
+    await flush()
+    expect(mc.live().length).toBe(READ_COUNT)
+  })
+
+  it('shows the read switch on and the dependent two off on a fresh profile', () => {
+    localStorage.clear()
+    store.resetForTests()
+    render(<WebMcpSettings />)
+    expect(screen.getByRole('checkbox', { name: /Offer read tools/ })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: /resolve DNSLink names/ })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: /Also offer tools that change your node/ })).not.toBeChecked()
+  })
+})
+
+describe('disabled state', () => {
+  it('registers nothing and sends nothing once the person switches it off, and the choice survives a reload', async () => {
+    localStorage.clear()
+    store.resetForTests()
+    store.updateSettings({ enabled: false })
+    store.resetForTests()
+    expect(store.getSettings()).toEqual({ enabled: false, dnslink: false, writes: false })
+    const mc = fakeModelContext()
+    const { client, calls } = fakeIpfs()
+    render(<WebMcpController ipfs={client} doc={{ modelContext: mc }} />)
+    await flush()
+    expect(mc.registerTool).not.toHaveBeenCalled()
+    expect(status.getStatus().state).toBe('off')
+    expect(calls).toEqual([])
+  })
+})
+
 describe('registration', () => {
-  it('registers nothing on a fresh profile, even when the browser has WebMCP', async () => {
+  it('registers nothing on a profile that opted out, even when the browser has WebMCP', async () => {
     const mc = fakeModelContext()
     const { client } = fakeIpfs()
     expect(store.getSettings()).toEqual({ enabled: false, dnslink: false, writes: false })
@@ -290,9 +331,10 @@ describe('settings store', () => {
     localStorage.setItem(store.STORAGE_KEY, JSON.stringify({ enabled: false, dnslink: true, writes: true }))
     store.resetForTests()
     expect(store.getSettings()).toEqual({ enabled: false, dnslink: false, writes: false })
+    // Unreadable storage cannot encode a choice: the shipped default applies, writes stay off.
     localStorage.setItem(store.STORAGE_KEY, '{not json')
     store.resetForTests()
-    expect(store.getSettings()).toEqual({ enabled: false, dnslink: false, writes: false })
+    expect(store.getSettings()).toEqual({ enabled: true, dnslink: false, writes: false })
   })
 
   it('works when storage is blocked: the settings then last for the page only', () => {
@@ -767,7 +809,7 @@ describe('confirmation dialog', () => {
 })
 
 describe('settings', () => {
-  it('shows all three switches off by default, the dependent two disabled until the first is on', () => {
+  it('shows all three switches off for a profile that opted out, the dependent two disabled until the first is on', () => {
     render(<WebMcpSettings />)
     const read = screen.getByRole('checkbox', { name: /Offer read tools/ })
     const dns = screen.getByRole('checkbox', { name: /resolve DNSLink names/ })

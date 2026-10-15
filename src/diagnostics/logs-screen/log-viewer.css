@@ -150,8 +150,10 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+/* The pulse is the nudge. The accent stays with the primary action on the page (Apply), so
+   the play icon is solid text colour while it pulses, not a second accent (L6). */
 .prom-log-btn-nudge {
-  color: var(--accent-text);
+  color: var(--text);
 }
 
 @media (prefers-reduced-motion: reduce) {
