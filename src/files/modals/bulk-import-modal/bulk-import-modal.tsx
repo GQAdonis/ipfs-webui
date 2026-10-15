@@ -3,7 +3,7 @@ import Button from '../../../components/button/button'
 import { Modal, ModalActions, ModalBody } from '../../../components/modal/modal'
 import { useTranslation } from 'react-i18next'
 import * as isIPFS from 'is-ipfs'
-import Icon from '../../../icons/StrokeDocument.js'
+import { DocumentIcon as Icon } from '../../../promethity/icons.js'
 import { normalizeFiles } from '../../../lib/files.js'
 import { FileStream } from '../../types'
 

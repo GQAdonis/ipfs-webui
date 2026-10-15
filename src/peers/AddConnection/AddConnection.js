@@ -5,7 +5,7 @@ import { multiaddr } from '@multiformats/multiaddr'
 import { P2P, Circuit, WebRTC } from '@multiformats/multiaddr-matcher'
 
 import Checkbox from '../../components/checkbox/Checkbox.js'
-import Icon from '../../icons/StrokeDecentralization.js'
+import { NetworkIcon as Icon } from '../../promethity/icons.js'
 import Button from '../../components/button/button.tsx'
 import Overlay from '../../components/overlay/overlay'
 
@@ -122,7 +122,7 @@ class AddConnection extends React.Component {
                 onChange={this.onChange}
                 onKeyPress={this.onKeyPress}
                 required
-                className={`input-reset charcoal ba b--black-20 br1 pa2 mv2 db w-90 center focus-outline ${this.inputClass}`} />
+                className={`input-reset charcoal ba br1 pa2 mv2 db w-90 center focus-outline ${this.inputClass}`} />
 
               <Checkbox
                 className='dib'

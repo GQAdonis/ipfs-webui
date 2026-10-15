@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import IconTooltip from '../../components/tooltip/icon-tooltip'
-import { GlyphInfo } from '../../icons'
+import { InfoIcon } from '../../promethity/icons.js'
 import type { SweepProvideStats } from '../../contexts/ProvideStat/types'
 import {
   Card,
@@ -59,7 +59,7 @@ export const Workers: React.FC<Props> = ({ sweep }) => {
       <CardHeader className='flex justify-between items-center'>
         <CardTitle>{t('dhtProvide.workers.title')}</CardTitle>
         <IconTooltip text={t('dhtProvide.workers.tooltip')} position='top'>
-          <GlyphInfo className='fill-charcoal-muted o-50 pointer' style={{ width: 22, height: 22 }} />
+          <InfoIcon className='fill-charcoal-muted pointer' size={22} />
         </IconTooltip>
       </CardHeader>
       <CardContent>
@@ -74,7 +74,7 @@ export const Workers: React.FC<Props> = ({ sweep }) => {
           </div>
         </div>
 
-        <div className='mt3 pt3 bt b--black-10'>
+        <div className='mt3 pt3'>
           <div className='mb3'>
             <MetricRow
               label={t('dhtProvide.workers.periodic')}
@@ -104,7 +104,7 @@ export const Workers: React.FC<Props> = ({ sweep }) => {
           )}
         </div>
 
-        <div className='mt3 pt3 bt b--black-10'>
+        <div className='mt3 pt3'>
           <MetricRow
             label={t('dhtProvide.workers.maxConnsPerWorker')}
             value={connsPerWorker.toString()}

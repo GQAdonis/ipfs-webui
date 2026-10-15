@@ -6,7 +6,7 @@ import Details from '../details/Details.js'
 
 const ExampleRequest = ({ url, method = 'GET' }) => {
   return (
-    <pre className='overflow-x-scroll pa3 mr3 f6 ba b--black-10 br2 bg-snow-muted'>
+    <pre className='overflow-x-scroll pa3 mr3 f6 br2 bg-snow-muted'>
       <code className='green'>{method}</code> {url}
     </pre>
   )
@@ -17,7 +17,7 @@ const QueryParams = ({ url }) => {
   const params = (new URL(url)).searchParams
   const entries = [...params]
   return (
-    <dl className='pa3 mr3 f7 overflow-x-scroll monospace nowrap ba b--black-10 br2 bg-snow-muted'>
+    <dl className='pa3 mr3 f7 overflow-x-scroll monospace nowrap br2 bg-snow-muted'>
       {entries.map(([key, value]) => (
         <div key={`QueryParams-${key}`}>
           <dt className='dib green'>{key}:</dt>
@@ -32,7 +32,7 @@ const AnalyticType = ({ children, onChange, enabled, label, summary, exampleRequ
   // show hide state. update react.
   const [isOpen, setOpen] = useState(false)
   return (
-    <section className='bg-white bb b--black-10'>
+    <section className='bg-white'>
       <div className='flex items-center'>
         <Checkbox className='pv3 pl3 pr1 bg-white flex-none' onChange={onChange} checked={enabled} label={
           <span className='fw5 f6'>{label}</span>

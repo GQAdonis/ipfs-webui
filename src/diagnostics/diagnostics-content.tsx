@@ -37,13 +37,13 @@ const TabButton = ({ tabKey, label, active }: TabButtonProps) => (
   <a
     key={tabKey}
     href={`#/diagnostics/${tabKey}`}
-    className={`pv2 ph3 mr2 br2 pointer fw5 no-underline transition-all ${
+    aria-current={active ? 'page' : undefined}
+    className={`diagnostics-tab pv2 ph3 mr2 br2 pointer fw5 no-underline ${
       active
         ? 'bg-transparent'
         : 'bg-transparent charcoal-muted hover-bg-gray-muted hover-charcoal'
     }`}
     style={{
-      transition: 'background-color 0.2s ease, color 0.2s ease',
       // DESIGN.md: the active tab is accent-text at weight 600, no pill.
       ...(active && {
         color: 'var(--accent-text)',

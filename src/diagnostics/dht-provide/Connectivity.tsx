@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import IconTooltip from '../../components/tooltip/icon-tooltip'
-import { GlyphInfo } from '../../icons'
+import { InfoIcon } from '../../promethity/icons.js'
 import type { SweepProvideStats } from '../../contexts/ProvideStat/types'
 import {
   Card,
@@ -26,7 +26,7 @@ export const Connectivity: React.FC<Props> = ({ sweep }) => {
       <CardHeader className='flex justify-between items-center'>
         <CardTitle>{t('dhtProvide.connectivity.title')}</CardTitle>
         <IconTooltip text={t('dhtProvide.connectivity.tooltip')} position='top'>
-          <GlyphInfo className='fill-charcoal-muted o-50 pointer' style={{ width: 22, height: 22 }} />
+          <InfoIcon className='fill-charcoal-muted pointer' size={22} />
         </IconTooltip>
       </CardHeader>
 

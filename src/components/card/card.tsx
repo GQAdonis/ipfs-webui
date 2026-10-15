@@ -11,7 +11,7 @@ export const Card: React.FC<{
 }> = ({ className = '', style, children }) => {
   return (
     <Box
-      className={`ba b--black-10 br2 bg-white ${className}`}
+      className={`br2 bg-white ${className}`}
       style={{ padding: 0, ...style }}
     >
       {children}
@@ -27,7 +27,7 @@ export const CardHeader: React.FC<{
   children: React.ReactNode
 }> = ({ className = '', children }) => {
   return (
-    <div className={`pa3 bb b--black-10 ${className}`}>
+    <div className={`pa3 ${className}`}>
       {children}
     </div>
   )
@@ -97,7 +97,7 @@ export const CardFooter: React.FC<{
   children: React.ReactNode
 }> = ({ className = '', children }) => {
   return (
-    <div className={`pa3 bt b--black-10 ${className}`}>
+    <div className={`pa3 ${className}`}>
       {children}
     </div>
   )

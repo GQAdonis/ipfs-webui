@@ -4,6 +4,10 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { Modal, ModalActions, ModalBody } from './modal'
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key })
+}))
+
 describe('Modal', () => {
   describe('Modal component', () => {
     it('renders modal container element', () => {
@@ -14,8 +18,9 @@ describe('Modal', () => {
     it('renders with default props', () => {
       const { container } = render(<Modal />)
       const modalElement = container.firstChild as HTMLElement
-      expect(modalElement).toHaveClass('bg-white', 'w-80', 'shadow-4', 'sans-serif', 'relative')
-      expect(modalElement).toHaveStyle({ maxWidth: '34em' })
+      expect(modalElement).toHaveClass('prom-modal', 'sans-serif', 'relative')
+      // Fill, no shadow: the sheet is on the raised token (prom-modal in components.css).
+      expect(modalElement).not.toHaveClass('bg-white', 'shadow-4')
     })
 
     it('renders with custom className', () => {
@@ -23,7 +28,7 @@ describe('Modal', () => {
       const { container } = render(<Modal className={customClass} />)
       const modalElement = container.firstChild as HTMLElement
       expect(modalElement).toHaveClass(customClass)
-      expect(modalElement).toHaveClass('bg-white', 'w-80', 'shadow-4', 'sans-serif', 'relative')
+      expect(modalElement).toHaveClass('prom-modal', 'sans-serif', 'relative')
     })
 
     it('renders children correctly', () => {
@@ -40,20 +45,24 @@ describe('Modal', () => {
       const mockOnCancel = jest.fn()
       const { container } = render(<Modal onCancel={mockOnCancel} />)
 
-      const cancelIcon = container.querySelector('svg')
-      expect(cancelIcon).toBeInTheDocument()
-      expect(cancelIcon).toHaveClass('absolute', 'pointer', 'w2', 'h2', 'top-0', 'right-0', 'fill-gray')
+      const closeButton = container.querySelector('button')
+      expect(closeButton).toBeInTheDocument()
+      expect(closeButton).toHaveClass('prom-modal-close', 'absolute', 'pointer', 'top-0', 'right-0')
+      // N9: a real button with an accessible name, not a clickable svg.
+      expect(closeButton).toHaveAttribute('type', 'button')
+      expect(closeButton).toHaveAttribute('aria-label')
+      expect(closeButton!.querySelector('svg')).toBeInTheDocument()
     })
 
     it('does not render cancel icon when onCancel is not provided', () => {
       const { container } = render(<Modal />)
-      const cancelIcon = container.querySelector('svg')
+      const cancelIcon = container.querySelector('button.prom-modal-close')
       expect(cancelIcon).not.toBeInTheDocument()
     })
 
     it('does not render cancel icon when onCancel is null', () => {
       const { container } = render(<Modal onCancel={null} />)
-      const cancelIcon = container.querySelector('svg')
+      const cancelIcon = container.querySelector('button.prom-modal-close')
       expect(cancelIcon).not.toBeInTheDocument()
     })
 
@@ -61,7 +70,7 @@ describe('Modal', () => {
       const mockOnCancel = jest.fn()
       const { container } = render(<Modal onCancel={mockOnCancel} />)
 
-      const cancelIcon = container.querySelector('svg')
+      const cancelIcon = container.querySelector('button.prom-modal-close')
       expect(cancelIcon).toBeInTheDocument()
 
       fireEvent.click(cancelIcon!)
@@ -124,7 +133,7 @@ describe('Modal', () => {
       const { container } = render(<ModalActions />)
       const actionsElement = container.firstChild as HTMLElement
       expect(actionsElement).toHaveClass('flex', 'justify-between', 'pa2')
-      expect(actionsElement.className).toBe('flex justify-between pa2 ')
+      expect(actionsElement.className).toBe('flex justify-between pa2 prom-modal-actions ')
     })
   })
 
@@ -244,10 +253,10 @@ describe('Modal', () => {
       // Check Modal container
       const modalElement = container.firstChild as HTMLElement
       expect(modalElement).toHaveClass('test-modal')
-      expect(modalElement).toHaveClass('bg-white', 'w-80', 'shadow-4', 'sans-serif', 'relative')
+      expect(modalElement).toHaveClass('prom-modal', 'sans-serif', 'relative')
 
       // Check cancel icon
-      const cancelIcon = container.querySelector('svg')
+      const cancelIcon = container.querySelector('button.prom-modal-close')
       expect(cancelIcon).toBeInTheDocument()
 
       // Check ModalBody content
@@ -274,7 +283,7 @@ describe('Modal', () => {
         </Modal>
       )
 
-      const cancelIcon = container.querySelector('svg')
+      const cancelIcon = container.querySelector('button.prom-modal-close')
       expect(cancelIcon).toBeInTheDocument()
 
       fireEvent.click(cancelIcon!)

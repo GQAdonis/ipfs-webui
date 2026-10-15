@@ -13,10 +13,7 @@ import RemoveKeyModal from './remove-key-modal/RemoveKeyModal.js'
 
 import ContextMenu from '../context-menu/ContextMenu.js'
 import ContextMenuItem from '../context-menu/ContextMenuItem.js'
-import GlyphDots from '../../icons/GlyphDots.js'
-import StrokePencil from '../../icons/StrokePencil.js'
-import StrokeCancel from '../../icons/StrokeCancel.js'
-
+import { DotsIcon as GlyphDots, PencilIcon as StrokePencil, CloseIcon as StrokeCancel } from '../../promethity/icons.js'
 const ROW_HEIGHT = 50
 const HEADER_HEIGHT = 32
 
@@ -110,7 +107,7 @@ export const IpnsManager = ({ t, ipfsReady, doFetchIpnsKeys, doGenerateIpnsKey, 
                 rowHeight={ROW_HEIGHT}
                 rowCount={sortedKeys.length}
                 rowGetter={({ index }) => sortedKeys[index]}
-                rowClassName='bb b--light-gray mt2'
+                rowClassName='mt2'
                 sort={(...sortArgs) => setSortSettings(...sortArgs)}
                 sortBy={sortSettings.sortBy}
                 sortDirection={sortSettings.sortDirection}>

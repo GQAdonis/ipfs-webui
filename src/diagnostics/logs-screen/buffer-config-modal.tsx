@@ -73,7 +73,7 @@ export const BufferConfigModal: React.FC<BufferConfigModalProps> = ({
               <input
                 id='buffer-config-memory'
                 type='number'
-                className='input-reset charcoal ba b--black-20 br1 pa2 w-100 focus-outline'
+                className='input-reset charcoal ba br1 pa2 w-100 focus-outline'
                 value={displayValues.memory}
                 onChange={(e) => {
                   const value = e.target?.value || ''
@@ -88,7 +88,7 @@ export const BufferConfigModal: React.FC<BufferConfigModalProps> = ({
               <input
                 id='buffer-config-indexeddb'
                 type='number'
-                className='input-reset charcoal ba b--black-20 br1 pa2 w-100 focus-outline'
+                className='input-reset charcoal ba br1 pa2 w-100 focus-outline'
                 value={displayValues.indexedDB}
                 onChange={(e) => {
                   const value = e.target?.value || ''
@@ -103,7 +103,7 @@ export const BufferConfigModal: React.FC<BufferConfigModalProps> = ({
               <input
                 id='buffer-config-warn'
                 type='number'
-                className='input-reset charcoal ba b--black-20 br1 pa2 w-100 focus-outline'
+                className='input-reset charcoal ba br1 pa2 w-100 focus-outline'
                 value={displayValues.warnThreshold}
                 onChange={(e) => {
                   const value = e.target?.value || ''
@@ -118,7 +118,7 @@ export const BufferConfigModal: React.FC<BufferConfigModalProps> = ({
               <input
                 id='buffer-config-autodisable'
                 type='number'
-                className='input-reset charcoal ba b--black-20 br1 pa2 w-100 focus-outline'
+                className='input-reset charcoal ba br1 pa2 w-100 focus-outline'
                 value={displayValues.autoDisableThreshold}
                 onChange={(e) => {
                   const value = e.target?.value || ''

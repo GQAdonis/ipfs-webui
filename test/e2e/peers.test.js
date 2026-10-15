@@ -39,7 +39,7 @@ test.describe('Peers screen', () => {
     await expect(page.getByText('Successfully connected to the provided peer')).toBeVisible()
   })
 
-  test('should have a peer from a "Local Network"', async ({ page }) => {
+  test('should have a peer from a "Local network"', async ({ page }) => {
     await expect(peers.localNetwork(page).first()).toBeVisible()
   })
 

@@ -14,6 +14,13 @@
   opacity: 1;
 }
 
+/* The tick is a Lucide stroke (promethity/icons.js): a heavier stroke in the
+   primary text colour so it holds against the control fill at 16px. */
+.Checkbox > span:first-of-type svg.prom-icon {
+  stroke-width: 3;
+  color: var(--text);
+}
+
 .Checkbox > input:disabled + span {
   cursor: not-allowed;
   opacity: 0.5;

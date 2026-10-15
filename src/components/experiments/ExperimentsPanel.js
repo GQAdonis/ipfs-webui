@@ -18,7 +18,7 @@ const Experiments = ({ doExpToggleAction, experiments, t }) => {
             return (
               <div
                 key={key}
-                className='pa3 mr3 mb3 mw6 br3 bg-white dib f6 ba b1 b--light-gray'
+                className='pa3 mr3 mb3 mw6 br3 bg-white dib f6'
               >
                 <h3>{tkey('title', key)}</h3>
                 <p className='charcoal'>{tkey('description', key)}</p>
@@ -37,7 +37,7 @@ const Experiments = ({ doExpToggleAction, experiments, t }) => {
                         rel='noopener noreferrer'
                         key={action.key}
                         className={`link blue pr2 ${i > 0 &&
-                          'bl b1 pl2 b--light-gray'}`}
+                          'pl2'}`}
                         href={action.url}
                       >
                         {tkey(action.key)}

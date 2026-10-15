@@ -4,13 +4,11 @@ import { withTranslation } from 'react-i18next'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import Button from '../../../components/button/button.tsx'
 import { Modal, ModalActions, ModalBody } from '../../../components/modal/modal'
-import Icon from '../../../icons/StrokeSpeaker.js'
+import { PublishIcon as Icon, CopyIcon as GlyphCopy, CheckIcon as GlyphTick } from '../../../promethity/icons.js'
 import { connect } from 'redux-bundler-react'
 import Radio from '../../../components/radio/radio.js'
 import { buildShareLink, toIpnsBase36 } from '../../../lib/share-link.js'
 import ProgressBar from '../../../components/progress-bar/ProgressBar.js'
-import GlyphCopy from '../../../icons/GlyphCopy.js'
-import GlyphTick from '../../../icons/GlyphTick.js'
 import './PublishModal.css'
 
 export const PublishModal = ({ t, tReady, onLeave, onSubmit, file, ipnsKeys, effectiveShareLinkType, localGatewayUrl, publicGateway, publicSubdomainGateway, className, doFetchIpnsKeys, doUpdateExpectedPublishTime, expectedPublishTime, ...props }) => {
@@ -90,7 +88,7 @@ export const PublishModal = ({ t, tReady, onLeave, onSubmit, file, ipnsKeys, eff
             <input
               value={link}
               readOnly
-              className={'input-reset flex-grow-1 charcoal-muted ba b--black-20 br1 pa2 focus-outline'}
+              className={'input-reset flex-grow-1 charcoal-muted ba br1 pa2 focus-outline'}
               style={{ color: 'var(--text-muted)', opacity: copied ? 0.6 : 1 }}
               type='text' />
 

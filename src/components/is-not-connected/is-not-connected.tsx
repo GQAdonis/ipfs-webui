@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import ApiAddressForm from '../api-address-form/api-address-form'
 import Box from '../box/Box.js'
 import Shell from '../shell/Shell.js'
-import GlyphAttention from '../../icons/GlyphAttention.js'
+import { ErrIcon } from '../../promethity/icons.js'
 import { useBridgeSelector } from '../../helpers/context-bridge'
 
 const TABS = {
@@ -24,8 +24,11 @@ const IsNotConnected = () => {
   return (
     <Box className='pv3 ph4 lh-copy charcoal'>
       <div className='flex flex-wrap items-center'>
-        <GlyphAttention style={{ height: 76 }} className='fill-red mr' role='presentation' />
-        <h1 className='montserrat fw4 charcoal ma0 f3 red'>{t('app:status.couldNotConnect')}</h1>
+        <span className='prom-state-mark prom-state-mark-err mr3'><ErrIcon size={28} /></span>
+        <div>
+          <p className='prom-state-word prom-state-word-err ma0'>{t('app:status.disconnectedShort')}</p>
+          <h1 className='montserrat fw4 charcoal ma0 f3'>{t('app:status.couldNotConnect')}</h1>
+        </div>
       </div>
       <Trans i18nKey='notConnected.paragraph1' t={t}>
         <p className='fw6 mb3'>Check out the installation guide in the <a className='link blue' href='https://docs.ipfs.tech/install/command-line-quick-start/' target='_blank' rel='noopener noreferrer'>IPFS Docs</a>, or try these common fixes:</p>
@@ -46,13 +49,13 @@ const IsNotConnected = () => {
             </Trans>
             <div className='br1 overflow-hidden'>
               <div className='f7 mb0 sans-serif charcoal pv1 pl2 bg-black-20 flex items-center overflow-x-auto'>
-                <button onClick={() => setActiveTab(TABS.UNIX)} className={classNames('pointer mr3 ttu tracked', activeTab === TABS.UNIX && 'fw7')}>
+                <button onClick={() => setActiveTab(TABS.UNIX)} className={classNames('pointer mr3', activeTab === TABS.UNIX && 'fw7')}>
                 Unix & MacOS
                 </button>
-                <button onClick={() => setActiveTab(TABS.POWERSHELL)} className={classNames('pointer mr3 ttu tracked', activeTab === TABS.POWERSHELL && 'fw7')}>
+                <button onClick={() => setActiveTab(TABS.POWERSHELL)} className={classNames('pointer mr3', activeTab === TABS.POWERSHELL && 'fw7')}>
                   Windows Powershell
                 </button>
-                <button onClick={() => setActiveTab(TABS.WINDOWS)} className={classNames('pointer ttu tracked', activeTab === TABS.WINDOWS && 'fw7')}>
+                <button onClick={() => setActiveTab(TABS.WINDOWS)} className={classNames('pointer', activeTab === TABS.WINDOWS && 'fw7')}>
                   Windows CMD
                 </button>
               </div>

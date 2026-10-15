@@ -1,0 +1,318 @@
+{
+  "title": "Agent",
+  "on": "On",
+  "off": "Off",
+  "save": "Save",
+  "error": "Error",
+  "summary": {
+    "on": "Chat on",
+    "off": "Chat off",
+    "needsEndpoint": "Chat needs an endpoint",
+    "text": "WebMCP tools are {webmcp}. Backend, model and connection are set on the Agent page.",
+    "webmcpOn": "on",
+    "webmcpOff": "off",
+    "link": "Open agent settings"
+  },
+  "header": {
+    "chatOn": "Agent chat is on.",
+    "chatOff": "Agent chat is off.",
+    "loading": {
+      "word": "Loading",
+      "text": "Reading the settings from the node."
+    },
+    "needsConnection": {
+      "word": "Needs a connection",
+      "text": "The settings live on the node. Set the agent endpoint and the admin token below."
+    },
+    "unauthorized": {
+      "word": "Sign in again",
+      "text": "The node refused the admin token. Enter it again below."
+    },
+    "unavailable": {
+      "word": "Not available",
+      "text": "This node serves no agent settings. It has no admin principal, or agent settings are switched off."
+    },
+    "error": {
+      "word": "Could not load",
+      "text": "The settings did not load."
+    },
+    "noBackend": {
+      "word": "No backend",
+      "text": "{chat} Backend: not chosen. Choose a backend to start."
+    },
+    "configured": {
+      "word": "Configured",
+      "openai": "{chat} Backend: OpenAI-compatible at {host}, model {model}.",
+      "uar": "{chat} Backend: Universal Agent Runtime at {host}."
+    },
+    "appliedHere": "Last applied here at {time}.",
+    "retry": "Try again",
+    "back": "Settings"
+  },
+  "backend": {
+    "title": "Backend",
+    "choose": "Backend",
+    "uar": "Universal Agent Runtime",
+    "openai": "OpenAI-compatible endpoint",
+    "uarSoon": "Not available yet"
+  },
+  "firstRun": {
+    "label": "Setup steps",
+    "step1": {
+      "title": "Choose a backend."
+    },
+    "step2": {
+      "title": "Pick a model.",
+      "text": "Test the connection first, then set the model the agent will use."
+    },
+    "step3": {
+      "title": "Turn on agent chat.",
+      "text": "Use the switch under Features. The chat button appears once it is on."
+    }
+  },
+  "url": {
+    "label": "Base URL",
+    "help": "https, or http on this machine. Example: http://127.0.0.1:4000/v1",
+    "placeholder": "https://host/v1",
+    "error": {
+      "empty": "Enter the base URL of the endpoint.",
+      "invalid": "This is not a valid URL.",
+      "scheme": "Use https, or http on localhost, 127.0.0.1 or [::1].",
+      "extras": "Remove the username, password, query and fragment."
+    }
+  },
+  "key": {
+    "label": "API key",
+    "help": "Optional. Write-only: the node keeps it in a private file in its settings directory and never shows it again. Test connection and chats use the stored key, so save a new key before you test. The node sends it only to the current backend host or a host you have confirmed.",
+    "save": "Save key",
+    "saving": "Saving",
+    "cancel": "Cancel",
+    "replace": "Replace key",
+    "remove": "Remove key",
+    "stored": {
+      "word": "Stored",
+      "source": {
+        "settings_api": "Written by this page. It is never shown again.",
+        "environment": "Read from an environment variable on the node. It is never shown.",
+        "file": "Read from a file on the node. It is never shown."
+      }
+    },
+    "saved": {
+      "word": "Saved",
+      "text": "The node holds it now. Test the connection to use it."
+    },
+    "cleared": {
+      "word": "Removed",
+      "text": "The node no longer holds a key."
+    },
+    "failed": {
+      "word": "Not saved"
+    },
+    "serverManaged": {
+      "word": "Key",
+      "text": "Set on the server (Kubernetes Secret). This node does not accept keys through the settings page. Test connection and chats use the key the server holds."
+    },
+    "removeConfirm": {
+      "label": "Confirm removing the key",
+      "text": "Remove the stored key? Tests and chats then send no key.",
+      "yes": "Remove the key"
+    }
+  },
+  "test": {
+    "button": "Test connection",
+    "testing": "Testing",
+    "note": "The test asks the node to reach the URL. The node sends the stored key only to the current backend host or a host you have confirmed.",
+    "ok": {
+      "word": "Reachable",
+      "text": "{host} answered in {ms} ms.",
+      "models": "{count, plural, one {# model listed.} other {# models listed.}}",
+      "noModels": "The endpoint hides its model list. Type a model name."
+    },
+    "failed": {
+      "word": "Not reachable",
+      "text": "The node could not reach this endpoint."
+    },
+    "gated": "Test connection stays off until you type the host {host} below. The stored key is sent only to a host you have confirmed.",
+    "keySent": "The stored key was sent.",
+    "keyNotSent": {
+      "word": "Reachable, key not sent",
+      "text": "The stored key was withheld: this host is not the current backend and is not confirmed. An endpoint that needs a key may still refuse you."
+    }
+  },
+  "model": {
+    "label": "Model",
+    "help": "Pick from the list or type a model name the endpoint accepts.",
+    "disabled": "Test the connection to load the model list. This field stays off until the endpoint has answered.",
+    "placeholder": "model-name",
+    "toggle": "Show models",
+    "count": "{count, plural, one {# model available} other {# models available}}",
+    "noMatch": "No match. Press Enter to use what you typed."
+  },
+  "uar": {
+    "unavailable": {
+      "word": "Not available",
+      "text": "Universal Agent Runtime cannot be configured from this build. Nothing on this form is tested or applied."
+    },
+    "missing": {
+      "label": "What is missing",
+      "release": "A published Universal Agent Runtime release to connect to. Until one ships, no endpoint can be verified.",
+      "server": "Support for Universal Agent Runtime in this node. This build of ipfs mcp refuses it."
+    },
+    "configured": {
+      "word": "Configured",
+      "text": "This node is already set for Universal Agent Runtime at {url}. This page cannot change it yet."
+    },
+    "url": {
+      "label": "Instance URL",
+      "placeholder": "https://host"
+    },
+    "credential": {
+      "label": "Access credential"
+    },
+    "disabledHelp": "Unavailable until Universal Agent Runtime is supported.",
+    "agent": {
+      "label": "IPFS agent",
+      "word": "Not created",
+      "text": "Creating the IPFS agent needs Universal Agent Runtime. Nothing was created."
+    }
+  },
+  "confirm": {
+    "label": "Type the model host to confirm:",
+    "help": "Node content that an agent reads can be sent to this host. Apply stays off until you type it exactly.",
+    "matches": {
+      "word": "Matches",
+      "text": "Apply can send node content to {host}."
+    },
+    "differs": "Not the same yet. Type the host exactly as shown."
+  },
+  "apply": {
+    "bar": "Apply backend settings",
+    "apply": "Apply",
+    "applyingButton": "Applying",
+    "retry": "Retry",
+    "revert": "Revert",
+    "reload": "Reload settings",
+    "applying": {
+      "word": "Applying",
+      "text": "Sending the settings to the node. You can keep reading the form."
+    },
+    "applied": {
+      "word": "Applied",
+      "text": "At {time}. New chats use {model} at {host}. A chat in progress finishes on the previous backend.",
+      "textFirst": "At {time}. New chats use {model} at {host}.",
+      "chatOff": "Agent chat is off.",
+      "goToSwitch": "Go to the chat switch"
+    },
+    "failed": {
+      "word": "Not applied",
+      "text": "Nothing was changed. The previous backend is still in use.",
+      "textFirst": "Nothing was changed. No backend is set yet."
+    },
+    "elsewhere": {
+      "word": "Changed elsewhere",
+      "text": "The node's settings changed from another tab or client. Your edits are kept. Reload to see the current values before you apply."
+    },
+    "dirty": {
+      "word": "Unsaved changes",
+      "text": "Apply sends the backend, URL and model to the node. A chat in progress finishes on the backend it started with."
+    },
+    "blocked": {
+      "nothing-chosen": "Choose a backend first.",
+      "unavailable": "This backend is not available in this build.",
+      "url": "Enter a valid base URL.",
+      "model": "Pick or type a model.",
+      "confirm": "Type the host below to confirm the change."
+    },
+    "firstRun": {
+      "word": "Nothing to apply",
+      "text": "Choose a backend and a model, then apply. The chat answers only after both are set."
+    },
+    "clean": {
+      "word": "No changes",
+      "text": "These are the settings in effect."
+    },
+    "conflict": {
+      "text": "The node's settings changed while you were editing. They were reloaded and your edits are kept. Retry to apply your edits on top, or Reload settings to take the node's values."
+    }
+  },
+  "failure": {
+    "generic": "The change did not go through.",
+    "unauthorized": "The node refused the admin token. Sign in again.",
+    "route_absent": "This node serves no agent settings.",
+    "not_configured": "No admin token is set.",
+    "network": "Cannot reach the node. Check that ipfs mcp is running and that this page may connect to it.",
+    "http": "The node refused the request.",
+    "protocol": "The node answered with something that is not settings.",
+    "unavailable": "The settings service did not answer as expected.",
+    "backend_not_configured": "No backend is configured yet.",
+    "revision_conflict": "The settings changed while you were editing. They were reloaded; check the values, then try again.",
+    "egress_confirmation_required": "The node needs the new model host confirmed. Type {host} below.",
+    "secrets_not_accepted": "This node does not accept keys through the settings page.",
+    "serverSaid": "Detail: {detail}"
+  },
+  "features": {
+    "title": "Features",
+    "lede": "Each switch applies as soon as you flip it and is kept in this browser. None of them is part of the backend that Apply sends.",
+    "managed": "Managed",
+    "on": "On",
+    "off": "Off",
+    "chat": {
+      "title": "Agent chat",
+      "help": "Shows the chat button. While off, the page loads nothing and sends no request.",
+      "needs": {
+        "word": "Needs an endpoint",
+        "text": "The switch is on, but no valid /agui address is set, so the button stays hidden. Set one under Connection."
+      }
+    },
+    "webmcp": {
+      "attention": "Check"
+    },
+    "confirm": {
+      "title": "Desktop confirmation window",
+      "help": "Asks you in a separate IPFS Desktop window before an agent change runs.",
+      "failed": "Could not change this setting.",
+      "tray": "Switch this in the IPFS Desktop tray menu. This page cannot change it."
+    }
+  },
+  "policy": {
+    "subject": "Writes and deletes",
+    "word": "Asks you first",
+    "note": "Writes and deletes ask you first. This cannot be turned off here."
+  },
+  "connection": {
+    "title": "Connection",
+    "lede": "The settings route lives on the same node as the chat endpoint. This page reads and writes it with an admin token that is separate from the chat token.",
+    "managed": {
+      "word": "Managed by IPFS Desktop",
+      "text": "The local agent service is managed by IPFS Desktop.",
+      "port": "Local endpoint, managed by Desktop :{port}",
+      "stopped": {
+        "word": "Not running",
+        "text": "The local agent service is not running. IPFS Desktop starts it when the agent is on."
+      },
+      "help": "The endpoint and the keys are held by the Desktop app. There is nothing to enter here."
+    }
+  },
+  "admin": {
+    "label": "Admin token",
+    "help": "The bearer token of the admin principal of ipfs mcp. It can change the model backend. It is held in memory, tied to the agent endpoint above (a different endpoint forgets it) and sent only as an Authorization header to that node.",
+    "use": "Use token",
+    "signIn": "Sign in again",
+    "forget": "Forget token",
+    "none": "No admin token is set.",
+    "heldMemory": "A token is held in memory for {root}. Reloading this page forgets it.",
+    "heldTab": "A token is kept for this tab, for {root}. Closing the tab forgets it.",
+    "refused": {
+      "word": "Sign in again",
+      "text": "The node refused the admin token. Enter it again."
+    },
+    "keep": {
+      "label": "Keep for this tab",
+      "help": "Keeps the token in this tab's session storage so a reload does not ask again. Session storage is shared by every page this site serves, including any content it shows, so keep it only where you trust all of that. It is never written to local storage."
+    },
+    "noRoot": {
+      "word": "No endpoint",
+      "text": "Set a valid agent endpoint first. The admin token is tied to it and sent nowhere else."
+    }
+  }
+}

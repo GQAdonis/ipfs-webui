@@ -1,5 +1,5 @@
 import React from 'react'
-import CancelIcon from '../../icons/GlyphSmallCancel.js'
+import { CloseIcon as CancelIcon } from '../../promethity/icons.js'
 
 const Toast = ({ error, children, onDismiss, dismissLabel = 'Dismiss notification' }) => {
   const tone = error ? 'prom-toast-warn' : 'prom-toast-ok'

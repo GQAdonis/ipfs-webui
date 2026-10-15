@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../../../components/modal/modal'
-import CancelIcon from '../../../icons/GlyphSmallCancel.js'
+import { CloseIcon as CancelIcon } from '../../../promethity/icons.js'
 
 const keySymbols = {
   ArrowUp: '↑',
@@ -39,7 +39,7 @@ const KeyboardKey = ({ children, platform }) => {
   }
 
   return (
-    <kbd className="dib v-mid lh-solid br2 charcoal ba b--gray br2 f7 fw6 " style={{ minWidth: 'fit-content', padding: '6px', height: 'fit-content', textAlign: 'center' }}>
+    <kbd className="dib v-mid lh-solid br2 charcoal bg-light-gray br2 f7 fw6 " style={{ minWidth: 'fit-content', padding: '6px', height: 'fit-content', textAlign: 'center' }}>
       {getKeySymbol(children)}
     </kbd>
   )
@@ -51,8 +51,8 @@ KeyboardKey.propTypes = {
 }
 
 const ShortcutItem = ({ shortcut, description, platform }) => (
-  <div className="flex items-center justify-between pa2 bb b--black-10">
-    <div className="w-60 black f7">{description}</div>
+  <div className="flex items-center justify-between pa2">
+    <div className="w-60 charcoal f7">{description}</div>
     <div className="w-40 tr">
       {Array.isArray(shortcut)
         ? shortcut.map((key, i) => (
@@ -75,8 +75,8 @@ ShortcutItem.propTypes = {
 }
 
 const ShortcutSection = ({ title, shortcuts, platform }) => (
-  <div className="mb2 ba b--black-20">
-    <h3 className="f7 fw6 bb b--black-20 black pa2 ma0">{title}</h3>
+  <div className="mb2">
+    <h3 className="f7 fw6 charcoal pa2 ma0 bg-light-gray">{title}</h3>
     <div className="br1">
       {shortcuts.map((shortcut, i) => (
         <ShortcutItem key={i} shortcut={shortcut.shortcut} description={shortcut.description} platform={platform} />
@@ -126,15 +126,15 @@ const ShortcutModal = ({ onLeave, className, ...props }) => {
   ]
 
   return (
-    <Modal {...props} className={`${className} bg-near-black white`}>
-      <div className="flex items-center justify-between pa2 bb b--black-20">
-        <h2 className="ma0 f5 fw6 black">{t('shortcutModal.title')}</h2>
+    <Modal {...props} className={className}>
+      <div className="flex items-center justify-between pa2">
+        <h2 className="ma0 f5 fw6 charcoal">{t('shortcutModal.title')}</h2>
         <button
           onClick={onLeave}
-          className="button-reset bn bg-transparent pa0 pointer white"
+          className="button-reset bn bg-transparent pa0 pointer charcoal-muted"
           aria-label="Close"
         >
-          <CancelIcon className='pointer w2 h2 top-0 right-0 fill-gray' onClick={onLeave} />
+          <CancelIcon className='w2 h2' />
         </button>
       </div>
 

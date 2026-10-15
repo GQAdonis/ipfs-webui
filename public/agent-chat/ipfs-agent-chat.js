@@ -1,6 +1,6 @@
 import { t as e } from "./chunks/endpoint-BhoYC3ie.js";
 //#region src/island-loader.ts
-var t = () => import("./chunks/mount-9hrP-V2S.js"), n = "ipfs-agent-chat", r = "ipfs-agent-chat-openchange", i = "ipfs-agent-chat-notice", a = [
+var t = () => import("./chunks/mount-DYmoEgTR.js"), n = "ipfs-agent-chat", r = "ipfs-agent-chat-openchange", i = "ipfs-agent-chat-notice", a = [
 	"dark",
 	"light",
 	"auto"

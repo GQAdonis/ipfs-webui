@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { withTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { TFunction } from 'i18next'
+import { CloseIcon } from '../../promethity/icons.js'
 
 interface SearchFilterProps {
   initialValue?: string
@@ -38,7 +39,7 @@ const SearchFilter = ({ initialValue = '', onFilterChange, filteredCount, totalC
       <div className='flex items-center relative flex-auto'>
         <input
           id='search-filter-input'
-          className='input-reset ba b--black-20 pa2 db w-100 br1'
+          className='input-reset ba pa2 db w-100 br1'
           type='text'
           placeholder={t('searchFiles')}
           value={filter}
@@ -54,7 +55,7 @@ const SearchFilter = ({ initialValue = '', onFilterChange, filteredCount, totalC
             aria-label={t('clearSearch')}
             title={t('clearSearch')}
           >
-            ✕
+            <CloseIcon size={16} />
           </button>
         )}
       </div>

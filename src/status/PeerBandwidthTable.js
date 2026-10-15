@@ -4,6 +4,7 @@ import { withTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
 import { humanSize } from '../lib/files.js'
 import CountryFlag from 'react-country-flag'
+import { GlobeIcon } from '../promethity/icons.js'
 import Box from '../components/box/Box.js'
 import { Title } from './Commons.js'
 import ComponentLoader from '../loader/ComponentLoader.js'
@@ -68,7 +69,7 @@ export class PeerBandwidthTable extends Component {
             </tr>
             {visiblePeers.map((p, i) => (
               <tr key={p.id} className={i % 2 ? 'bg-snow-muted' : ''}>
-                <td className='f6 pv2 nowrap'><LocationFlag location={peerLocations[p.id]} /></td>
+                <td className='f6 pv2 nowrap'><LocationFlag location={peerLocations[p.id]} unknown={t('app:terms.unknown')} /></td>
                 <td className='f6 pv2 ph3 w-100 monospace'>{p.id}</td>
                 <td className='f6 pv2 ph3 nowrap'>{humansize(parseInt(p.bw.rateIn.toFixed(0), 10))}/s</td>
                 <td className='f6 pv2 ph3 nowrap'>{humansize(parseInt(p.bw.rateOut.toFixed(0), 10))}/s</td>
@@ -103,8 +104,8 @@ function SortArrow ({ field, sortField, direction }) {
   return <img src={src} className='v-mid' alt={'Sorted ' + (direction === 1 ? 'ascending' : 'descending')} />
 }
 
-function LocationFlag ({ location }) {
-  if (!location) return '🏳️‍🌈'
+function LocationFlag ({ location, unknown }) {
+  if (!location) return <span role='img' aria-label={unknown} title={unknown}><GlobeIcon size={18} /></span>
   return (
     <span title={location.country_name}>
       <CountryFlag code={location.country_code} svg={isWindows} />

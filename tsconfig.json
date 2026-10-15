@@ -109,7 +109,9 @@
     "src/promethity/icons.js",
     "src/promethity/page-title.js",
     "src/webmcp/*.js",
+    "src/settings/agent/core/*.js",
+    "src/agent-chat/endpoint.js",
     "src/webmcp/vendor/**/*.d.ts"
   ],
-  "exclude": ["src/webmcp/*.test.js"]
+  "exclude": ["src/webmcp/*.test.js", "src/settings/agent/**/*.test.js"]
 }

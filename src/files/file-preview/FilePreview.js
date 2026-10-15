@@ -11,7 +11,7 @@ import { CID } from 'multiformats/cid'
 import { useDrag } from 'react-dnd'
 import { toString as fromUint8ArrayToString } from 'uint8arrays'
 import Button from '../../components/button/button.tsx'
-import GlyphCancel from '../../icons/GlyphCancel.js'
+import { CloseIcon as GlyphCancel } from '../../promethity/icons.js'
 
 const maxPlainTextPreview = 1024 * 10 // only preview small part of huge files
 
@@ -111,7 +111,7 @@ const Preview = (props) => {
 
   // Close button header
   const closeButtonHeader = onClose != null && (
-    <div className="flex items-center justify-between mb3 pb2 bb b--light-gray">
+    <div className="flex items-center justify-between mb3 pb2">
       <div className="flex items-center flex-auto mr2">
         <h2
           className="ma0 f4 charcoal"
@@ -144,7 +144,7 @@ const Preview = (props) => {
 
   const cantPreview = (
     <div className='mt4'>
-      <p className='b'>{t('cantBePreviewed')} <span role='img' aria-label='sad'>😢</span></p>
+      <p className='b'>{t('cantBePreviewed')}</p>
       { openLinks && <p>{openLinks}</p> }
     </div>
   )

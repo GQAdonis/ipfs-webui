@@ -1,5 +1,6 @@
 import React from 'react'
-import CancelIcon from '../../icons/GlyphSmallCancel'
+import { useTranslation } from 'react-i18next'
+import { CloseIcon } from '../../promethity/icons.js'
 
 // Type definitions
 interface ModalActionsProps {
@@ -31,8 +32,7 @@ export const ModalActions: React.FC<ModalActionsProps> = ({
   ...props
 }) => (
   <div
-    className={`flex justify-${justify} pa2 ${className}`}
-    style={{ backgroundColor: 'var(--raised)' }}
+    className={`flex justify-${justify} pa2 prom-modal-actions ${className}`}
     {...props}
   >
     {children}
@@ -68,18 +68,22 @@ export const Modal: React.FC<ModalProps> = ({
   className = '',
   ...props
 }) => {
+  const { t } = useTranslation('app')
   return (
     <div
-      className={`${className} bg-white w-80 shadow-4 sans-serif relative`}
+      className={`${className} prom-modal sans-serif relative`}
       data-testid="ipfs-modal"
-      style={{ maxWidth: '34em' }}
       {...props}
     >
       {onCancel && (
-        <CancelIcon
-          className='absolute pointer w2 h2 top-0 right-0 fill-gray'
+        <button
+          type='button'
+          className='prom-modal-close absolute top-0 right-0 flex items-center justify-center pointer'
+          aria-label={t('actions.close')}
           onClick={onCancel}
-        />
+        >
+          <CloseIcon />
+        </button>
       )}
 
       {children}

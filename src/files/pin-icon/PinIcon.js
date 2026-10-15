@@ -1,7 +1,6 @@
 import React from 'react'
 import { withTranslation } from 'react-i18next'
-import GlyphPin from '../../icons/GlyphPin.js'
-import GlyphPinCloud from '../../icons/GlyphPinCloud.js'
+import { PinnedIcon as GlyphPin, PinCloudIcon as GlyphPinCloud } from '../../promethity/icons.js'
 import '../PendingAnimation.css'
 
 /**

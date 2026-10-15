@@ -1,5 +1,5 @@
 import React from 'react'
-import ErrorIcon from '../../icons/GlyphSmallCancel'
+import { CloseIcon as ErrorIcon } from '../../promethity/icons.js'
 
 interface ErrorBoundaryProps {
   /**
@@ -22,7 +22,7 @@ interface ErrorBoundaryState {
 }
 
 const FallbackComponent: React.FC<{ error?: Error; componentStack?: string }> = ({ error, componentStack }) => (
-  <div role='alert' className='pa3 br2 ba b--red bg-washed-red flex items-center'>
+  <div role='alert' className='pa3 br2 bg-washed-red flex items-center'>
     <span className='mr2'>
       <ErrorIcon className='h2 w2' aria-hidden />
     </span>

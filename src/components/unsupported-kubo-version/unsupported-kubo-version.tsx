@@ -2,6 +2,7 @@ import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import Box from '../box/Box.js'
 import Button from '../button/button'
+import { AttentionIcon } from '../../promethity/icons.js'
 import { useIdentity } from '../../contexts/identity-context'
 
 interface UnsupportedKuboVersionProps {
@@ -32,7 +33,7 @@ const UnsupportedKuboVersion: React.FC<UnsupportedKuboVersionProps> = () => {
   return (
     <Box className='pa4 tc' style={{ width: '100%' }}>
       <div className='mb4'>
-        <div className='f1 mb3'>⚠️</div>
+        <div className='mb3'><AttentionIcon size={48} /></div>
         <h3 className='montserrat fw6 charcoal ma0 f4 mb3'>
           {t('logs.unsupported.title')}
         </h3>

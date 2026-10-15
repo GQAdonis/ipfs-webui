@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '../../promethity/icons.js'
 import React, { useState, useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { DropdownMenu } from '@tableflip/react-dropdown'
@@ -79,14 +80,14 @@ const SortDropdown = ({ currentSort, onSortChange, t }) => {
     <div className="relative" ref={dropdownRef}>
       <button
         ref={buttonRef}
-        className="flex items-center justify-between pa2 bg-white ba b--light-gray br2 pointer hover-bg-near-white"
+        className="flex items-center justify-between pa2 bg-near-white br2 pointer hover-bg-light-gray"
         style={{ minWidth: '140px' }}
         aria-label={t('sortFiles')}
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="f6 charcoal truncate">{getCurrentLabel()}</span>
-        <span className="ml2 f6 gray">
-          {isOpen ? '▲' : '▼'}
+        <span className="ml2 f6 gray flex items-center">
+          <ChevronDownIcon size={16} style={isOpen ? { transform: 'rotate(180deg)' } : undefined} />
         </span>
       </button>
 

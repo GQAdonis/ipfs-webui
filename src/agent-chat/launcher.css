@@ -1,0 +1,68 @@
+/* The chat launcher: the one persistent action area, bottom right. Secondary
+   style (a control fill); the accent stays with the page's single primary
+   action. Tokens only, so light and dark follow data-theme. */
+
+/* How far a bottom-sticky action area lifts to stay clear of the launcher. The
+   launcher publishes its height; below 1280px the page column can reach it. */
+:root {
+  --ac-bar-lift: 0px;
+}
+
+@media (max-width: 1279px) {
+  :root {
+    --ac-bar-lift: var(--ac-launcher-clearance, 0px);
+  }
+}
+
+.ac-launcher {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  max-width: min(100vw, 26rem);
+  padding: var(--space-3);
+  font-family: var(--font-body);
+}
+
+.ac-launcher-button {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background-color: var(--control);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: filter var(--motion-duration) var(--motion-ease);
+  touch-action: manipulation;
+}
+
+.ac-launcher-button:hover {
+  filter: brightness(1.12);
+}
+
+.ac-launcher-button[aria-expanded='true'] {
+  background-color: var(--raised);
+}
+
+.ac-launcher-button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.ac-launcher-button[aria-busy='true'] {
+  cursor: progress;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-launcher-button {
+    transition: none;
+  }
+}

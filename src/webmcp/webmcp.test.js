@@ -428,6 +428,25 @@ describe('confirmation dialog', () => {
     await pending
   })
 
+  it('N1: the deadline and both safety disclosures come before the details and the decision row', async () => {
+    const { tool } = await setup()
+    let pending
+    await act(async () => { pending = tool('mfs_cp').execute({ source: `/ipfs/${CID}`, destination: '/saved/copy.txt' }) })
+    const dialog = screen.getByRole('alertdialog')
+    const notes = screen.getByTestId('webmcp-notes')
+    expect(notes).toHaveTextContent(/denied after 30 seconds/)
+    expect(notes).toHaveTextContent('Deny is final. Nothing is sent to your node.')
+    expect(notes).toHaveTextContent('An agent that controls this browser can answer it too.')
+    const details = dialog.querySelector('dl')
+    const footer = dialog.querySelector('.webmcp-footer')
+    // DOM order drives what is visible at scrollTop 0 on a phone: notes, then details, then the sticky footer.
+    expect(notes.compareDocumentPosition(details) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(notes.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(footer).not.toContainElement(notes)
+    await act(async () => { fireEvent.click(deny()) })
+    await pending
+  })
+
   it('Deny sends no RPC request and returns a declined result', async () => {
     const { tool, ipfs } = await setup()
     let pending

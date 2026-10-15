@@ -1,7 +1,6 @@
 import React from 'react'
 import { withTranslation } from 'react-i18next'
-import GlyphCancel from '../icons/GlyphCancel.js'
-import GlyphPinCloud from '../icons/hocs/GlyphPinCloud.js'
+import { CloseIcon as GlyphCancel, PinCloudIcon as GlyphPinCloud } from '../promethity/icons.js'
 import '../files/PendingAnimation.css'
 
 const Status = {
@@ -34,7 +33,7 @@ const Pin = (t, pin, status = Status.Pending, onDismiss) => {
     alt = t('pinningFailed')
   }
 
-  return (<li className="flex w-100 bb b--light-gray items-center f6 charcoal" key={cid}>
+  return (<li className="flex w-100 items-center f6 charcoal" key={cid}>
     {/* @ts-expect-error - alt & title are not valid props for GlyphPinCloud */}
     <GlyphPinCloud className={cloudClass} style={{ width: '36px' }} alt={alt} title={alt} failed={status === Status.Failed} />
     <span className="truncate">{cid}</span>

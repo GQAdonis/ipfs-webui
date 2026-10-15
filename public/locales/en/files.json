@@ -77,7 +77,7 @@
   },
   "pinningModal": {
     "title": "Select where you would like to pin these items.",
-    "complianceLabel": "🔍 Check pinning services' compliance",
+    "complianceLabel": "Check pinning services' compliance",
     "footer": "Need to add or configure a pinning service? Go to <1>Settings</1>.",
     "localNode": "Local node",
     "totalSize": "Total size: {size}"
@@ -85,13 +85,13 @@
   "addByPathModal": {
     "title": "Import from IPFS",
     "description": "Insert an IPFS or IPNS path, CID, or protocol URL to import.",
-    "preloadNote": "NOTE: Imported path is lazy-loaded by default, and will be retrieved on-demand as you browse it. To proactively prefetch imported path to the local Datastore, choose \u201cDownload\u201d from the context menu.",
+    "preloadNote": "NOTE: Imported path is lazy-loaded by default, and will be retrieved on-demand as you browse it. To proactively prefetch imported path to the local Datastore, choose “Download” from the context menu.",
     "importPathPlaceholder": "Path, CID, or URL (required)",
     "namePlaceholder": "Name (optional)",
     "examples": "Examples:"
   },
   "addByCarModal": {
-    "title": "CAR Import",
+    "title": "CAR import",
     "description": "Choose a CAR file to import a DAG from and specify a name for it to be imported into the current directory.",
     "selectCARButtonText": "Select CAR…",
     "namePlaceholder": "Name",
@@ -160,6 +160,11 @@
   "fileLabel": "Select {type} {name} with size: {size}",
   "hashUnavailable": "hash unavailable",
   "checkboxLabel": "View more options for {name}",
+  "selectLabel": "Select {name}",
+  "optionsLabel": "View more options for {name}",
+  "pinLabel": "Pin {name}",
+  "unpinLabel": "Unpin {name}",
+  "dismissFailedPinLabel": "Dismiss the failed pin of {name}",
   "pinned": "Pinned",
   "pinnedRemotely": "Pinned remotely",
   "pinningRemotely": "Pinning remotely",
@@ -210,7 +215,7 @@
     "helpListItemInspect": "Try <1>inspecting the path</1> (or its parent) in DAG Explorer to debug the issue.",
     "helpListItemRetrieval": "If you have a CID you believe should work, <1>run Retrieval Diagnostics</1>.",
     "helpListItemForums": "Visit the <1>Discussion Forums</1> to ask for help.",
-    "backButton": "Go to Files"
+    "backButton": "Go to files"
   },
   "inspectResolveFailed": "Failed to resolve path: {{path}}",
   "showSearch": "Click to show search filter",

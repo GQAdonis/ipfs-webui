@@ -8,7 +8,7 @@ import FileIcon from '../file-icon/FileIcon.js'
 import { connect } from 'redux-bundler-react'
 import FileThumbnail from '../file-preview/file-thumbnail.js'
 import PinIcon from '../pin-icon/PinIcon.js'
-import GlyphDots from '../../icons/GlyphDots.js'
+import { DotsIcon as GlyphDots } from '../../promethity/icons.js'
 import Checkbox from '../../components/checkbox/Checkbox.js'
 import { NativeTypes } from 'react-dnd-html5-backend'
 import { join, basename } from 'path'
@@ -193,7 +193,7 @@ const GridFile: FC<GridFilePropsConnected> = ({
           disabled={false}
           checked={selected}
           onChange={handleCheckboxClick}
-          aria-label={t('checkboxLabel', { name })}
+          aria-label={t('selectLabel', { name })}
         />
       </div>
       <div
@@ -231,7 +231,7 @@ const GridFile: FC<GridFilePropsConnected> = ({
             ref={dotsWrapper}
             className="grid-file-dots"
             onClick={handleDotsClick}
-            aria-label={t('checkboxLabel', { name })}
+            aria-label={t('optionsLabel', { name })}
             type="button"
           >
             <GlyphDots />

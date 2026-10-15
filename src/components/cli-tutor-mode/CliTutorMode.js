@@ -4,11 +4,10 @@ import { connect } from 'redux-bundler-react'
 
 // Components
 import { Modal, ModalBody, ModalActions } from '../modal/modal'
-import StrokeCode from '../../icons/StrokeCode.js'
+import { CodeIcon as StrokeCode, DownloadIcon as StrokeDownload } from '../../promethity/icons.js'
 import Button from '../button/button.tsx'
 import Overlay from '../overlay/overlay'
 import Shell from '../shell/Shell.js'
-import StrokeDownload from '../../icons/StrokeDownload.js'
 import { cliCmdKeys, cliCommandList, cliCmdPrefixes } from '../../bundles/files/consts.js'
 
 export const CliTutorialModal = ({ command, t, onLeave, className, downloadConfig, ...props }) => {
