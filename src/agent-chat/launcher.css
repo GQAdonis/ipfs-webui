@@ -3,14 +3,31 @@
    action. Tokens only, so light and dark follow data-theme. */
 
 /* How far a bottom-sticky action area lifts to stay clear of the launcher. The
-   launcher publishes its height; below 1280px the page column can reach it. */
+   launcher publishes its height and the bar lifts at every width: a width breakpoint
+   missed the 1280 to 1405px range, where the 960px page column still reached the
+   launcher's left edge. With the chat off the clearance is unset and the lift is 0. */
 :root {
-  --ac-bar-lift: 0px;
+  --ac-bar-lift: var(--ac-launcher-clearance, 0px);
 }
 
-@media (max-width: 1279px) {
-  :root {
-    --ac-bar-lift: var(--ac-launcher-clearance, 0px);
+/* Launcher-level clearance (WCAG 2.2 criterion 2.4.11, Focus Not Obscured). The fixed
+   launcher covers the bottom of the viewport on every page, so the clearance it publishes
+   protects every page, not only the ones that remember to read it:
+   - a focused control scrolls into view above the launcher (scroll-padding);
+   - the main column ends with the same space, so the last line of any page can be scrolled
+     clear of the launcher (the same 1rem and 2rem the column already used, plus the clearance).
+   With the chat off the clearance is unset and nothing changes. */
+html {
+  scroll-padding-bottom: var(--ac-launcher-clearance, 0px);
+}
+
+main[data-route] {
+  padding-bottom: calc(1rem + var(--ac-launcher-clearance, 0px));
+}
+
+@media (min-width: 60em) {
+  main[data-route] {
+    padding-bottom: calc(2rem + var(--ac-launcher-clearance, 0px));
   }
 }
 
@@ -26,6 +43,12 @@
   max-width: min(100vw, 26rem);
   padding: var(--space-3);
   font-family: var(--font-body);
+  /* The padding band is not part of the control: clicks in it reach the page underneath. */
+  pointer-events: none;
+}
+
+.ac-launcher > * {
+  pointer-events: auto;
 }
 
 .ac-launcher-button {

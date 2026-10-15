@@ -2,13 +2,37 @@
   display: flex;
   flex-direction: column;
   /* Mobile/tablet: account for top navbar + header + tabs */
-  height: calc(100vh - 400px);
+  /* The chat launcher covers the bottom of the viewport: its clearance (unset when the chat is off) keeps the toolbar and the storage footer above it. */
+  height: calc(100vh - 400px - var(--ac-launcher-clearance, 0px));
 }
 
 /* Large screens (60em = 960px) - matches navbar breakpoint */
 @media only screen and (min-width: 60em) {
   .logs-screen-container {
     /* Desktop: account for left sidebar layout */
-    height: calc(100vh - 220px);
+    height: calc(100vh - 220px - var(--ac-launcher-clearance, 0px));
+  }
+}
+
+.logs-viewer-box {
+  flex: 1 1 auto;
+  min-height: 15rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Below the navbar breakpoint the screen is taller than any fixed height it could be given
+   (level configuration, viewer, footer), so a fixed height lets the footer spill past the
+   container and past the chat launcher's clearance. Let the screen take its own height and
+   give the viewer a fixed one; the main column's bottom inset then ends the page above the
+   launcher. */
+@media only screen and (max-width: 59.99em) {
+  .logs-screen-container {
+    height: auto;
+  }
+
+  .logs-viewer-box {
+    flex: none;
+    height: 24rem;
   }
 }

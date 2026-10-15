@@ -63,7 +63,7 @@
     },
     "step2": {
       "title": "Pick a model.",
-      "text": "Test the connection first, then set the model the agent will use."
+      "text": "Enter the URL and type its host to confirm it, test the connection, then set the model the agent will use."
     },
     "step3": {
       "title": "Turn on agent chat.",
@@ -83,7 +83,8 @@
   },
   "key": {
     "label": "API key",
-    "help": "Optional. Write-only: the node keeps it in a private file in its settings directory and never shows it again. Test connection and chats use the stored key, so save a new key before you test. The node sends it only to the current backend host or a host you have confirmed.",
+    "help": "Optional. Write-only: the node keeps it in a private file in its settings directory and never shows it again. Test connection and chats use the stored key, so save a new key before you test. The node sends it only to the backend host it is stored for; moving the backend to another host needs a new key.",
+    "helpServer": "Optional. Write-only: the node keeps it in a private file in its settings directory and never shows it again. Test connection and chats use the stored key, so save a new key before you test. A key this node reads from the server follows a host change; a key stored through this page does not.",
     "save": "Save key",
     "saving": "Saving",
     "cancel": "Cancel",
@@ -121,23 +122,28 @@
   "test": {
     "button": "Test connection",
     "testing": "Testing",
-    "note": "The test asks the node to reach the URL. The node sends the stored key only to the current backend host or a host you have confirmed.",
+    "note": "The test asks the node to reach the URL.",
     "ok": {
       "word": "Reachable",
       "text": "{host} answered in {ms} ms.",
       "models": "{count, plural, one {# model listed.} other {# models listed.}}",
-      "noModels": "The endpoint hides its model list. Type a model name."
+      "noModels": "The endpoint hides its model list. Type a model name.",
+      "noModelsKeyWithheld": "The model list needs the stored key, and it was not sent to this host. Type a model name."
     },
     "failed": {
       "word": "Not reachable",
       "text": "The node could not reach this endpoint."
     },
-    "gated": "Test connection stays off until you type the host {host} below. The stored key is sent only to a host you have confirmed.",
+    "gated": "Test connection stays off until you type the host {host} above. A test of a new host never carries the stored key, and the key does not follow a move: supply a new key with the change.",
+    "gatedServer": "Test connection stays off until you type the host {host} above. A test of a new host never carries the stored key. After you apply, the key the server supplies goes to the new host.",
     "keySent": "The stored key was sent.",
     "keyNotSent": {
       "word": "Reachable, key not sent",
-      "text": "The stored key was withheld: this host is not the current backend and is not confirmed. An endpoint that needs a key may still refuse you."
-    }
+      "text": "Only the current backend receives the stored key, and this host is not it. The key does not follow a move to this host: supply a new key with the change. An endpoint that needs a key may still refuse you."
+    },
+    "keyNotSentServer": "This test did not send the key. Before you apply, a test of a new host never carries the key; after you apply, the key the server supplies goes to this host. An endpoint that needs a key may still refuse you.",
+    "noteNewHost": "The test asks the node to reach the URL. A test of a new host never carries the stored key, and the key does not follow a move: supply a new key with the change.",
+    "noteNewHostServer": "The test asks the node to reach the URL. A test of a new host never carries the stored key. After you apply, the key the server supplies goes to the new host."
   },
   "model": {
     "label": "Model",
@@ -178,12 +184,18 @@
   },
   "confirm": {
     "label": "Type the model host to confirm:",
-    "help": "Node content that an agent reads can be sent to this host. Apply stays off until you type it exactly.",
+    "help": "Node content that an agent reads goes to this host. Apply stays off until you type it exactly.",
     "matches": {
       "word": "Matches",
       "text": "Apply can send node content to {host}."
     },
-    "differs": "Not the same yet. Type the host exactly as shown."
+    "differs": "Not the same yet. Type the host exactly as shown.",
+    "helpKey": "The key stored through this page does not follow to a new host: applying removes it. To use a key there, choose Replace key and type it before you apply.",
+    "helpKeyServer": "A key this node reads from the server is sent to the new host too.",
+    "serverManaged": {
+      "word": "Set on the server",
+      "text": "A key this node reads from the server (an environment variable or a file) follows a host change: after you apply, chats and Test connection send it to the new host. Check the host before you apply. To use a different key there, change it on the server."
+    }
   },
   "apply": {
     "bar": "Apply backend settings",
@@ -221,7 +233,7 @@
       "unavailable": "This backend is not available in this build.",
       "url": "Enter a valid base URL.",
       "model": "Pick or type a model.",
-      "confirm": "Type the host below to confirm the change."
+      "confirm": "Type the host above to confirm the change."
     },
     "firstRun": {
       "word": "Nothing to apply",
@@ -233,6 +245,12 @@
     },
     "conflict": {
       "text": "The node's settings changed while you were editing. They were reloaded and your edits are kept. Retry to apply your edits on top, or Reload settings to take the node's values."
+    },
+    "keyNotCarried": {
+      "word": "Key not sent",
+      "text": "The key for the old host is not sent to the new host.",
+      "cleared": "It was removed.",
+      "prompt": "Replace key and type a new key if the new host needs one."
     }
   },
   "failure": {
@@ -246,7 +264,7 @@
     "unavailable": "The settings service did not answer as expected.",
     "backend_not_configured": "No backend is configured yet.",
     "revision_conflict": "The settings changed while you were editing. They were reloaded; check the values, then try again.",
-    "egress_confirmation_required": "The node needs the new model host confirmed. Type {host} below.",
+    "egress_confirmation_required": "The node needs the new model host confirmed. Type {host} above.",
     "secrets_not_accepted": "This node does not accept keys through the settings page.",
     "serverSaid": "Detail: {detail}"
   },

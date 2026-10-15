@@ -6,9 +6,10 @@
 /** @typedef {{ set: boolean, source?: 'settings_api' | 'environment' | 'file' }} ApiKeyStatus */
 /** @typedef {{ kind: BackendKind, base_url?: string, model?: string, api_key?: ApiKeyStatus }} BackendRead */
 /** @typedef {{ safety_prefix: string, custom: string }} SystemPromptRead */
-/** @typedef {{ revision: string, backend: BackendRead | null, system_prompt: SystemPromptRead }} GetResponse */
+/** @typedef {{ reason: 'host_changed', cleared: boolean }} KeyNotCarried */
+/** @typedef {{ revision: string, backend: BackendRead | null, system_prompt: SystemPromptRead, key_not_carried?: KeyNotCarried }} GetResponse */
 /** @typedef {GetResponse} SetResponse */
-/** @typedef {{ kind?: BackendKind, base_url?: string, model?: string }} BackendSet */
+/** @typedef {{ kind?: BackendKind, base_url?: string, model?: string, api_key?: string }} BackendSet */
 /** @typedef {{ revision: string, backend?: BackendSet, system_prompt?: string, egress_confirmation?: { host: string } }} SetRequest */
 /** @typedef {{ base_url: string, kind?: BackendKind }} TestConnectionRequest */
 /** @typedef {{ ok: boolean, detail?: string, latency_ms?: number, models?: string[], key_sent?: boolean }} TestConnectionResult */

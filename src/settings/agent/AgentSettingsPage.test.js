@@ -11,6 +11,7 @@ import axe from 'axe-core'
 import agentSettingsEn from '../../../public/locales/en/agentSettings.json'
 import agentChatEn from '../../../public/locales/en/agentChat.json'
 import webmcpEn from '../../../public/locales/en/webmcp.json'
+import searchEn from '../../../public/locales/en/search.json'
 import { AgentSettingsPage } from './AgentSettingsPage.js'
 import AgentSettingsSummary from './AgentSettingsSummary.js'
 import { SettingsError } from './core/errors.js'
@@ -29,9 +30,9 @@ const missing = []
 i18n.use(ICU).use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
-  ns: ['agentSettings', 'agentChat', 'webmcp', 'app'],
+  ns: ['agentSettings', 'agentChat', 'webmcp', 'search', 'app'],
   defaultNS: 'agentSettings',
-  resources: { en: { agentSettings: agentSettingsEn, agentChat: agentChatEn, webmcp: webmcpEn, app: {} } },
+  resources: { en: { agentSettings: agentSettingsEn, agentChat: agentChatEn, webmcp: webmcpEn, search: searchEn, app: {} } },
   interpolation: { escapeValue: false },
   saveMissing: true,
   missingKeyHandler: (_l, ns, key) => { missing.push(`${ns}:${key}`) },
@@ -81,6 +82,9 @@ const confirmHost = (host) => fireEvent.change(screen.getByLabelText(CONFIRM), {
 beforeEach(() => {
   localStorage.clear()
   sessionStorage.clear()
+  // The page tests start from a profile that opted out of both features.
+  localStorage.setItem(CHAT_KEY, JSON.stringify({ enabled: false }))
+  localStorage.setItem(WEBMCP_KEY, JSON.stringify({ enabled: false }))
   resetChat()
   resetWebMcp()
   resetAdminTokenForTests()
@@ -133,7 +137,8 @@ describe('OpenAI-compatible form', () => {
     expect(model).toBeDisabled()
 
     type('Base URL', 'http://127.0.0.1:4000/v1')
-    expect(screen.getByRole('button', { name: 'Test connection' })).toBeDisabled()
+    // No key is stored, so a test has nothing to send and is not held back.
+    expect(screen.getByRole('button', { name: 'Test connection' })).not.toBeDisabled()
     confirmHost('127.0.0.1:4000')
     fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
     expect(await screen.findByText(/127.0.0.1:4000 answered in 12 ms/)).toBeInTheDocument()
@@ -238,7 +243,12 @@ describe('the stored key and Test connection (security)', () => {
     type('Base URL', 'https://attacker.example/v1')
     const test = screen.getByRole('button', { name: 'Test connection' })
     expect(test).toBeDisabled()
-    expect(screen.getByText(/stays off until you type the host attacker.example/)).toBeInTheDocument()
+    expect(screen.getByText(/stays off until you type the host attacker.example above/)).toBeInTheDocument()
+    expect(screen.getByText(/never carries the stored key, and the key does not follow a move/)).toBeInTheDocument()
+    // The reason is linked to the button, and the host field sits above it.
+    expect(test).toHaveAccessibleDescription(/stays off until you type the host/)
+    const host = screen.getByLabelText(CONFIRM)
+    expect(host.compareDocumentPosition(test) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     fireEvent.click(test)
     expect(client.testConnection).not.toHaveBeenCalled()
     confirmHost('attacker.example')
@@ -261,7 +271,7 @@ describe('the stored key and Test connection (security)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
     expect(await screen.findByText('Reachable, key not sent')).toBeInTheDocument()
     expect(screen.queryByText('Reachable', { selector: 'strong' })).toBeNull()
-    expect(screen.getByText(/stored key was withheld/)).toBeInTheDocument()
+    expect(screen.getByText(/Only the current backend receives the stored key, and this host is not it/)).toBeInTheDocument()
   })
 
   it('says the key was sent when the node reports it', async () => {
@@ -280,9 +290,142 @@ describe('the stored key and Test connection (security)', () => {
     expect(screen.queryByText(/key not sent/)).toBeNull()
   })
 
-  it('states in the key help that the stored key goes only to a confirmed host', async () => {
+  it('states in the key help that the key stays with the host it is stored for', async () => {
     await open(fakeClient({ server: SERVER(OPENAI) }))
-    expect(screen.getByText(/sends it only to the current backend host or a host you have confirmed/)).toBeInTheDocument()
+    expect(screen.getByText(/sends it only to the backend host it is stored for; moving the backend to another host needs a new key/)).toBeInTheDocument()
+  })
+
+  describe('ADR-0012: a backend move and the stored key', () => {
+    it('says node content goes to the new host and the stored key does not follow, only while a key is stored', async () => {
+      await open(fakeClient({ server: SERVER(STORED) }))
+      type('Base URL', 'https://new.example/v1')
+      const field = screen.getByLabelText(CONFIRM)
+      expect(field).toHaveAccessibleDescription(/Node content that an agent reads goes to this host/)
+      expect(field).toHaveAccessibleDescription(/stored through this page does not follow to a new host: applying removes it/)
+    })
+
+    it('does not mention the key in the move copy when none is stored', async () => {
+      await open(fakeClient({ server: SERVER(OPENAI) }))
+      type('Base URL', 'https://new.example/v1')
+      expect(screen.getByLabelText(CONFIRM)).not.toHaveAccessibleDescription(/stored key/)
+    })
+
+    it('sends a replacement key typed in the field with the move, in the same write', async () => {
+      const client = fakeClient({ server: SERVER(STORED) })
+      await open(client)
+      fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
+      fireEvent.change(screen.getByLabelText('API key'), { target: { value: 'sk-test-fake-9' } })
+      type('Base URL', 'https://new.example/v1')
+      confirmHost('new.example')
+      fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+      await waitFor(() => expect(client.set).toHaveBeenCalled())
+      expect(client.set.mock.calls[0][0].backend).toMatchObject({ base_url: 'https://new.example/v1', api_key: 'sk-test-fake-9' })
+    })
+
+    it('shows "The key for the old host is not sent to the new host", that it was removed, and prompts for a new key', async () => {
+      const set = jest.fn(async (req) => ({ ...SERVER({ ...STORED, ...req.backend, api_key: { set: false } }, 'rev-2'), key_not_carried: { reason: 'host_changed', cleared: true } }))
+      await open(fakeClient({ server: SERVER(STORED), set }))
+      type('Base URL', 'https://new.example/v1')
+      confirmHost('new.example')
+      fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+      expect(await screen.findByText('Key not sent')).toBeInTheDocument()
+      expect(screen.getByText(/The key for the old host is not sent to the new host\. It was removed\. Replace key and type a new key/)).toBeInTheDocument()
+      // The page no longer claims a key is stored, so Test connection to this host is not gated.
+      expect(screen.getByLabelText('API key')).toHaveValue('')
+      expect(screen.getByText('Applied')).toBeInTheDocument()
+    })
+
+    it('shows no key notice when the write carries none', async () => {
+      await open(fakeClient({ server: SERVER(OPENAI) }))
+      type('Base URL', 'https://new.example/v1')
+      confirmHost('new.example')
+      fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+      expect(await screen.findByText('Applied')).toBeInTheDocument()
+      expect(screen.queryByText('Key not sent')).toBeNull()
+    })
+
+    it('says a provider change is a server configuration edit on a node that does not accept keys', async () => {
+      const client = fakeClient({ server: SERVER(OPENAI), setApiKey: jest.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') }) })
+      await open(client)
+      fireEvent.change(screen.getByLabelText('API key'), { target: { value: 'sk-test-fake-1' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
+      await screen.findByText(/Set on the server \(Kubernetes Secret\)/)
+      type('Base URL', 'https://new.example/v1')
+      expect(screen.getByText(/follows a host change/)).toBeInTheDocument()
+    })
+
+    it('says the same for a key the node reads from the environment, and never sends a key', async () => {
+      const client = fakeClient({ server: SERVER({ ...OPENAI, api_key: { set: true, source: 'environment' } }) })
+      await open(client)
+      type('Base URL', 'https://new.example/v1')
+      // The server-supplied key follows the move, and the page says so; it never says it is removed.
+      expect(screen.getByText(/follows a host change: after you apply, chats and Test connection send it to the new host/)).toBeInTheDocument()
+      expect(screen.getByLabelText(CONFIRM)).toHaveAccessibleDescription(/reads from the server is sent to the new host too/)
+      expect(screen.getByLabelText(CONFIRM)).not.toHaveAccessibleDescription(/applying removes it/)
+      confirmHost('new.example')
+      fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+      await waitFor(() => expect(client.set).toHaveBeenCalled())
+      expect(client.set.mock.calls[0][0].backend.api_key).toBeUndefined()
+    })
+
+    it('never says a server-supplied key does not follow a move, in the test note, the gate or the key help', async () => {
+      await open(fakeClient({ server: SERVER({ ...OPENAI, api_key: { set: true, source: 'environment' } }) }))
+      type('Base URL', 'https://new.example/v1')
+      expect(screen.getByText(/the key the server supplies goes to the new host/)).toBeInTheDocument()
+      expect(screen.getByText(/A test of a new host never carries the stored key/)).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
+      expect(screen.getByText(/A key this node reads from the server follows a host change/)).toBeInTheDocument()
+      expect(screen.queryByText(/does not follow/)).toBeNull()
+      expect(screen.queryByText(/needs a new key/)).toBeNull()
+    })
+
+    it('says the page-stored key is removed, not that it is sent, and shows no server-key note', async () => {
+      await open(fakeClient({ server: SERVER(STORED) }))
+      type('Base URL', 'https://new.example/v1')
+      expect(screen.getByLabelText(CONFIRM)).toHaveAccessibleDescription(/applying removes it/)
+      expect(screen.getByLabelText(CONFIRM)).not.toHaveAccessibleDescription(/reads from the server/)
+      expect(screen.queryByText(/follows a host change/)).toBeNull()
+      expect(screen.getByText(/the key does not follow a move: supply a new key with the change/)).toBeInTheDocument()
+    })
+
+    it('does not show the server-key note for a model-only change', async () => {
+      await open(fakeClient({ server: SERVER({ ...OPENAI, api_key: { set: true, source: 'environment' } }) }))
+      expect(screen.queryByText(/follows a host change/)).toBeNull()
+    })
+  })
+
+  it('does not gate Test connection when no key is stored, but still asks for the host before Apply', async () => {
+    const client = fakeClient({ server: SERVER(OPENAI) })
+    await open(client)
+    type('Base URL', 'https://llm.example/v1')
+    const test = screen.getByRole('button', { name: 'Test connection' })
+    expect(test).not.toBeDisabled()
+    expect(screen.queryByText(/stays off until you type the host/)).toBeNull()
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled()
+    expect(screen.getByText('Type the host above to confirm the change.')).toBeInTheDocument()
+    fireEvent.click(test)
+    expect(await screen.findByText(/llm.example answered/)).toBeInTheDocument()
+    expect(client.testConnection).toHaveBeenCalledTimes(1)
+  })
+
+  it('gates Test connection once a key is stored from this page, and again after it is removed', async () => {
+    const client = fakeClient({ server: SERVER(OPENAI) })
+    await open(client)
+    fireEvent.change(screen.getByLabelText('API key'), { target: { value: 'sk-test-fake-123' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
+    await screen.findByText('Stored')
+    type('Base URL', 'https://llm.example/v1')
+    expect(screen.getByRole('button', { name: 'Test connection' })).toBeDisabled()
+  })
+
+  it('says a hidden model list needs the key when the key was withheld', async () => {
+    const client = fakeClient({ server: SERVER(STORED), testConnection: jest.fn(async () => ({ ok: true, latency_ms: 9, key_sent: false })) })
+    await open(client)
+    type('Base URL', 'https://llm.example/v1')
+    confirmHost('llm.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
+    expect(await screen.findByText(/model list needs the stored key, and it was not sent to this host/)).toBeInTheDocument()
+    expect(screen.queryByText(/hides its model list/)).toBeNull()
   })
 
   it('shows the typed host in monospace, with no placeholder, and a match status', async () => {
@@ -331,6 +474,15 @@ describe('the API key', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Remove the key' }))
     await waitFor(() => expect(client.clearApiKey).toHaveBeenCalledWith({ revision: 'rev-1', kind: 'openai' }))
     expect(await screen.findByLabelText('API key')).toBeInTheDocument()
+  })
+
+  it('returns focus to Remove key when the removal is cancelled', async () => {
+    const client = fakeClient({ server: SERVER({ ...OPENAI, api_key: { set: true, source: 'settings_api' } }) })
+    await open(client)
+    fireEvent.click(screen.getByRole('button', { name: 'Remove key' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Remove key' })))
+    expect(client.clearApiKey).not.toHaveBeenCalled()
   })
 
   it('replaces the field with "Set on the server" on secrets_not_accepted', async () => {
@@ -434,6 +586,12 @@ describe('apply states', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Reload settings' }))
     await waitFor(() => expect(screen.getByRole('combobox', { name: 'Model' })).toHaveValue('node-model'))
+    // The conflict message and the disabled Retry are history once the edits are discarded.
+    expect(screen.getByText('No changes')).toBeInTheDocument()
+    expect(screen.queryByText(/reloaded and your edits are kept/)).toBeNull()
+    expect(screen.queryByTestId('apply-failure')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument()
   })
 
   it('reverts edits to the server state', async () => {

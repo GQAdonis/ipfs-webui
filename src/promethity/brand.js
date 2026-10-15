@@ -10,5 +10,9 @@ export const BRAND = Object.freeze({
   // (D8: attribution in About and the footer). The MIT notice in LICENSE stays
   // as upstream wrote it.
   forkRepo: 'https://github.com/GQAdonis/ipfs-webui',
-  upstreamRepo: 'https://github.com/ipfs/ipfs-webui'
+  upstreamRepo: 'https://github.com/ipfs/ipfs-webui',
+  // The Kubo fork that carries the `ipfs mcp` documentation the Web UI links to,
+  // and the ref those links read from.
+  kuboForkRepo: 'https://github.com/GQAdonis/kubo',
+  kuboDocsRef: 'master'
 })

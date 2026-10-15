@@ -3,8 +3,11 @@
 // decision (2026-10-10) it is saved in localStorage in this browser profile, under its
 // own key, apart from the settings. It is never part of the settings object, a URL,
 // an attribute or a log line. Switching the chat off, or "Forget token", removes it.
-// If storage is blocked the token lasts for the page only. The switch is off and the
-// endpoint empty by default.
+// If storage is blocked the token lasts for the page only. The switch is ON and the
+// endpoint empty by default (the fork's agent features ship enabled, AGENTS.md User
+// Agency); the launcher still shows nothing until a valid /agui endpoint exists. A stored
+// `enabled: false` is the person's choice and always wins: only an absent key takes the
+// default (see boot.js, decision D18).
 
 export const STORAGE_KEY = 'ipfs-webui:agent-chat'
 export const TOKEN_STORAGE_KEY = 'ipfs-webui:agent-chat:token'
@@ -12,7 +15,7 @@ export const TOKEN_STORAGE_KEY = 'ipfs-webui:agent-chat:token'
 /** @typedef {{ enabled: boolean, endpoint: string }} AgentChatSettings */
 
 /** @type {AgentChatSettings} */
-const DEFAULTS = Object.freeze({ enabled: false, endpoint: '' })
+export const DEFAULTS = Object.freeze({ enabled: true, endpoint: '' })
 
 /** @type {Set<() => void>} */
 const listeners = new Set()
@@ -43,7 +46,7 @@ function read () {
     if (!raw) return DEFAULTS
     const parsed = JSON.parse(raw)
     return Object.freeze({
-      enabled: parsed?.enabled === true,
+      enabled: typeof parsed?.enabled === 'boolean' ? parsed.enabled : DEFAULTS.enabled,
       endpoint: typeof parsed?.endpoint === 'string' ? parsed.endpoint : ''
     })
   } catch (_) {
@@ -97,9 +100,12 @@ export function subscribe (fn) {
   return () => { listeners.delete(fn) }
 }
 
-/** Test seam: drop everything held in memory and re-read storage, as a reload does. */
-export function resetForTests () {
+/** Re-read storage into memory, as a reload does (boot calls it after the migration). */
+export function reload () {
   token = readToken()
   snapshot = read()
   emit()
 }
+
+/** Test seam. */
+export const resetForTests = reload

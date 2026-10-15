@@ -111,6 +111,12 @@
     "src/webmcp/*.js",
     "src/settings/agent/core/*.js",
     "src/agent-chat/endpoint.js",
+    "src/search/client.js",
+    "src/search/errors.js",
+    "src/search/plain-text.js",
+    "src/search/content-kinds.js",
+    "src/search/format.js",
+    "src/search/settings-store.js",
     "src/webmcp/vendor/**/*.d.ts"
   ],
   "exclude": ["src/webmcp/*.test.js", "src/settings/agent/**/*.test.js"]

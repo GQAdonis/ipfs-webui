@@ -1,6 +1,6 @@
 {
   "title": "Agent tools (WebMCP)",
-  "description": "Lets an AI agent in this browser use IPFS tools on your node through WebMCP. It is off by default. While it is off, this page registers no tool for agents and sends no request on an agent's behalf. Requests go to the node address in the API address setting.",
+  "description": "Lets an AI agent in this browser use IPFS tools on your node through WebMCP. It is on by default for read tools only; tools that change your node are off after every page load. While it is off, this page registers no tool for agents and sends no request on an agent's behalf. Requests go to the node address in the API address setting.",
   "toggle": {
     "label": "Offer read tools to agents in this browser",
     "help": "Read tools can fetch content from the network through your node. What a tool returns, including file contents, peer addresses and your node's listen addresses, goes to the AI provider behind the agent."

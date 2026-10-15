@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import Box from '../../components/box/Box.js'
 import Title from '../Title.js'
 import { PolicyDecision, StatusLine, Switch } from '../../promethity/components/index.js'
+import SearchSettingsSwitch from '../../search/SearchSettingsSwitch.js'
 import { getBridge } from '../../agent-chat/bridge.js'
 import { validateEndpoint } from '../../agent-chat/endpoint.js'
 import { updateSettings as updateChat } from '../../agent-chat/settings-store.js'
@@ -69,6 +70,20 @@ const ChatFeature = () => {
           ? <StatusLine tone='warn' word={t('features.chat.needs.word')}>{t('features.chat.needs.text')}</StatusLine>
           : null}
       </div>
+    </div>
+  )
+}
+
+/**
+ * The Search switch (`search.enabled`, Web UI preference). Off hides the Search entry,
+ * redirects #/search and stops every request to the search routes. Under Desktop the same
+ * switch applies to this window; Desktop's own Search setting controls the index.
+ */
+const SearchFeature = () => {
+  const { t } = useTranslation('agentSettings')
+  return (
+    <div className='as-feature' data-id='SearchSettings'>
+      <SearchSettingsSwitch onText={t('on')} offText={t('off')} />
     </div>
   )
 }
@@ -182,6 +197,7 @@ export const FeaturesSection = () => {
         <Title props={{ id: 'as-features-title' }}>{t('features.title')}</Title>
         <p className='pm-help as-lede'>{t('features.lede')}</p>
         <ChatFeature />
+        <SearchFeature />
         <WebMcpFeature />
         <DesktopConfirmFeature />
         <PolicyDecision subject={t('policy.subject')} decision='ask' word={t('policy.word')}>

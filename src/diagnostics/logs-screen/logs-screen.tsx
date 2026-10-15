@@ -71,7 +71,7 @@ const LogsScreen = () => {
     <div className='logs-screen-container'>
       <GologLevelSection />
 
-      <Box className='' style={{ flex: '1 1 auto', minHeight: '15rem', display: 'flex', flexDirection: 'column' }}>
+      <Box className='logs-viewer-box'>
         <LogViewer
           logEntries={safeLogEntries}
           isStreaming={isLogStreaming}

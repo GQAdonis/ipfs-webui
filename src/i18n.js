@@ -38,7 +38,7 @@ i18n
         }
       ]
     },
-    ns: ['app', 'welcome', 'status', 'files', 'explore', 'peers', 'settings', 'diagnostics', 'notify', 'agentChat', 'webmcp'],
+    ns: ['app', 'welcome', 'status', 'files', 'explore', 'peers', 'settings', 'diagnostics', 'notify', 'agentChat', 'webmcp', 'search'],
     defaultNS: 'app',
     fallbackNS: 'app',
     fallbackLng: {

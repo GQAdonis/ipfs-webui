@@ -26,11 +26,12 @@ const TONES = Object.freeze({
  * @param {string} [props.word]
  * @param {React.ReactNode} [props.children]
  * @param {string} [props.className]
+ * @param {boolean} [props.announce] false when a live region elsewhere already announces this state
  */
-export const StatusLine = ({ tone = 'info', word, children, className }) => {
+export const StatusLine = ({ tone = 'info', word, children, className, announce = true }) => {
   const { Icon, word: defaultWord } = TONES[tone]
   return (
-    <p className={classNames('pm-status', `pm-tone-${tone}`, className)} role={tone === 'err' ? 'alert' : 'status'}>
+    <p className={classNames('pm-status', `pm-tone-${tone}`, className)} role={announce ? (tone === 'err' ? 'alert' : 'status') : undefined}>
       <Icon />
       <span className='pm-status-body'>
         <strong className='pm-status-word'>{word ?? defaultWord}</strong>

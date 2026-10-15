@@ -41,13 +41,19 @@ export const ApplyStatus = () => {
       )
     }
     if (apply.state === 'applied' && apply.applied) {
+      const moved = apply.applied.keyNotCarried
       return (
+        <>
         <StatusLine tone='ok' word={t('apply.applied.word')}>
           {t(apply.applied.first ? 'apply.applied.textFirst' : 'apply.applied.text', { time: timeOf(apply.at), model: apply.applied.model, host: apply.applied.host })}
           {chatOn
             ? null
             : <> {t('apply.applied.chatOff')} <Button buttonType='button' type='link' minWidth={0} onClick={focusChatSwitch}>{t('apply.applied.goToSwitch')}</Button></>}
         </StatusLine>
+        {moved
+          ? <StatusLine tone='warn' word={t('apply.keyNotCarried.word')}>{t('apply.keyNotCarried.text')}{moved.cleared ? ` ${t('apply.keyNotCarried.cleared')}` : ''} {t('apply.keyNotCarried.prompt')}</StatusLine>
+          : null}
+        </>
       )
     }
     if (state.elsewhere) return <StatusLine tone='warn' word={t('apply.elsewhere.word')}>{t('apply.elsewhere.text')}</StatusLine>

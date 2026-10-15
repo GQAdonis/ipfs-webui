@@ -3,7 +3,8 @@
 // the Desktop bridge wrapper.
 
 import { validateBackendUrl, hostOf, settingsRootFromEndpoint } from './url.js'
-import { reducer, INITIAL_STATE, draftFromServer, buildSetRequest, confirmation, applyBlockers, isDirty } from './form.js'
+import { reducer, INITIAL_STATE, draftFromServer, buildSetRequest, confirmation, applyBlockers, isDirty, keyStored } from './form.js'
+import { readShape } from './read-shape.js'
 import { ADMIN_TOKEN_SESSION_KEY, getAdminToken, getAdminTokenRoot, setAdminToken, setAdminTokenRemembered, forgetAdminToken, forgetAdminTokenUnless, resetAdminTokenForTests } from './admin-token.js'
 import { createHttpSettingsClient } from './http-client.js'
 import { createDesktopSettingsClient, getDesktopConfirmSwitch } from './desktop-client.js'
@@ -153,11 +154,56 @@ describe('412 recovery and the host gate (reducer)', () => {
     expect(confirmation(s)).toMatchObject({ gatesTest: false, testAllowed: true })
   })
 
-  it('gates the first test too, when no backend is set', () => {
+  it('does not gate the first test when no key is stored, but Apply still sends the host', () => {
     let s = loaded(SERVER(null))
     s = reducer(s, { type: 'kind', kind: 'openai' })
     s = reducer(s, { type: 'base-url', value: 'https://llm.example/v1' })
-    expect(confirmation(s).testAllowed).toBe(false)
+    expect(confirmation(s)).toMatchObject({ required: true, gatesTest: false, testAllowed: true, sendsEgressConfirmation: true })
+  })
+
+  it('gates the test of a new host only while a key is stored', () => {
+    let s = loaded(SERVER(OPENAI))
+    s = reducer(s, { type: 'base-url', value: 'https://new.example/v1' })
+    expect(confirmation(s)).toMatchObject({ gatesTest: true, testAllowed: false })
+    s = reducer(s, { type: 'confirm-text', value: 'new.example' })
+    expect(confirmation(s)).toMatchObject({ gatesTest: true, testAllowed: true })
+    const cleared = reducer(s, { type: 'key-cleared', revision: 'r2' })
+    expect(confirmation(cleared)).toMatchObject({ gatesTest: false, testAllowed: true })
+  })
+
+  it('drops a finished apply message when Reload settings discards the edits, and keeps it when edits are kept', () => {
+    let s = loaded(SERVER(OPENAI))
+    s = reducer(s, { type: 'model', value: 'next-model' })
+    s = reducer(s, { type: 'apply-failed', at: 't', failure: { kind: 'revision_conflict', message: 'stale' } })
+    expect(s.apply.state).toBe('failed')
+    const kept = reducer(s, { type: 'loaded', server: SERVER(OPENAI, 'rev-7'), keepEdits: true })
+    expect(kept.apply.state).toBe('failed')
+    const discarded = reducer(s, { type: 'loaded', server: SERVER(OPENAI, 'rev-7'), keepEdits: false })
+    expect(discarded.apply.state).toBe('idle')
+    expect(discarded.elsewhere).toBe(false)
+  })
+
+  it('reads key_not_carried from the write response and nothing else unknown', () => {
+    const read = readShape({ revision: 'r', backend: null, system_prompt: {}, key_not_carried: { reason: 'host_changed', cleared: true, extra: 1 }, other: 1 })
+    expect(read.key_not_carried).toEqual({ reason: 'host_changed', cleared: true })
+    expect(read).not.toHaveProperty('other')
+    expect(readShape({ revision: 'r', backend: null, system_prompt: {} })).not.toHaveProperty('key_not_carried')
+    expect(readShape({ revision: 'r', backend: null, system_prompt: {}, key_not_carried: { reason: 'unknown', cleared: true } })).not.toHaveProperty('key_not_carried')
+  })
+
+  it('records the notice on a successful move, drops the staged key, and sends a typed key in the same write', () => {
+    let s = loaded(SERVER(OPENAI))
+    s = reducer(s, { type: 'key-saved', revision: 'r1', apiKey: { set: true, source: 'settings_api' } })
+    s = reducer(s, { type: 'base-url', value: 'https://new.example/v1' })
+    s = reducer(s, { type: 'key-draft', value: 'sk-test-fake-2' })
+    expect(buildSetRequest(s).backend.api_key).toBe('sk-test-fake-2')
+    s = reducer(s, { type: 'key-draft', value: '' })
+    expect(buildSetRequest(s).backend).not.toHaveProperty('api_key')
+    const server = { ...SERVER({ kind: 'openai', base_url: 'https://new.example/v1', model: 'm1', api_key: { set: false } }, 'r2'), key_not_carried: { reason: 'host_changed', cleared: true } }
+    const done = reducer(s, { type: 'apply-succeeded', server, submitted: s.draft, at: 't' })
+    expect(done.apply.applied.keyNotCarried).toEqual({ cleared: true })
+    expect(done.key.stagedThisSession).toBe(false)
+    expect(keyStored(done)).toBe(false)
   })
 
   it('records whether the stored key was sent', () => {
