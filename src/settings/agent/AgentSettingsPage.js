@@ -83,9 +83,9 @@ const Body = () => {
  * when the main process exposed it, else HTTP to the node the chat points at.
  * A `client` prop replaces that choice (tests, and any host with its own).
  *
- * @param {{ client?: import('./core/types.js').SettingsClient, managed?: boolean, uarAvailable?: boolean, now?: () => number }} props
+ * @param {{ client?: import('./core/types.js').SettingsClient, managed?: boolean, now?: () => number }} props
  */
-export const AgentSettingsPage = ({ client: injected, managed: injectedManaged, uarAvailable, now }) => {
+export const AgentSettingsPage = ({ client: injected, managed: injectedManaged, now }) => {
   const { t } = useTranslation('agentSettings')
   const picked = useSettingsClient()
   const client = injected ?? picked.client
@@ -95,7 +95,7 @@ export const AgentSettingsPage = ({ client: injected, managed: injectedManaged, 
       <Helmet>
         <title>{titleWithBrand(t('title'))}</title>
       </Helmet>
-      <AgentSettingsProvider client={client} connectionKey={picked.root} managed={managed} uarAvailable={uarAvailable} now={now}>
+      <AgentSettingsProvider client={client} connectionKey={picked.root} managed={managed} now={now}>
         <Body />
       </AgentSettingsProvider>
     </div>

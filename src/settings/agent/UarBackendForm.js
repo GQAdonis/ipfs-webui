@@ -1,45 +1,61 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Button from '../../components/button/button.tsx'
 import { Field, FieldInput, StatusLine } from '../../promethity/components/index.js'
+import { ApiKeyField } from './ApiKeyField.js'
+import { ConfirmHost } from './ConfirmHost.js'
 import { useAgentSettings } from './AgentSettings.js'
+import { TestConnection } from './TestConnection.js'
 
 /**
- * Universal Agent Runtime, with honest unavailable states. The server refuses
- * `kind: uar` in this build and no UAR release is published, so every control
- * is shown disabled with the reason beside it, nothing is tested, and nothing
- * can be applied: no fake success. `agent-backend-uar` 1.6 turns this form on
- * by passing `uarAvailable` to the provider.
+ * Universal Agent Runtime (`backend.kind: uar`, ADR-0010). The same shape as the
+ * OpenAI-compatible form, against the same settings API: instance URL, write-only
+ * credential, typed host confirmation, test connection. There is no model field: the
+ * agent the node creates on the runtime brings its own. Every state here is read from
+ * the node or from a request this page just made; nothing is staged locally, so a
+ * runtime that is down or misconfigured shows as exactly that.
  */
 export const UarBackendForm = () => {
   const { t } = useTranslation('agentSettings')
-  const { state } = useAgentSettings()
-  const configured = state.server?.backend?.kind === 'uar' ? state.server.backend : undefined
+  const { state, actions, meta } = useAgentSettings()
+  const [urlTouched, setUrlTouched] = useState(false)
+  const test = meta.test
+  const urlError = urlTouched && !meta.urlCheck.ok ? t(`url.error.${meta.urlCheck.reason}`) : undefined
+  const runTest = () => { setUrlTouched(true); void actions.testConnection() }
 
   return (
     <div className='as-fields' data-id='AgentSettingsUar'>
-      <StatusLine tone='warn' word={t('uar.unavailable.word')}>{t('uar.unavailable.text')}</StatusLine>
-      <p className='pm-label as-missing-lead'>{t('uar.missing.label')}</p>
-      <ul className='as-missing' aria-label={t('uar.missing.label')}>
-        <li>{t('uar.missing.release')}</li>
-        <li>{t('uar.missing.server')}</li>
-      </ul>
-      {configured
-        ? <StatusLine tone='info' word={t('uar.configured.word')}>{t('uar.configured.text', { url: configured.base_url ?? '' })}</StatusLine>
-        : null}
+      <Field label={t('uar.url.label')} help={t('uar.url.help')} error={urlError} errorLabel={t('error')}>
+        <FieldInput
+          type='text'
+          inputMode='url'
+          autoComplete='off'
+          spellCheck={false}
+          placeholder={t('uar.url.placeholder')}
+          value={state.draft.baseUrl}
+          onChange={(e) => actions.setBaseUrl(e.target.value)}
+          onBlur={() => setUrlTouched(true)}
+        />
+      </Field>
 
-      <Field label={t('uar.url.label')} help={t('uar.disabledHelp')}>
-        <FieldInput type='text' disabled value='' placeholder={t('uar.url.placeholder')} readOnly />
-      </Field>
-      <Field label={t('uar.credential.label')} help={t('uar.disabledHelp')}>
-        <FieldInput type='password' disabled value='' readOnly autoComplete='off' />
-      </Field>
-      <div className='as-test'>
-        <Button buttonType='button' bg='bg-charcoal' minWidth={160} disabled>{t('test.button')}</Button>
-      </div>
+      <ApiKeyField />
+
+      <ConfirmHost />
+
+      <TestConnection
+        noteId='as-uar-test-note'
+        note={t('uar.test.note')}
+        onRun={runTest}
+        failedLead={(host) => `${t('uar.test.failed.text', { host })}${test.detail ? ` ${test.detail}` : ''}`}
+        ok={(
+          <StatusLine tone='ok' word={t('test.ok.word')}>
+            {t('test.ok.text', { host: meta.confirmation.host, ms: test.latencyMs ?? 0 })} {t('uar.test.noKey')}
+          </StatusLine>
+        )}
+      />
+
       <div className='as-agent-block'>
         <p className='pm-label'>{t('uar.agent.label')}</p>
-        <StatusLine tone='info' word={t('uar.agent.word')}>{t('uar.agent.text')}</StatusLine>
+        <p className='pm-help'>{t('uar.agent.text')}</p>
       </div>
     </div>
   )

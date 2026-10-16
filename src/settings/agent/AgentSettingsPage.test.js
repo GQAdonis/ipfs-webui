@@ -75,7 +75,7 @@ const open = async (client, props = {}) => {
 
 const chooseOpenAi = () => fireEvent.click(screen.getByRole('radio', { name: 'OpenAI-compatible endpoint' }))
 const type = (label, value) => fireEvent.change(screen.getByLabelText(label), { target: { value } })
-const CONFIRM = /Type the model host to confirm/
+const CONFIRM = /Type the backend host to confirm/
 // A host other than the current backend's must be typed back before Test connection or Apply works.
 const confirmHost = (host) => fireEvent.change(screen.getByLabelText(CONFIRM), { target: { value: host } })
 
@@ -113,11 +113,12 @@ describe('first run', () => {
     expect(missing).toEqual([])
   })
 
-  it('moves focus to the first backend that can be used, not to the unavailable one', async () => {
+  it('moves focus to the first backend choice, and offers Universal Agent Runtime as a plain choice', async () => {
     await open(fakeClient())
     expect(document.activeElement).toBe(screen.getAllByRole('radio')[0])
     expect(document.activeElement).toBe(screen.getByRole('radio', { name: 'OpenAI-compatible endpoint' }))
-    expect(screen.getByRole('radio', { name: /Universal Agent Runtime/ })).toHaveAccessibleName('Universal Agent Runtime Not available yet')
+    expect(screen.getByRole('radio', { name: 'Universal Agent Runtime' })).not.toBeDisabled()
+    expect(screen.queryByText('Not available yet')).toBeNull()
   })
 
   it('drops the chat step when chat is already on', async () => {
@@ -454,7 +455,7 @@ describe('the API key', () => {
     fireEvent.change(input, { target: { value: 'sk-test-fake-123' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
     await screen.findByText('Stored')
-    expect(client.setApiKey).toHaveBeenCalledWith({ revision: 'rev-1', api_key: 'sk-test-fake-123', kind: 'openai' })
+    expect(client.setApiKey).toHaveBeenCalledWith({ revision: 'rev-1', api_key: 'sk-test-fake-123' })
     expect(screen.queryByLabelText('API key')).toBeNull()
     expect(document.body.innerHTML).not.toContain('sk-test-fake-123')
     expect(document.querySelectorAll('input[value="sk-test-fake-123"]')).toHaveLength(0)
@@ -472,7 +473,7 @@ describe('the API key', () => {
     expect(client.clearApiKey).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Cancel' }))
     fireEvent.click(screen.getByRole('button', { name: 'Remove the key' }))
-    await waitFor(() => expect(client.clearApiKey).toHaveBeenCalledWith({ revision: 'rev-1', kind: 'openai' }))
+    await waitFor(() => expect(client.clearApiKey).toHaveBeenCalledWith({ revision: 'rev-1' }))
     expect(await screen.findByLabelText('API key')).toBeInTheDocument()
   })
 
@@ -512,27 +513,306 @@ describe('the API key', () => {
   })
 })
 
-describe('Universal Agent Runtime', () => {
-  it('states what is missing, disables every control and cannot be applied', async () => {
+describe('Universal Agent Runtime form', () => {
+  const chooseUar = () => fireEvent.click(screen.getByRole('radio', { name: 'Universal Agent Runtime' }))
+  const UAR = { kind: 'uar', base_url: 'https://uar.example', api_key: { set: true, source: 'settings_api' } }
+
+  it('starts empty: URL and credential fields, no model, Apply and Test off, nothing claimed', async () => {
     const client = fakeClient()
     await open(client)
-    fireEvent.click(screen.getByRole('radio', { name: /Universal Agent Runtime/ }))
-    expect(screen.getAllByText('Not available').length).toBeGreaterThan(0)
-    const missingList = screen.getByRole('list', { name: 'What is missing' })
-    expect(within(missingList).getAllByRole('listitem')).toHaveLength(2)
-    expect(screen.getByLabelText('Instance URL')).toBeDisabled()
-    expect(screen.getByLabelText('Access credential')).toBeDisabled()
+    chooseUar()
+    expect(screen.getByLabelText('Instance URL')).toHaveValue('')
+    expect(screen.getByLabelText('Instance URL')).not.toBeDisabled()
+    expect(screen.getByLabelText('API key')).not.toBeDisabled()
+    expect(screen.queryByRole('combobox', { name: 'Model' })).toBeNull()
     expect(screen.getByRole('button', { name: 'Test connection' })).toBeDisabled()
-    expect(screen.getByText('Nothing was created.', { exact: false })).toBeInTheDocument()
-    expect(screen.queryByText(/ready|success/i)).toBeNull()
     expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled()
+    expect(screen.getByText('Enter a valid URL.')).toBeInTheDocument()
+    expect(screen.queryByText('Not created')).toBeNull()
+    expect(screen.queryByText(/not available in this build/i)).toBeNull()
     expect(client.set).not.toHaveBeenCalled()
     expect(client.testConnection).not.toHaveBeenCalled()
+    expect(missing).toEqual([])
   })
 
-  it('says a node already set for UAR cannot be changed here yet', async () => {
-    await open(fakeClient({ server: SERVER({ kind: 'uar', base_url: 'https://uar.example' }) }))
-    expect(screen.getByText(/already set for Universal Agent Runtime at https:\/\/uar.example/)).toBeInTheDocument()
+  it('shows a specific error on a bad URL', async () => {
+    await open(fakeClient())
+    chooseUar()
+    const url = screen.getByLabelText('Instance URL')
+    fireEvent.change(url, { target: { value: 'http://remote.example' } })
+    fireEvent.blur(url)
+    expect(url).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByText(/Use https, or http on localhost/)).toBeInTheDocument()
+  })
+
+  it('does not carry a URL typed for the other backend', async () => {
+    await open(fakeClient())
+    chooseOpenAi()
+    type('Base URL', 'https://llm.example/v1')
+    chooseUar()
+    expect(screen.getByLabelText('Instance URL')).toHaveValue('')
+  })
+
+  it('tests the connection as kind uar and reports the result without a model list', async () => {
+    const client = fakeClient({ testConnection: jest.fn(async () => ({ ok: true, latency_ms: 21 })) })
+    await open(client)
+    chooseUar()
+    type('Instance URL', 'https://uar.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
+    expect(await screen.findByText(/uar.example answered in 21 ms/)).toBeInTheDocument()
+    expect(screen.getByText('Reachable')).toBeInTheDocument()
+    expect(screen.getByText(/The test reads the instance's public agent card and sends no credential/)).toBeInTheDocument()
+    expect(screen.queryByText(/not it/)).toBeNull()
+    expect(screen.queryByText(/models listed/)).toBeNull()
+    expect(client.testConnection).toHaveBeenCalledWith({ base_url: 'https://uar.example', kind: 'uar' })
+  })
+
+  it('reports an unreachable or misconfigured runtime with the node detail', async () => {
+    const client = fakeClient({ testConnection: jest.fn(async () => ({ ok: false, detail: 'the instance answered 401. Check the credential.' })) })
+    await open(client)
+    chooseUar()
+    type('Instance URL', 'https://uar.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
+    expect(await screen.findByText(/could not use the Universal Agent Runtime instance at uar.example/)).toBeInTheDocument()
+    expect(screen.getByText(/the instance answered 401. Check the credential./)).toBeInTheDocument()
+    expect(screen.getByText('Not reachable')).toBeInTheDocument()
+  })
+
+  it('never says the key was withheld: the UAR test sends none, with a key stored on the current instance', async () => {
+    const client = fakeClient({ server: SERVER(UAR), testConnection: jest.fn(async () => ({ ok: true })) })
+    await open(client)
+    fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
+    expect(await screen.findByText('Reachable')).toBeInTheDocument()
+    expect(screen.queryByText(/this instance is not it/)).toBeNull()
+    expect(screen.queryByText('Reachable, key not sent')).toBeNull()
+    expect(screen.queryByText(/stored key was sent/)).toBeNull()
+    expect(screen.getByText(/sends no credential/)).toBeInTheDocument()
+  })
+
+  it('says where the credential goes: a private file on the node, sent only to this instance', async () => {
+    await open(fakeClient())
+    chooseUar()
+    expect(screen.getByText('The node keeps the credential in a file only it can read and sends it only to this instance, to create and run the agent.')).toBeInTheDocument()
+    expect(screen.queryByText(/stays on the node/)).toBeNull()
+  })
+
+  it('uses one word for the secret and describes the UAR key without test or chat use', async () => {
+    const client = fakeClient({ server: SERVER(UAR) })
+    await open(client)
+    expect(screen.getByText('Stored')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
+    expect(screen.getByLabelText('API key')).toBeInTheDocument()
+    expect(screen.queryByText(/credential/i, { selector: 'label' })).toBeNull()
+    expect(screen.getByText(/Test connection sends no key/)).toBeInTheDocument()
+    expect(screen.queryByText(/Test connection and chats use the stored key/)).toBeNull()
+    type('API key', 'k')
+    fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
+    expect(await screen.findByText(/Apply sends it to the instance when it creates the agent/)).toBeInTheDocument()
+    expect(client.setApiKey).toHaveBeenCalledWith({ revision: 'rev-1', api_key: 'k' })
+  })
+
+  it('uses kind-neutral copy for the empty URL, the dirty note and the host confirmation', async () => {
+    await open(fakeClient())
+    chooseUar()
+    expect(document.querySelector('[data-id="AgentSettingsUar"]').textContent).not.toMatch(/model/i)
+    type('Instance URL', 'https://uar.example')
+    expect(screen.getByLabelText(CONFIRM)).toBeInTheDocument()
+    expect(document.querySelector('[data-id="AgentSettingsUar"]').textContent).not.toMatch(/model/i)
+    confirmHost('uar.example')
+    expect(screen.getByText(/Apply sends the backend settings to the node/)).toBeInTheDocument()
+    expect(screen.queryByText(/backend, URL and model/)).toBeNull()
+  })
+
+  it('offers no standalone Save on a kind change: the key goes with Apply, and no request carries a kind', async () => {
+    const client = fakeClient({ server: SERVER(OPENAI) })
+    await open(client)
+    chooseUar()
+    expect(screen.queryByRole('button', { name: 'Save key' })).toBeNull()
+    expect(screen.getByText(/The key is sent with Apply, together with the URL and the host you confirm/)).toBeInTheDocument()
+    type('API key', 'secret-cred')
+    fireEvent.keyDown(screen.getByLabelText('API key'), { key: 'Enter' })
+    expect(client.setApiKey).not.toHaveBeenCalled()
+    expect(client.clearApiKey).not.toHaveBeenCalled()
+  })
+
+  it('offers no standalone Save on first run either, for either kind', async () => {
+    const client = fakeClient()
+    await open(client)
+    chooseUar()
+    expect(screen.queryByRole('button', { name: 'Save key' })).toBeNull()
+    chooseOpenAi()
+    expect(screen.queryByRole('button', { name: 'Save key' })).toBeNull()
+    expect(client.setApiKey).not.toHaveBeenCalled()
+  })
+
+  it('keeps the standalone Save for a first run under the Desktop bridge, and sends no kind', async () => {
+    const client = fakeClient({ status: { transport: 'desktop-bridge', managed_by_desktop: true } })
+    await open(client, { managed: true })
+    chooseUar()
+    type('API key', 'k2')
+    fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
+    await waitFor(() => expect(client.setApiKey).toHaveBeenCalledWith({ revision: 'rev-1', api_key: 'k2' }))
+  })
+
+  it('Apply on a kind change to the same host sends the egress confirmation', async () => {
+    const client = fakeClient({ server: SERVER({ kind: 'openai', base_url: 'https://llm.example/v1', model: 'm', api_key: { set: false } }) })
+    await open(client)
+    chooseUar()
+    type('Instance URL', 'https://llm.example')
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled()
+    confirmHost('llm.example')
+    type('API key', 'cred-2')
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    await waitFor(() => expect(client.set).toHaveBeenCalledTimes(1))
+    expect(client.set).toHaveBeenCalledWith({
+      revision: 'rev-1',
+      backend: { kind: 'uar', base_url: 'https://llm.example', api_key: 'cred-2' },
+      egress_confirmation: { host: 'llm.example' }
+    })
+  })
+
+  it('names the stored key and the MCP grant in the host confirmation', async () => {
+    await open(fakeClient())
+    chooseUar()
+    type('Instance URL', 'https://uar.example')
+    expect(screen.getByText(/The stored API key and this node's MCP grant go to this host. The grant lets the agent call this node's tools./)).toBeInTheDocument()
+    expect(screen.queryByText(/Node content that an agent reads goes to this host/)).toBeNull()
+  })
+
+  it('renders every UAR key state with its own copy and no missing translation key', async () => {
+    const guarded = SERVER(UAR)
+    await open(fakeClient({ server: guarded }))
+    fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Remove key' }))
+    expect(screen.getByText('Remove the stored key? The node then sends no key to the instance.')).toBeInTheDocument()
+    cleanup()
+    await open(fakeClient({ server: SERVER({ ...UAR, api_key: { set: true, source: 'environment' } }) }))
+    fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
+    expect(screen.getByText(/A key this node reads from the server is sent to this instance/)).toBeInTheDocument()
+    cleanup()
+    await open(fakeClient({ server: SERVER(UAR), setApiKey: jest.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') }) }))
+    fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
+    type('API key', 'k')
+    fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
+    expect(await screen.findByText(/The node sends the key the server holds to this instance/)).toBeInTheDocument()
+    cleanup()
+    await open(fakeClient())
+    chooseUar()
+    expect(missing).toEqual([])
+    for (const key of ['help', 'helpServer', 'saved.text', 'removeConfirm.text', 'serverManaged.text']) {
+      expect(key.split('.').reduce((o, k) => o?.[k], agentSettingsEn.uar.key)).toEqual(expect.any(String))
+    }
+    expect(agentSettingsEn.uar.confirm.help).toEqual(expect.any(String))
+    expect(agentSettingsEn.uar.confirmServerManaged.text).toEqual(expect.any(String))
+  })
+
+  it('applies with the typed host and the credential, sends no model, and confirms against the node', async () => {
+    const client = fakeClient()
+    await open(client)
+    chooseUar()
+    type('Instance URL', 'https://uar.example')
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled()
+    expect(screen.getByText('Type the host above to confirm the change.')).toBeInTheDocument()
+    type('API key', 'cred-1')
+    confirmHost('uar.example')
+    expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    await waitFor(() => expect(client.set).toHaveBeenCalledTimes(1))
+    expect(client.set).toHaveBeenCalledWith({
+      revision: 'rev-1',
+      backend: { kind: 'uar', base_url: 'https://uar.example', api_key: 'cred-1' },
+      egress_confirmation: { host: 'uar.example' }
+    })
+    expect(await screen.findByText(/New chats use the IPFS agent on Universal Agent Runtime at uar.example/)).toBeInTheDocument()
+    expect(screen.getByText('Applied')).toBeInTheDocument()
+    expect(missing).toEqual([])
+  })
+
+  it('shows a node already set for UAR as the form values, with the credential stored and no change pending', async () => {
+    await open(fakeClient({ server: SERVER(UAR) }))
+    expect(screen.getByLabelText('Instance URL')).toHaveValue('https://uar.example')
+    expect(screen.getByText('Written by this page. It is never shown again.')).toBeInTheDocument()
+    expect(screen.getByText('No changes')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled()
+    expect(screen.getByText(/Backend: Universal Agent Runtime at https:\/\/uar.example/)).toBeInTheDocument()
+  })
+
+  it('moving to another instance asks for its host on Apply but does not hold Test back: the probe carries no key', async () => {
+    const client = fakeClient({ server: SERVER(UAR), testConnection: jest.fn(async () => ({ ok: true, latency_ms: 4 })) })
+    await open(client)
+    type('Instance URL', 'https://other.example')
+    expect(screen.getByRole('button', { name: 'Test connection' })).not.toBeDisabled()
+    expect(screen.queryByText(/never carries the stored key/)).toBeNull()
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled()
+    confirmHost('other.example')
+    expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
+    expect(await screen.findByText(/other.example answered in 4 ms/)).toBeInTheDocument()
+  })
+
+  it('says so when the node moved the backend and withheld the credential', async () => {
+    const set = jest.fn(async () => ({ ...SERVER({ kind: 'uar', base_url: 'https://other.example', api_key: { set: false } }, 'rev-2'), key_not_carried: { reason: 'host_changed', cleared: true } }))
+    await open(fakeClient({ server: SERVER(UAR), set }))
+    type('Instance URL', 'https://other.example')
+    confirmHost('other.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    expect(await screen.findByText('Key not sent')).toBeInTheDocument()
+  })
+
+  it('shows the failure with the runtime lead and the node detail, and Retry stays available', async () => {
+    const set = jest.fn(async () => { throw new SettingsError('http', 'x', { status: 502, detail: 'the runtime refused the agent: bad credential' }) })
+    await open(fakeClient({ set }))
+    chooseUar()
+    type('Instance URL', 'https://uar.example')
+    confirmHost('uar.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    const failure = await screen.findByTestId('apply-failure')
+    expect(failure).toHaveTextContent('Nothing was changed. No backend is set yet.')
+    expect(failure).toHaveTextContent('The node could not set up the runtime.')
+    expect(failure).toHaveTextContent('bad credential')
+    expect(document.activeElement).toBe(failure)
+    expect(screen.getByRole('button', { name: 'Retry' })).not.toBeDisabled()
+  })
+
+  it('does not blame the runtime for a network failure', async () => {
+    const set = jest.fn(async () => { throw new SettingsError('network', 'x') })
+    await open(fakeClient({ set }))
+    chooseUar()
+    type('Instance URL', 'https://uar.example')
+    confirmHost('uar.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    const failure = await screen.findByTestId('apply-failure')
+    expect(failure).toHaveTextContent('Cannot reach the node.')
+    expect(failure).not.toHaveTextContent('could not set up the runtime')
+  })
+
+  it('recovers from a stale revision and retries on the current one', async () => {
+    const set = jest.fn()
+      .mockRejectedValueOnce(new SettingsError('revision_conflict', 'stale', { details: { current_revision: 'rev-7' } }))
+      .mockImplementationOnce(async (req) => SERVER({ kind: 'uar', ...req.backend, api_key: { set: false } }, 'rev-8'))
+    const client = fakeClient({ set })
+    client.get.mockResolvedValueOnce(SERVER(null)).mockResolvedValue(SERVER(null, 'rev-7'))
+    await open(client)
+    chooseUar()
+    type('Instance URL', 'https://uar.example')
+    confirmHost('uar.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    expect(await screen.findByText(/reloaded and your edits are kept/)).toBeInTheDocument()
+    expect(screen.getByLabelText('Instance URL')).toHaveValue('https://uar.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    await waitFor(() => expect(set).toHaveBeenCalledTimes(2))
+    expect(set.mock.calls[0][0].revision).toBe('rev-1')
+    expect(set.mock.calls[1][0].revision).toBe('rev-7')
+    expect(await screen.findByText('Applied')).toBeInTheDocument()
+  })
+
+  it('shows the key as set on the server when the node refuses keys through this page', async () => {
+    const setApiKey = jest.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') })
+    await open(fakeClient({ server: SERVER({ kind: 'uar', base_url: 'https://uar.example', api_key: { set: false } }), setApiKey }))
+    type('API key', 'cred')
+    fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
+    expect(await screen.findByText(/Set on the server/)).toBeInTheDocument()
   })
 })
 
@@ -817,6 +1097,28 @@ describe.each(['dark', 'light'])('accessibility in the %s theme', (theme) => {
     await screen.findByText(/llm.example answered/)
     expect(await violations(container)).toEqual([])
     fireEvent.click(screen.getByRole('radio', { name: /Universal Agent Runtime/ }))
+    expect(await violations(container)).toEqual([])
+  })
+
+  it('has no violations in the Universal Agent Runtime form: empty, tested, unreachable and failed', async () => {
+    const testConnection = jest.fn()
+      .mockResolvedValueOnce({ ok: true, latency_ms: 9 })
+      .mockResolvedValueOnce({ ok: false, detail: 'the instance did not answer' })
+    const set = jest.fn(async () => { throw new SettingsError('http', 'x', { detail: 'the runtime refused the agent' }) })
+    const { container } = await open(fakeClient({ testConnection, set }))
+    fireEvent.click(screen.getByRole('radio', { name: /Universal Agent Runtime/ }))
+    expect(await violations(container)).toEqual([])
+    type('Instance URL', 'https://uar.example')
+    confirmHost('uar.example')
+    expect(await violations(container)).toEqual([])
+    fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
+    await screen.findByText(/uar.example answered/)
+    expect(await violations(container)).toEqual([])
+    fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
+    await screen.findByText(/did not answer/)
+    expect(await violations(container)).toEqual([])
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    await screen.findByTestId('apply-failure')
     expect(await violations(container)).toEqual([])
   })
 

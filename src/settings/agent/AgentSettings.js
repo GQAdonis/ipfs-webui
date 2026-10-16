@@ -19,7 +19,6 @@ const AgentSettingsContext = createContext(/** @type {AgentSettingsValue | null}
  * @typedef {Object} Meta
  * @property {boolean} managedByDesktop
  * @property {import('./core/types.js').StatusResponse | undefined} status
- * @property {{ uarAvailable: boolean }} caps
  * @property {boolean} dirty
  * @property {ReturnType<typeof urlCheck>} urlCheck
  * @property {ReturnType<typeof testForDraft>} test
@@ -107,7 +106,7 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
       const url = check.value
       dispatch({ type: 'test-started', url })
       try {
-        const result = await client.testConnection({ base_url: url, kind: 'openai' })
+        const result = await client.testConnection({ base_url: url, kind: s.draft.kind === 'uar' ? 'uar' : 'openai' })
         dispatch({ type: 'test-finished', url, result })
       } catch (e) {
         const failure = failureOf(e)
@@ -120,9 +119,11 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
       const client = clientRef.current
       const s = stateRef.current
       if (!client || !s.server || s.keyDraft === '' || s.key.state === 'saving') return
+      // A key for a backend the node does not run goes with Apply, never on its own.
+      if (s.server.backend && s.server.backend.kind !== s.draft.kind) return
       dispatch({ type: 'key-started' })
       try {
-        const res = await client.setApiKey({ revision: s.server.revision, api_key: s.keyDraft, kind: 'openai' })
+        const res = await client.setApiKey({ revision: s.server.revision, api_key: s.keyDraft })
         dispatch({ type: 'key-saved', revision: res.revision, apiKey: res.api_key })
         void refreshStatus()
       } catch (e) {
@@ -137,9 +138,10 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
       const client = clientRef.current
       const s = stateRef.current
       if (!client || !s.server || s.key.state === 'saving') return
+      if (s.server.backend && s.server.backend.kind !== s.draft.kind) return
       dispatch({ type: 'key-started' })
       try {
-        const res = await client.clearApiKey({ revision: s.server.revision, kind: 'openai' })
+        const res = await client.clearApiKey({ revision: s.server.revision })
         dispatch({ type: 'key-cleared', revision: res.revision })
         void refreshStatus()
       } catch (e) {
@@ -179,11 +181,10 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
  * @param {import('./core/types.js').SettingsClient | undefined} props.client undefined means no connection is configured yet
  * @param {string} [props.connectionKey] which node the client talks to; a new token for the same node keeps the draft
  * @param {boolean} [props.managed] the Desktop bridge is the transport, known before the first status answer
- * @param {boolean} [props.uarAvailable] flipped by agent-backend-uar when the server serves kind uar
  * @param {() => number} [props.now] test seam
  * @param {React.ReactNode} props.children
  */
-export const AgentSettingsProvider = ({ client, connectionKey, managed = false, uarAvailable = false, now = Date.now, children }) => {
+export const AgentSettingsProvider = ({ client, connectionKey, managed = false, now = Date.now, children }) => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
   const [status, setStatus] = useState(/** @type {import('./core/types.js').StatusResponse | undefined} */ (undefined))
   const stateRef = useRef(state)
@@ -215,20 +216,18 @@ export const AgentSettingsProvider = ({ client, connectionKey, managed = false, 
   }, [client, connectionKey, actions])
 
   const meta = useMemo(() => {
-    const caps = { uarAvailable }
     return /** @type {Meta} */ ({
       managedByDesktop: status ? status.managed_by_desktop === true : managed,
       status,
-      caps,
       dirty: isDirty(state),
       urlCheck: urlCheck(state),
       test: testForDraft(state),
       confirmation: confirmation(state),
       keyStored: keyStored(state),
       keyServerManaged: keyServerManaged(state),
-      blockers: applyBlockers(state, caps)
+      blockers: applyBlockers(state)
     })
-  }, [state, status, uarAvailable, managed])
+  }, [state, status, managed])
 
   const value = useMemo(() => ({ state, actions, meta }), [state, actions, meta])
   return <AgentSettingsContext.Provider value={value}>{children}</AgentSettingsContext.Provider>

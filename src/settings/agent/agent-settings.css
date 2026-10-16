@@ -127,16 +127,6 @@
   margin: 0;
 }
 
-.as-missing {
-  margin: var(--space-2) 0 var(--space-3);
-  padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-4) + var(--space-3));
-  border-radius: var(--radius-md);
-  background-color: var(--raised);
-  font-size: var(--text-small);
-  line-height: 1.55;
-  max-width: 66ch;
-}
-
 .as-agent-block {
   margin: 0 0 var(--space-3);
 }
@@ -181,14 +171,6 @@
 
 .as-confirm-remove > .pm-help {
   margin: 0 0 var(--space-2);
-}
-
-.as-segment-note {
-  font-weight: 400;
-}
-
-.as-missing-lead {
-  margin: var(--space-2) 0 0;
 }
 
 .as-focus-target:focus {
