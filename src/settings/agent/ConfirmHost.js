@@ -50,7 +50,7 @@ export const ConfirmHost = () => {
   const keyHelp = moves && meta.keyStored
     ? t(meta.keyServerManaged ? 'confirm.helpKeyServer' : 'confirm.helpKey')
     : ''
-  const help = [t('confirm.help'), keyHelp].filter(Boolean).join(' ')
+  const help = [t(state.draft.kind === 'uar' ? 'uar.confirm.help' : 'confirm.help'), keyHelp].filter(Boolean).join(' ')
   return (
     <div className='as-confirm' data-id='AgentSettingsConfirm'>
       <Field
@@ -60,7 +60,7 @@ export const ConfirmHost = () => {
         <HostInput host={meta.confirmation.host} value={state.confirmText} matches={meta.confirmation.matches} onChange={actions.setConfirmText} />
       </Field>
       {meta.keyServerManaged && moves
-        ? <StatusLine tone='info' word={t('confirm.serverManaged.word')}>{t('confirm.serverManaged.text')}</StatusLine>
+        ? <StatusLine tone='info' word={t('confirm.serverManaged.word')}>{t(state.draft.kind === 'uar' ? 'uar.confirmServerManaged.text' : 'confirm.serverManaged.text')}</StatusLine>
         : null}
     </div>
   )

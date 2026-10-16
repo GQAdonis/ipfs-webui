@@ -53,8 +53,7 @@
     "title": "Backend",
     "choose": "Backend",
     "uar": "Universal Agent Runtime",
-    "openai": "OpenAI-compatible endpoint",
-    "uarSoon": "Not available yet"
+    "openai": "OpenAI-compatible endpoint"
   },
   "firstRun": {
     "label": "Setup steps",
@@ -62,8 +61,8 @@
       "title": "Choose a backend."
     },
     "step2": {
-      "title": "Pick a model.",
-      "text": "Enter the URL and type its host to confirm it, test the connection, then set the model the agent will use."
+      "title": "Connect it.",
+      "text": "Enter the URL and type its host to confirm it, test the connection, then apply. An OpenAI-compatible endpoint also needs a model."
     },
     "step3": {
       "title": "Turn on agent chat.",
@@ -75,7 +74,7 @@
     "help": "https, or http on this machine. Example: http://127.0.0.1:4000/v1",
     "placeholder": "https://host/v1",
     "error": {
-      "empty": "Enter the base URL of the endpoint.",
+      "empty": "Enter the URL of the backend.",
       "invalid": "This is not a valid URL.",
       "scheme": "Use https, or http on localhost, 127.0.0.1 or [::1].",
       "extras": "Remove the username, password, query and fragment."
@@ -117,7 +116,9 @@
       "label": "Confirm removing the key",
       "text": "Remove the stored key? Tests and chats then send no key.",
       "yes": "Remove the key"
-    }
+    },
+    "withApply": "The key is sent with Apply, together with the URL and the host you confirm. It is not saved before then.",
+    "helpWithApply": "Optional. Write-only: the node keeps it in a file only it can read and never shows it again. The key goes with Apply, so a test before Apply may answer that a key is needed. The node sends it only to the backend host it is applied for."
   },
   "test": {
     "button": "Test connection",
@@ -155,35 +156,45 @@
     "noMatch": "No match. Press Enter to use what you typed."
   },
   "uar": {
-    "unavailable": {
-      "word": "Not available",
-      "text": "Universal Agent Runtime cannot be configured from this build. Nothing on this form is tested or applied."
-    },
-    "missing": {
-      "label": "What is missing",
-      "release": "A published Universal Agent Runtime release to connect to. Until one ships, no endpoint can be verified.",
-      "server": "Support for Universal Agent Runtime in this node. This build of ipfs mcp refuses it."
-    },
-    "configured": {
-      "word": "Configured",
-      "text": "This node is already set for Universal Agent Runtime at {url}. This page cannot change it yet."
-    },
     "url": {
       "label": "Instance URL",
+      "help": "The address of your Universal Agent Runtime instance. https, or http on this machine. This node has no default.",
       "placeholder": "https://host"
     },
-    "credential": {
-      "label": "Access credential"
+    "test": {
+      "note": "The test asks the node to reach the instance.",
+      "noKey": "The test reads the instance's public agent card and sends no API key.",
+      "failed": {
+        "text": "The node could not use the Universal Agent Runtime instance at {host}."
+      }
     },
-    "disabledHelp": "Unavailable until Universal Agent Runtime is supported.",
     "agent": {
       "label": "IPFS agent",
-      "word": "Not created",
-      "text": "Creating the IPFS agent needs Universal Agent Runtime. Nothing was created."
+      "text": "The node keeps the API key in a file only it can read and sends it only to this instance, to create and run the agent."
+    },
+    "applyFailed": "The node could not set up the runtime. Check the instance URL and the API key, then test the connection.",
+    "key": {
+      "help": "Write-only: the node keeps it in a file only it can read and never shows it again. The node sends it only to this instance, when it creates and runs the agent. Test connection sends no key.",
+      "helpServer": "Write-only: the node keeps it in a file only it can read and never shows it again. A key this node reads from the server is sent to this instance when the agent is created and run. Test connection sends no key.",
+      "saved": {
+        "text": "The node holds it now and sends it to this instance on the next run."
+      },
+      "removeConfirm": {
+        "text": "Remove the stored key? The node then sends no key to the instance."
+      },
+      "serverManaged": {
+        "text": "Set on the server (Kubernetes Secret). This node does not accept keys through the settings page. The node sends the key the server holds to this instance."
+      }
+    },
+    "confirmServerManaged": {
+      "text": "A key this node reads from the server (an environment variable or a file) follows a host change: after you apply, the node sends it to the new instance. Check the host before you apply. To use a different key there, change it on the server."
+    },
+    "confirm": {
+      "help": "Node content an agent reads, any API key you enter with this change, and this node's MCP grant (when one is configured) go to this host. Apply stays off until you type the host exactly."
     }
   },
   "confirm": {
-    "label": "Type the model host to confirm:",
+    "label": "Type the backend host to confirm:",
     "help": "Node content that an agent reads goes to this host. Apply stays off until you type it exactly.",
     "matches": {
       "word": "Matches",
@@ -213,7 +224,8 @@
       "text": "At {time}. New chats use {model} at {host}. A chat in progress finishes on the previous backend.",
       "textFirst": "At {time}. New chats use {model} at {host}.",
       "chatOff": "Agent chat is off.",
-      "goToSwitch": "Go to the chat switch"
+      "goToSwitch": "Go to the chat switch",
+      "textUar": "At {time}. New chats use the IPFS agent on Universal Agent Runtime at {host}. A chat in progress finishes on the previous backend."
     },
     "failed": {
       "word": "Not applied",
@@ -226,18 +238,17 @@
     },
     "dirty": {
       "word": "Unsaved changes",
-      "text": "Apply sends the backend, URL and model to the node. A chat in progress finishes on the backend it started with."
+      "text": "Apply sends the backend settings to the node. A chat in progress finishes on the backend it started with."
     },
     "blocked": {
       "nothing-chosen": "Choose a backend first.",
-      "unavailable": "This backend is not available in this build.",
-      "url": "Enter a valid base URL.",
+      "url": "Enter a valid URL.",
       "model": "Pick or type a model.",
       "confirm": "Type the host above to confirm the change."
     },
     "firstRun": {
       "word": "Nothing to apply",
-      "text": "Choose a backend and a model, then apply. The chat answers only after both are set."
+      "text": "Choose a backend and fill in its settings, then apply. The chat answers only after that."
     },
     "clean": {
       "word": "No changes",

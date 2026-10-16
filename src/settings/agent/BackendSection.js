@@ -62,7 +62,7 @@ export const BackendSection = () => {
               onChange={(kind) => actions.setKind(/** @type {'openai' | 'uar'} */ (kind))}
               options={[
                 { value: 'openai', label: t('backend.openai') },
-                { value: 'uar', label: meta.caps.uarAvailable ? t('backend.uar') : <>{t('backend.uar')} <span className='as-segment-note'>{t('backend.uarSoon')}</span></> }
+                { value: 'uar', label: t('backend.uar') }
               ]}
             />
           </div>

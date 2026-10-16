@@ -6,6 +6,10 @@ import { useAgentSettings } from './AgentSettings.js'
 import { failureText } from './failure-text.js'
 import { focusChatSwitch, useChatOn } from './use-chat-on.js'
 
+// Failures that say the node could not use the runtime it was pointed at, as opposed to a
+// stale revision, a refused token or a missing host confirmation, which have their own copy.
+const RUNTIME_FAILURES = new Set(['http', 'backend_not_configured'])
+
 /** @param {string | undefined} iso */
 const timeOf = (iso) => (iso ? new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '')
 
@@ -35,7 +39,7 @@ export const ApplyStatus = () => {
           <StatusLine tone='err' word={t('apply.failed.word')}>
             {apply.failure?.kind === 'revision_conflict'
               ? t('apply.conflict.text')
-              : <>{t(server?.backend ? 'apply.failed.text' : 'apply.failed.textFirst')} {failureText(t, apply.failure, { host: meta.confirmation.host })}</>}
+              : <>{t(server?.backend ? 'apply.failed.text' : 'apply.failed.textFirst')} {draft.kind === 'uar' && RUNTIME_FAILURES.has(apply.failure?.kind ?? '') ? `${t('uar.applyFailed')} ` : ''}{failureText(t, apply.failure, { host: meta.confirmation.host })}</>}
           </StatusLine>
         </div>
       )
@@ -45,7 +49,7 @@ export const ApplyStatus = () => {
       return (
         <>
         <StatusLine tone='ok' word={t('apply.applied.word')}>
-          {t(apply.applied.first ? 'apply.applied.textFirst' : 'apply.applied.text', { time: timeOf(apply.at), model: apply.applied.model, host: apply.applied.host })}
+          {t(apply.applied.kind === 'uar' ? 'apply.applied.textUar' : apply.applied.first ? 'apply.applied.textFirst' : 'apply.applied.text', { time: timeOf(apply.at), model: apply.applied.model, host: apply.applied.host })}
           {chatOn
             ? null
             : <> {t('apply.applied.chatOff')} <Button buttonType='button' type='link' minWidth={0} onClick={focusChatSwitch}>{t('apply.applied.goToSwitch')}</Button></>}
@@ -59,7 +63,6 @@ export const ApplyStatus = () => {
     if (state.elsewhere) return <StatusLine tone='warn' word={t('apply.elsewhere.word')}>{t('apply.elsewhere.text')}</StatusLine>
     if (meta.dirty) {
       const reason = meta.blockers.find((b) => b !== 'busy' && b !== 'clean')
-      if (reason === 'unavailable') return <StatusLine tone='warn' word={t('uar.unavailable.word')}>{t('apply.blocked.unavailable')}</StatusLine>
       return (
         <StatusLine tone='info' word={t('apply.dirty.word')}>
           {reason ? t(`apply.blocked.${reason}`) : t('apply.dirty.text')}

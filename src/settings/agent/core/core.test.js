@@ -53,7 +53,7 @@ describe('form reducer', () => {
     expect(s.phase).toBe('ready')
     expect(s.draft).toEqual({ kind: '', baseUrl: '', model: '' })
     expect(isDirty(s)).toBe(false)
-    expect(applyBlockers(s, { uarAvailable: false })).toContain('nothing-chosen')
+    expect(applyBlockers(s)).toContain('nothing-chosen')
   })
 
   it('builds a first-run request with the kind, URL and model, and the typed egress host', () => {
@@ -62,9 +62,9 @@ describe('form reducer', () => {
     s = reducer(s, { type: 'base-url', value: 'https://llm.example/v1' })
     s = reducer(s, { type: 'model', value: 'm1' })
     expect(confirmation(s)).toMatchObject({ required: true, host: 'llm.example', matches: false, sendsEgressConfirmation: true })
-    expect(applyBlockers(s, { uarAvailable: false })).toContain('confirm')
+    expect(applyBlockers(s)).toContain('confirm')
     s = reducer(s, { type: 'confirm-text', value: 'LLM.example' })
-    expect(applyBlockers(s, { uarAvailable: false })).toEqual([])
+    expect(applyBlockers(s)).toEqual([])
     expect(buildSetRequest(s)).toEqual({
       revision: 'rev-1',
       backend: { kind: 'openai', base_url: 'https://llm.example/v1', model: 'm1' },
@@ -89,11 +89,42 @@ describe('form reducer', () => {
     expect(confirmation(s).matches).toBe(false)
   })
 
-  it('refuses to apply the uar kind while it is unavailable', () => {
-    let s = loaded(SERVER(null))
+  it('builds a uar request with no model, and the typed host as egress confirmation', () => {
+    let s = loaded(SERVER(OPENAI))
     s = reducer(s, { type: 'kind', kind: 'uar' })
-    expect(applyBlockers(s, { uarAvailable: false })).toContain('unavailable')
-    expect(buildSetRequest(s)).toBeUndefined()
+    // A URL typed for the OpenAI-compatible backend is not carried to the runtime.
+    expect(s.draft).toEqual({ kind: 'uar', baseUrl: '', model: '' })
+    expect(applyBlockers(s)).toContain('url')
+    expect(applyBlockers(s)).not.toContain('model')
+    s = reducer(s, { type: 'base-url', value: 'https://uar.example' })
+    expect(applyBlockers(s)).toContain('confirm')
+    s = reducer(s, { type: 'confirm-text', value: 'uar.example' })
+    s = reducer(s, { type: 'key-draft', value: 'cred' })
+    expect(applyBlockers(s)).toEqual([])
+    expect(buildSetRequest(s)).toEqual({
+      revision: 'rev-1',
+      backend: { kind: 'uar', base_url: 'https://uar.example', api_key: 'cred' },
+      egress_confirmation: { host: 'uar.example' }
+    })
+  })
+
+  it('ignores the key and URL the node holds for the other kind', () => {
+    let s = loaded(SERVER(OPENAI))
+    expect(keyStored(s)).toBe(true)
+    s = reducer(s, { type: 'kind', kind: 'uar' })
+    expect(keyStored(s)).toBe(false)
+    s = reducer(s, { type: 'kind', kind: 'openai' })
+    expect(s.draft).toEqual(draftFromServer(s.server))
+    expect(keyStored(s)).toBe(true)
+  })
+
+  it('drops a finished test when the kind changes', () => {
+    let s = loaded(SERVER(null))
+    s = reducer(s, { type: 'kind', kind: 'openai' })
+    s = reducer(s, { type: 'base-url', value: 'https://x.example' })
+    s = reducer(s, { type: 'test-finished', url: 'https://x.example', result: { ok: true } })
+    s = reducer(s, { type: 'kind', kind: 'uar' })
+    expect(s.test.state).toBe('idle')
   })
 
   it('keeps edits when the server changes under them and flags it', () => {

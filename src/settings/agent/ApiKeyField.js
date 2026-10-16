@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import Button from '../../components/button/button.tsx'
 import { Field, FieldInput, StatusLine } from '../../promethity/components/index.js'
 import { useAgentSettings } from './AgentSettings.js'
+import { keySavesAlone, serverBackendOfDraft } from './core/form.js'
 import { failureText } from './failure-text.js'
 
 /**
@@ -34,7 +35,11 @@ export const ApiKeyField = () => {
     const remove = storedRef.current?.querySelector('[data-remove]')
     if (remove instanceof HTMLElement) remove.focus()
   }, [refocusRemove, confirmingRemove])
-  const stored = state.server?.backend?.api_key
+  // Same field, same word for the secret in both flows. Only the sentences that describe what
+  // the secret is used for differ: the Universal Agent Runtime test sends no key.
+  const ns = state.draft.kind === 'uar' ? 'uar.key' : 'key'
+  const alone = keySavesAlone(state, meta.managedByDesktop)
+  const stored = serverBackendOfDraft(state)?.api_key
   const hasKey = stored?.set === true || (state.key.stagedThisSession && state.key.state !== 'cleared')
   const refused = state.key.failure?.kind === 'secrets_not_accepted'
   const saving = state.key.state === 'saving'
@@ -50,7 +55,7 @@ export const ApiKeyField = () => {
   if (refused) {
     return (
       <div className='as-key' data-id='AgentSettingsKeyServerManaged'>
-        <StatusLine tone='info' word={t('key.serverManaged.word')}>{t('key.serverManaged.text')}</StatusLine>
+        <StatusLine tone='info' word={t('key.serverManaged.word')}>{t(`${state.draft.kind === 'uar' ? 'uar.key' : 'key'}.serverManaged.text`)}</StatusLine>
       </div>
     )
   }
@@ -61,11 +66,14 @@ export const ApiKeyField = () => {
   }
 
   const showInput = !hasKey || replacing
+  const baseHelp = ns === 'key' && !alone && !meta.keyServerManaged ? t('key.helpWithApply') : t(`${ns}.${meta.keyServerManaged ? 'helpServer' : 'help'}`)
+  // The line that says the key goes with Apply is part of the field's help, so the input is described by it.
+  const helpText = alone ? baseHelp : `${baseHelp} ${t('key.withApply')}`
   return (
     <div className='as-key' data-id='AgentSettingsKey'>
       {showInput
         ? (
-          <Field label={t('key.label')} help={t(meta.keyServerManaged ? 'key.helpServer' : 'key.help')}>
+          <Field label={t('key.label')} help={helpText}>
             <div className='as-inline'>
               <FieldInput
                 type='password'
@@ -74,11 +82,15 @@ export const ApiKeyField = () => {
                 spellCheck={false}
                 value={state.keyDraft}
                 onChange={(e) => actions.setKeyDraft(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') save(e) }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { if (alone) save(e); else e.preventDefault() } }}
               />
-              <Button buttonType='button' bg='bg-charcoal' minWidth={120} disabled={state.keyDraft === '' || saving} aria-busy={saving} onClick={save}>
-                {saving ? t('key.saving') : t('key.save')}
-              </Button>
+              {alone
+                ? (
+                  <Button buttonType='button' bg='bg-charcoal' minWidth={120} disabled={state.keyDraft === '' || saving} aria-busy={saving} onClick={save}>
+                    {saving ? t('key.saving') : t('key.save')}
+                  </Button>
+                  )
+                : null}
               {replacing ? <Button buttonType='button' type='link' minWidth={80} onClick={() => { actions.setKeyDraft(''); setReplacing(false) }}>{t('key.cancel')}</Button> : null}
             </div>
           </Field>
@@ -96,7 +108,7 @@ export const ApiKeyField = () => {
             {confirmingRemove
               ? (
                 <div ref={confirmRef} className='as-confirm-remove' role='group' aria-label={t('key.removeConfirm.label')}>
-                  <p className='pm-help'>{t('key.removeConfirm.text')}</p>
+                  <p className='pm-help'>{t(`${ns}.removeConfirm.text`)}</p>
                   <div className='as-inline'>
                     <Button buttonType='button' bg='bg-charcoal' minWidth={120} disabled={saving} onClick={() => { setConfirmingRemove(false); void actions.clearKey() }}>{t('key.removeConfirm.yes')}</Button>
                     <Button buttonType='button' type='link' minWidth={80} data-cancel='' onClick={() => { setRefocusRemove(true); setConfirmingRemove(false) }}>{t('key.cancel')}</Button>
@@ -106,7 +118,7 @@ export const ApiKeyField = () => {
               : null}
           </div>
           )}
-      {state.key.state === 'saved' ? <StatusLine tone='ok' word={t('key.saved.word')}>{t('key.saved.text')}</StatusLine> : null}
+      {state.key.state === 'saved' ? <StatusLine tone='ok' word={t('key.saved.word')}>{t(`${ns}.saved.text`)}</StatusLine> : null}
       {state.key.state === 'cleared' ? <StatusLine tone='ok' word={t('key.cleared.word')}>{t('key.cleared.text')}</StatusLine> : null}
       {state.key.state === 'failed' ? <StatusLine tone='err' word={t('key.failed.word')}>{failureText(t, state.key.failure)}</StatusLine> : null}
     </div>

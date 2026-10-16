@@ -93,7 +93,7 @@ export function reducer (state, action) {
     case 'phase':
       return { ...state, phase: action.phase, failure: action.failure }
     case 'kind':
-      return { ...state, draft: { ...state.draft, kind: action.kind }, confirmText: '', apply: settle(state.apply) }
+      return { ...state, draft: draftForKind(state, action.kind), keyDraft: '', key: state.draft.kind !== '' && action.kind !== state.draft.kind ? INITIAL_STATE.key : state.key, test: INITIAL_STATE.test, confirmText: '', apply: settle(state.apply) }
     case 'base-url':
       return { ...state, draft: { ...state.draft, baseUrl: action.value }, confirmText: '', apply: settle(state.apply) }
     case 'model':
@@ -116,9 +116,9 @@ export function reducer (state, action) {
     case 'key-started':
       return { ...state, key: { ...state.key, state: 'saving', failure: undefined } }
     case 'key-saved':
-      return { ...state, keyDraft: '', key: { state: 'saved', stagedThisSession: true }, server: bumpRevision(state.server, action.revision, action.apiKey) }
+      return { ...state, keyDraft: '', key: { state: 'saved', stagedThisSession: true }, server: bumpRevision(state.server, state.draft.kind, action.revision, action.apiKey) }
     case 'key-cleared':
-      return { ...state, key: { state: 'cleared', stagedThisSession: false }, server: bumpRevision(state.server, action.revision, { set: false }) }
+      return { ...state, key: { state: 'cleared', stagedThisSession: false }, server: bumpRevision(state.server, state.draft.kind, action.revision, { set: false }) }
     case 'key-failed':
       return { ...state, key: { ...state.key, state: 'failed', failure: action.failure } }
     case 'apply-started':
@@ -140,6 +140,11 @@ export function reducer (state, action) {
       }
     }
     case 'apply-failed':
+      // A node that refuses keys through the settings page says so on Apply too: the key field
+      // then shows the server-managed statement and the next Apply sends no key.
+      if (action.failure.kind === 'secrets_not_accepted') {
+        return { ...state, key: { ...state.key, state: 'failed', failure: action.failure }, apply: { state: 'failed', at: action.at, failure: action.failure } }
+      }
       // A stale revision means the node's settings moved: the page reloads them next and says so.
       return { ...state, elsewhere: action.failure.kind === 'revision_conflict' ? true : state.elsewhere, apply: { state: 'failed', at: action.at, failure: action.failure } }
     case 'revert':
@@ -152,6 +157,22 @@ export function reducer (state, action) {
 }
 
 /**
+ * The draft after the backend kind changes. Going back to the kind the node already runs
+ * restores the node's values. Going to a kind the node does not run starts that kind empty:
+ * a URL or a model typed for one backend is not carried to another, so an OpenAI-compatible
+ * URL never sits in the Universal Agent Runtime field.
+ *
+ * @param {FormState} state
+ * @param {'' | 'openai' | 'uar'} kind
+ * @returns {Draft}
+ */
+function draftForKind (state, kind) {
+  if (kind === '' || kind === state.draft.kind) return { ...state.draft, kind }
+  if (kind === state.server?.backend?.kind) return draftFromServer(state.server)
+  return { kind, baseUrl: '', model: '' }
+}
+
+/**
  * A finished apply message is history once the person edits again.
  *
  * @param {FormState['apply']} apply
@@ -161,21 +182,32 @@ function settle (apply) {
 }
 
 /**
+ * The key status lands on the node's backend only when that backend is the kind the key was for.
+ *
  * @param {import('./types.js').GetResponse | null} server
+ * @param {'' | 'openai' | 'uar'} kind
  * @param {string} revision
  * @param {import('./types.js').ApiKeyStatus} apiKey
  * @returns {import('./types.js').GetResponse | null}
  */
-function bumpRevision (server, revision, apiKey) {
+function bumpRevision (server, kind, revision, apiKey) {
   if (!server) return server
   return {
     ...server,
     revision,
-    backend: server.backend ? { ...server.backend, api_key: apiKey } : server.backend
+    backend: server.backend && server.backend.kind === (kind || server.backend.kind) ? { ...server.backend, api_key: apiKey } : server.backend
   }
 }
 
 // ---- derivations ----
+
+/**
+ * What the node reports for the backend kind the form is editing. A key or a URL the node holds
+ * for the other kind says nothing about this one.
+ *
+ * @param {FormState} state
+ */
+export const serverBackendOfDraft = (state) => (state.server?.backend?.kind === state.draft.kind ? state.server.backend : undefined)
 
 /** @param {FormState} state */
 export const isDirty = (state) => !sameDraft(state.draft, draftFromServer(state.server))
@@ -200,7 +232,7 @@ export const testForDraft = (state) => (state.test.url === state.draft.baseUrl.t
  *
  * @param {FormState} state
  */
-export const keyStored = (state) => state.server?.backend?.api_key?.set === true || (state.key.stagedThisSession && state.key.state !== 'cleared')
+export const keyStored = (state) => serverBackendOfDraft(state)?.api_key?.set === true || (state.key.stagedThisSession && state.key.state !== 'cleared')
 
 /**
  * Whether the key belongs to the server rather than to this page: the node refused keys
@@ -209,7 +241,7 @@ export const keyStored = (state) => state.server?.backend?.api_key?.set === true
  * @param {FormState} state
  */
 export const keyServerManaged = (state) => {
-  const k = state.server?.backend?.api_key
+  const k = serverBackendOfDraft(state)?.api_key
   return state.key.failure?.kind === 'secrets_not_accepted' || (k?.set === true && k.source !== undefined && k.source !== 'settings_api')
 }
 
@@ -217,6 +249,23 @@ export const keyServerManaged = (state) => {
 export const hostChanged = (state) => {
   const next = urlCheck(state).ok ? hostOf(state.draft.baseUrl.trim()) : ''
   return next !== '' && next !== hostOf(state.server?.backend?.base_url ?? '')
+}
+
+/**
+ * Whether the key field may save on its own. A standalone save acts on the backend the node
+ * runs and never names a kind, so it is offered only for that backend. For any other kind the
+ * key goes with Apply, next to the URL and the typed host. The one exception is a first run
+ * under Desktop, which holds the key until the first backend write and ignores any kind.
+ * A drafted host move also sends the key with Apply: a standalone save would store it for the
+ * host the node runs now.
+ *
+ * @param {FormState} state
+ * @param {boolean} desktop the transport is the Desktop bridge
+ */
+export const keySavesAlone = (state, desktop) => {
+  const nodeKind = state.server?.backend?.kind
+  if (state.server?.backend && hostChanged(state)) return false
+  return nodeKind === state.draft.kind || (nodeKind === undefined && desktop)
 }
 
 /** @param {FormState} state */
@@ -230,41 +279,41 @@ export const kindChanged = (state) => state.draft.kind !== '' && state.draft.kin
  * @param {FormState} state
  */
 export function confirmation (state) {
-  const required = state.draft.kind === 'openai' && isDirty(state) && (hostChanged(state) || kindChanged(state))
+  const required = state.draft.kind !== '' && isDirty(state) && (hostChanged(state) || kindChanged(state))
   const host = urlCheck(state).ok ? hostOf(state.draft.baseUrl.trim()) : ''
   const matches = required && host !== '' && state.confirmText.trim().toLowerCase() === host
-  // Test connection can send the stored key to the candidate host. With a key stored it is
+  // Test connection can send the stored key to the candidate host (OpenAI-compatible only: the
+  // Universal Agent Runtime probe reads the public agent card and carries no credential). With a key stored it is
   // held back for any host other than the current backend's until the host has been typed
   // back. With no key stored a test has nothing to send, so it is never gated. Apply still
   // asks for the host and sends the acknowledgement whenever the host changed.
-  const gatesTest = required && hostChanged(state) && keyStored(state)
+  const gatesTest = state.draft.kind === 'openai' && required && hostChanged(state) && keyStored(state)
   return {
     required,
     host,
     matches,
-    sendsEgressConfirmation: required && hostChanged(state),
+    // A kind change is a move too, even to the same host: the node asks for the host typed back.
+    sendsEgressConfirmation: required && (hostChanged(state) || kindChanged(state)),
     gatesTest,
     testAllowed: !gatesTest || matches
   }
 }
 
 /**
- * Every reason Apply is off, so the form can say which. Only an OpenAI-compatible
- * backend can be applied by this build; UAR is shown as unavailable.
+ * Every reason Apply is off, so the form can say which. Both kinds need a valid URL; only
+ * the OpenAI-compatible kind needs a model (the Universal Agent Runtime agent brings its own).
  *
  * @param {FormState} state
- * @param {{ uarAvailable: boolean }} caps
- * @returns {('nothing-chosen' | 'unavailable' | 'url' | 'model' | 'confirm' | 'clean' | 'busy')[]}
+ * @returns {('nothing-chosen' | 'url' | 'model' | 'confirm' | 'clean' | 'busy')[]}
  */
-export function applyBlockers (state, caps) {
-  /** @type {('nothing-chosen' | 'unavailable' | 'url' | 'model' | 'confirm' | 'clean' | 'busy')[]} */
+export function applyBlockers (state) {
+  /** @type {('nothing-chosen' | 'url' | 'model' | 'confirm' | 'clean' | 'busy')[]} */
   const out = []
   if (state.apply.state === 'applying') out.push('busy')
   if (state.draft.kind === '') out.push('nothing-chosen')
-  else if (state.draft.kind === 'uar' && !caps.uarAvailable) out.push('unavailable')
-  else if (state.draft.kind === 'openai') {
+  else {
     if (!urlCheck(state).ok) out.push('url')
-    if (state.draft.model.trim() === '') out.push('model')
+    if (state.draft.kind === 'openai' && state.draft.model.trim() === '') out.push('model')
   }
   if (!isDirty(state) && state.draft.kind !== '') out.push('clean')
   const c = confirmation(state)
@@ -280,13 +329,13 @@ export function applyBlockers (state, caps) {
  * @returns {import('./types.js').SetRequest | undefined}
  */
 export function buildSetRequest (state) {
-  if (!state.server || state.draft.kind !== 'openai') return undefined
+  if (!state.server || state.draft.kind === '') return undefined
   const was = draftFromServer(state.server)
   /** @type {import('./types.js').BackendSet} */
   const backend = {}
   if (state.draft.kind !== was.kind) backend.kind = state.draft.kind
   if (state.draft.baseUrl.trim() !== was.baseUrl) backend.base_url = state.draft.baseUrl.trim()
-  if (state.draft.model.trim() !== was.model) backend.model = state.draft.model.trim()
+  if (state.draft.kind === 'openai' && state.draft.model.trim() !== was.model) backend.model = state.draft.model.trim()
   if (Object.keys(backend).length === 0) return undefined
   const c = confirmation(state)
   // ADR-0012: a move without api_key in the same write leaves the new host with no key. A key
