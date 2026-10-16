@@ -117,7 +117,8 @@
       "text": "Remove the stored key? Tests and chats then send no key.",
       "yes": "Remove the key"
     },
-    "withApply": "The key is sent with Apply, together with the URL and the host you confirm. It is not saved before then."
+    "withApply": "The key is sent with Apply, together with the URL and the host you confirm. It is not saved before then.",
+    "helpWithApply": "Optional. Write-only: the node keeps it in a file only it can read and never shows it again. The key goes with Apply, so a test before Apply may answer that a key is needed. The node sends it only to the backend host it is applied for."
   },
   "test": {
     "button": "Test connection",
@@ -162,21 +163,21 @@
     },
     "test": {
       "note": "The test asks the node to reach the instance.",
-      "noKey": "The test reads the instance's public agent card and sends no credential.",
+      "noKey": "The test reads the instance's public agent card and sends no API key.",
       "failed": {
         "text": "The node could not use the Universal Agent Runtime instance at {host}."
       }
     },
     "agent": {
       "label": "IPFS agent",
-      "text": "The node keeps the credential in a file only it can read and sends it only to this instance, to create and run the agent."
+      "text": "The node keeps the API key in a file only it can read and sends it only to this instance, to create and run the agent."
     },
-    "applyFailed": "The node could not set up the runtime. Check the instance URL and the credential, then test the connection.",
+    "applyFailed": "The node could not set up the runtime. Check the instance URL and the API key, then test the connection.",
     "key": {
-      "help": "Write-only: the node keeps it in a private file in its settings directory and never shows it again. The node sends it only to this instance, when it creates and runs the agent. Test connection sends no key.",
-      "helpServer": "Write-only: the node keeps it in a private file in its settings directory and never shows it again. A key this node reads from the server is sent to this instance when the agent is created and run. Test connection sends no key.",
+      "help": "Write-only: the node keeps it in a file only it can read and never shows it again. The node sends it only to this instance, when it creates and runs the agent. Test connection sends no key.",
+      "helpServer": "Write-only: the node keeps it in a file only it can read and never shows it again. A key this node reads from the server is sent to this instance when the agent is created and run. Test connection sends no key.",
       "saved": {
-        "text": "The node holds it now. Apply sends it to the instance when it creates the agent."
+        "text": "The node holds it now and sends it to this instance on the next run."
       },
       "removeConfirm": {
         "text": "Remove the stored key? The node then sends no key to the instance."
@@ -189,7 +190,7 @@
       "text": "A key this node reads from the server (an environment variable or a file) follows a host change: after you apply, the node sends it to the new instance. Check the host before you apply. To use a different key there, change it on the server."
     },
     "confirm": {
-      "help": "The stored API key and this node's MCP grant go to this host. The grant lets the agent call this node's tools. Apply stays off until you type the host exactly."
+      "help": "Node content an agent reads, any API key you enter with this change, and this node's MCP grant (when one is configured) go to this host. Apply stays off until you type the host exactly."
     }
   },
   "confirm": {

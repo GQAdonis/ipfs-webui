@@ -4,6 +4,7 @@ import { Combobox, Field, FieldInput, StatusLine } from '../../promethity/compon
 import { ApiKeyField } from './ApiKeyField.js'
 import { ConfirmHost } from './ConfirmHost.js'
 import { useAgentSettings } from './AgentSettings.js'
+import { keySavesAlone } from './core/form.js'
 import { TestConnection } from './TestConnection.js'
 
 /**
@@ -21,7 +22,10 @@ export const OpenAiBackendForm = () => {
   const urlError = urlTouched && !meta.urlCheck.ok ? t(`url.error.${meta.urlCheck.reason}`) : undefined
   const serverUrl = server?.backend?.kind === 'openai' ? server.backend.base_url : undefined
   const modelsKnown = test.state === 'ok'
-  const modelEnabled = modelsKnown || (serverUrl !== undefined && serverUrl === draft.baseUrl.trim())
+  // When the key goes with Apply, a test before Apply can be refused for want of that key. Once a
+  // test has been tried the model can be typed, so such an endpoint can still be set up.
+  const keyWithApply = !keySavesAlone(state, meta.managedByDesktop)
+  const modelEnabled = modelsKnown || (keyWithApply && test.state === 'failed') || (serverUrl !== undefined && serverUrl === draft.baseUrl.trim())
 
   const options = useMemo(() => {
     const ids = test.state === 'ok' && test.models ? test.models : []

@@ -183,16 +183,17 @@ describe('OpenAI-compatible form', () => {
     expect(screen.getByRole('button', { name: 'Test connection' })).toBeDisabled()
   })
 
-  it('reports a failed test with the node detail and leaves the model field off', async () => {
+  it('reports a failed test with the node detail; the model stays off until a test is tried, then can be typed because the key goes with Apply', async () => {
     const client = fakeClient({ testConnection: jest.fn(async () => ({ ok: false, detail: 'the server answered 401. Check the key.' })) })
     await open(client)
     chooseOpenAi()
     type('Base URL', 'https://llm.example/v1')
     confirmHost('llm.example')
+    expect(screen.getByRole('combobox', { name: 'Model' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
     expect(await screen.findByText('the server answered 401. Check the key.')).toBeInTheDocument()
     expect(screen.getByText('Not reachable')).toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Model' })).toBeDisabled()
+    expect(screen.getByRole('combobox', { name: 'Model' })).not.toBeDisabled()
   })
 
   it('accepts a free-text model when the backend hides its list', async () => {
@@ -444,6 +445,33 @@ describe('the stored key and Test connection (security)', () => {
   })
 })
 
+describe('OpenAI-compatible endpoint that needs a key, first run in the browser', () => {
+  it('lets a model be typed after a refused test, and Apply sends the key with the URL and model', async () => {
+    const client = fakeClient({ testConnection: jest.fn(async () => ({ ok: false, detail: 'the server answered 401. Check the key.' })) })
+    await open(client)
+    chooseOpenAi()
+    expect(screen.queryByRole('button', { name: 'Save key' })).toBeNull()
+    type('Base URL', 'https://llm.example/v1')
+    type('API key', 'sk-needed')
+    confirmHost('llm.example')
+    expect(screen.getByRole('combobox', { name: 'Model' })).toBeDisabled()
+    expect(screen.getByText(/a test before Apply may answer that a key is needed/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
+    await screen.findByText('the server answered 401. Check the key.')
+    const model = screen.getByRole('combobox', { name: 'Model' })
+    expect(model).not.toBeDisabled()
+    fireEvent.change(model, { target: { value: 'gpt-x' } })
+    fireEvent.keyDown(model, { key: 'Enter' })
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    await waitFor(() => expect(client.set).toHaveBeenCalledTimes(1))
+    expect(client.set).toHaveBeenCalledWith({
+      revision: 'rev-1',
+      backend: { kind: 'openai', base_url: 'https://llm.example/v1', model: 'gpt-x', api_key: 'sk-needed' },
+      egress_confirmation: { host: 'llm.example' }
+    })
+  })
+})
+
 describe('the API key', () => {
   it('is write-only: the field is never re-rendered with a value, and saving swaps it for a stored state', async () => {
     const client = fakeClient({ server: SERVER(OPENAI) })
@@ -561,7 +589,7 @@ describe('Universal Agent Runtime form', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
     expect(await screen.findByText(/uar.example answered in 21 ms/)).toBeInTheDocument()
     expect(screen.getByText('Reachable')).toBeInTheDocument()
-    expect(screen.getByText(/The test reads the instance's public agent card and sends no credential/)).toBeInTheDocument()
+    expect(screen.getByText(/The test reads the instance's public agent card and sends no API key/)).toBeInTheDocument()
     expect(screen.queryByText(/not it/)).toBeNull()
     expect(screen.queryByText(/models listed/)).toBeNull()
     expect(client.testConnection).toHaveBeenCalledWith({ base_url: 'https://uar.example', kind: 'uar' })
@@ -586,13 +614,13 @@ describe('Universal Agent Runtime form', () => {
     expect(screen.queryByText(/this instance is not it/)).toBeNull()
     expect(screen.queryByText('Reachable, key not sent')).toBeNull()
     expect(screen.queryByText(/stored key was sent/)).toBeNull()
-    expect(screen.getByText(/sends no credential/)).toBeInTheDocument()
+    expect(screen.getByText(/sends no API key/)).toBeInTheDocument()
   })
 
-  it('says where the credential goes: a private file on the node, sent only to this instance', async () => {
+  it('says where the API key goes: a file only the node can read, sent only to this instance', async () => {
     await open(fakeClient())
     chooseUar()
-    expect(screen.getByText('The node keeps the credential in a file only it can read and sends it only to this instance, to create and run the agent.')).toBeInTheDocument()
+    expect(screen.getByText('The node keeps the API key in a file only it can read and sends it only to this instance, to create and run the agent.')).toBeInTheDocument()
     expect(screen.queryByText(/stays on the node/)).toBeNull()
   })
 
@@ -607,7 +635,7 @@ describe('Universal Agent Runtime form', () => {
     expect(screen.queryByText(/Test connection and chats use the stored key/)).toBeNull()
     type('API key', 'k')
     fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
-    expect(await screen.findByText(/Apply sends it to the instance when it creates the agent/)).toBeInTheDocument()
+    expect(await screen.findByText(/sends it to this instance on the next run/)).toBeInTheDocument()
     expect(client.setApiKey).toHaveBeenCalledWith({ revision: 'rev-1', api_key: 'k' })
   })
 
@@ -671,12 +699,63 @@ describe('Universal Agent Runtime form', () => {
     })
   })
 
-  it('names the stored key and the MCP grant in the host confirmation', async () => {
+  it('says what goes to the host without claiming a stored key: first run and kind change', async () => {
+    const sentence = "Node content an agent reads, any API key you enter with this change, and this node's MCP grant (when one is configured) go to this host. Apply stays off until you type the host exactly."
     await open(fakeClient())
     chooseUar()
     type('Instance URL', 'https://uar.example')
-    expect(screen.getByText(/The stored API key and this node's MCP grant go to this host. The grant lets the agent call this node's tools./)).toBeInTheDocument()
-    expect(screen.queryByText(/Node content that an agent reads goes to this host/)).toBeNull()
+    expect(screen.getByText(sentence, { exact: false })).toBeInTheDocument()
+    expect(screen.queryByText(/The stored API key/)).toBeNull()
+    cleanup()
+    await open(fakeClient({ server: SERVER({ ...OPENAI, api_key: { set: true, source: 'settings_api' } }) }))
+    chooseUar()
+    type('Instance URL', 'https://uar.example')
+    expect(screen.getByText(sentence, { exact: false })).toBeInTheDocument()
+    expect(screen.queryByText(/The stored API key/)).toBeNull()
+  })
+
+  it('ties the "sent with Apply" line to the key input through aria-describedby', async () => {
+    await open(fakeClient({ server: SERVER(OPENAI) }))
+    chooseUar()
+    const input = screen.getByLabelText('API key')
+    const ids = input.getAttribute('aria-describedby').split(' ')
+    const text = ids.map((id) => document.getElementById(id)?.textContent ?? '').join(' ')
+    expect(text).toMatch(/The key is sent with Apply, together with the URL and the host you confirm/)
+  })
+
+  it('keeps a drafted host move for a key typed now: no standalone Save, the key goes with Apply', async () => {
+    const client = fakeClient({ server: SERVER({ ...UAR, base_url: 'https://uar.example' }) })
+    await open(client)
+    expect(screen.queryByRole('button', { name: 'Save key' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
+    expect(screen.getByRole('button', { name: 'Save key' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    type('Instance URL', 'https://other.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
+    expect(screen.queryByRole('button', { name: 'Save key' })).toBeNull()
+    type('API key', 'moved-key')
+    confirmHost('other.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    await waitFor(() => expect(client.set).toHaveBeenCalledTimes(1))
+    expect(client.set.mock.calls[0][0].backend).toMatchObject({ base_url: 'https://other.example', api_key: 'moved-key' })
+    expect(client.setApiKey).not.toHaveBeenCalled()
+  })
+
+  it('maps secrets_not_accepted from Apply into the server-managed statement and retries without a key', async () => {
+    const set = jest.fn()
+      .mockRejectedValueOnce(new SettingsError('secrets_not_accepted', 'no'))
+      .mockImplementationOnce(async (req) => SERVER({ kind: 'uar', ...req.backend, api_key: { set: false } }, 'rev-2'))
+    await open(fakeClient({ set }))
+    chooseUar()
+    type('Instance URL', 'https://uar.example')
+    type('API key', 'cred-x')
+    confirmHost('uar.example')
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    expect(await screen.findByText(/The node sends the key the server holds to this instance/)).toBeInTheDocument()
+    expect(screen.queryByLabelText('API key')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    await waitFor(() => expect(set).toHaveBeenCalledTimes(2))
+    expect(set.mock.calls[1][0].backend.api_key).toBeUndefined()
   })
 
   it('renders every UAR key state with its own copy and no missing translation key', async () => {

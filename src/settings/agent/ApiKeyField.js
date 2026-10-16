@@ -66,12 +66,14 @@ export const ApiKeyField = () => {
   }
 
   const showInput = !hasKey || replacing
+  const baseHelp = ns === 'key' && !alone && !meta.keyServerManaged ? t('key.helpWithApply') : t(`${ns}.${meta.keyServerManaged ? 'helpServer' : 'help'}`)
+  // The line that says the key goes with Apply is part of the field's help, so the input is described by it.
+  const helpText = alone ? baseHelp : `${baseHelp} ${t('key.withApply')}`
   return (
     <div className='as-key' data-id='AgentSettingsKey'>
       {showInput
         ? (
-          <>
-          <Field label={t('key.label')} help={t(`${ns}.${meta.keyServerManaged ? 'helpServer' : 'help'}`)}>
+          <Field label={t('key.label')} help={helpText}>
             <div className='as-inline'>
               <FieldInput
                 type='password'
@@ -92,8 +94,6 @@ export const ApiKeyField = () => {
               {replacing ? <Button buttonType='button' type='link' minWidth={80} onClick={() => { actions.setKeyDraft(''); setReplacing(false) }}>{t('key.cancel')}</Button> : null}
             </div>
           </Field>
-          {alone ? null : <p className='pm-help as-key-withapply' data-id='AgentSettingsKeyWithApply'>{t('key.withApply')}</p>}
-          </>
           )
         : (
           <div ref={storedRef} className='as-key-stored'>

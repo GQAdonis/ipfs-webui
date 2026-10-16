@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { INITIAL_STATE, applyBlockers, buildSetRequest, confirmation, isDirty, keyServerManaged, keyStored, reducer, testForDraft, urlCheck } from './core/form.js'
+import { INITIAL_STATE, keySavesAlone, applyBlockers, buildSetRequest, confirmation, isDirty, keyServerManaged, keyStored, reducer, testForDraft, urlCheck } from './core/form.js'
 import { toSettingsError } from './core/errors.js'
 
 // The state, actions and meta of the Agent settings page as one context
@@ -120,7 +120,7 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
       const s = stateRef.current
       if (!client || !s.server || s.keyDraft === '' || s.key.state === 'saving') return
       // A key for a backend the node does not run goes with Apply, never on its own.
-      if (s.server.backend && s.server.backend.kind !== s.draft.kind) return
+      if (!keySavesAlone(s, true)) return
       dispatch({ type: 'key-started' })
       try {
         const res = await client.setApiKey({ revision: s.server.revision, api_key: s.keyDraft })
@@ -138,7 +138,7 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
       const client = clientRef.current
       const s = stateRef.current
       if (!client || !s.server || s.key.state === 'saving') return
-      if (s.server.backend && s.server.backend.kind !== s.draft.kind) return
+      if (!keySavesAlone(s, true)) return
       dispatch({ type: 'key-started' })
       try {
         const res = await client.clearApiKey({ revision: s.server.revision })

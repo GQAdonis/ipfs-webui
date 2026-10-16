@@ -140,6 +140,11 @@ export function reducer (state, action) {
       }
     }
     case 'apply-failed':
+      // A node that refuses keys through the settings page says so on Apply too: the key field
+      // then shows the server-managed statement and the next Apply sends no key.
+      if (action.failure.kind === 'secrets_not_accepted') {
+        return { ...state, key: { ...state.key, state: 'failed', failure: action.failure }, apply: { state: 'failed', at: action.at, failure: action.failure } }
+      }
       // A stale revision means the node's settings moved: the page reloads them next and says so.
       return { ...state, elsewhere: action.failure.kind === 'revision_conflict' ? true : state.elsewhere, apply: { state: 'failed', at: action.at, failure: action.failure } }
     case 'revert':
@@ -240,24 +245,27 @@ export const keyServerManaged = (state) => {
   return state.key.failure?.kind === 'secrets_not_accepted' || (k?.set === true && k.source !== undefined && k.source !== 'settings_api')
 }
 
+/** @param {FormState} state */
+export const hostChanged = (state) => {
+  const next = urlCheck(state).ok ? hostOf(state.draft.baseUrl.trim()) : ''
+  return next !== '' && next !== hostOf(state.server?.backend?.base_url ?? '')
+}
+
 /**
  * Whether the key field may save on its own. A standalone save acts on the backend the node
  * runs and never names a kind, so it is offered only for that backend. For any other kind the
  * key goes with Apply, next to the URL and the typed host. The one exception is a first run
  * under Desktop, which holds the key until the first backend write and ignores any kind.
+ * A drafted host move also sends the key with Apply: a standalone save would store it for the
+ * host the node runs now.
  *
  * @param {FormState} state
  * @param {boolean} desktop the transport is the Desktop bridge
  */
 export const keySavesAlone = (state, desktop) => {
   const nodeKind = state.server?.backend?.kind
+  if (state.server?.backend && hostChanged(state)) return false
   return nodeKind === state.draft.kind || (nodeKind === undefined && desktop)
-}
-
-/** @param {FormState} state */
-export const hostChanged = (state) => {
-  const next = urlCheck(state).ok ? hostOf(state.draft.baseUrl.trim()) : ''
-  return next !== '' && next !== hostOf(state.server?.backend?.base_url ?? '')
 }
 
 /** @param {FormState} state */
