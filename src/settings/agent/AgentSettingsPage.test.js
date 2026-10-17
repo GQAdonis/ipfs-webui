@@ -18,6 +18,7 @@ import { SettingsError } from './core/errors.js'
 import { resetAdminTokenForTests, getAdminToken, getAdminTokenRoot, setAdminToken } from './core/admin-token.js'
 import { STORAGE_KEY as CHAT_KEY, resetForTests as resetChat, getSettings as getChat, updateSettings as updateChat } from '../../agent-chat/settings-store.js'
 import { STORAGE_KEY as WEBMCP_KEY, resetForTests as resetWebMcp } from '../../webmcp/settings-store.js'
+import { enterSession, resetSessionForTests } from '../../agent-chat/session.js'
 
 // Box wraps its children in an error boundary imported as .js from a .tsx file, which webpack
 // resolves and jest does not. The panel markup is all this test needs.
@@ -1214,5 +1215,49 @@ describe.each(['dark', 'light'])('accessibility in the %s theme', (theme) => {
     const signedOut = render(<AgentSettingsPage client={fakeClient({ get: jest.fn(async () => { throw new SettingsError('unauthorized', 'x') }) })} />)
     await screen.findByRole('button', { name: 'Sign in again' })
     expect(await violations(signedOut.container)).toEqual([])
+  })
+})
+
+// console-session-auth 3.4: in session mode the Connection section is the sign-in panel (no endpoint or
+// token fields), a 401 says "Sign in again", and a 403 step_up_required explains the second factor.
+describe('console session mode', () => {
+  const REPORT = { principals: [{ name: 'operator', kind: 'admin' }], email: 'ada@example.org', exp: 1900000000, admin: 'ok' }
+  beforeEach(() => { enterSession(REPORT) })
+  afterEach(() => { resetSessionForTests() })
+
+  it('replaces the endpoint and token fields with who is signed in and the sign-out note', async () => {
+    await open(fakeClient())
+    expect(screen.getAllByRole('status').some((el) => el.textContent === 'Signed in as ada@example.org.')).toBe(true)
+    expect(screen.getByText(/does not sign you out of know-me\.tools/)).toBeInTheDocument()
+    expect(screen.queryByLabelText('Access token')).toBeNull()
+    expect(screen.queryByLabelText('Admin token')).toBeNull()
+    expect(missing).toEqual([])
+  })
+
+  it('says "Sign in again" on a 401, with the sign-in action first', async () => {
+    await open(fakeClient({ get: jest.fn(async () => { throw new SettingsError('unauthorized', 'no', { status: 401 }) }) }))
+    expect(screen.getAllByText('The settings did not load because your sign-in has ended.')).not.toHaveLength(0)
+    expect(screen.getByRole('button', { name: 'Sign in again' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+    expect(missing).toEqual([])
+  })
+
+  it('explains a 403 step_up_required and offers sign in and sign out', async () => {
+    await open(fakeClient({ get: jest.fn(async () => { throw new SettingsError('step_up_required', 'verify', { status: 403 }) }) }))
+    expect(screen.getAllByText(/recent sign-in with a second factor/)).not.toHaveLength(0)
+    expect(screen.getByRole('button', { name: 'Sign in again' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+    expect(missing).toEqual([])
+  })
+
+  it('moves to the step-up state when Apply is refused for a missing second factor', async () => {
+    const client = fakeClient({ server: SERVER(OPENAI), set: jest.fn(async () => { throw new SettingsError('step_up_required', 'verify', { status: 403 }) }) })
+    await open(client)
+    const model = screen.getByRole('combobox', { name: 'Model' })
+    fireEvent.change(model, { target: { value: 'other-model' } })
+    fireEvent.keyDown(model, { key: 'Enter' })
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Sign in again' })).toBeInTheDocument())
+    expect(screen.getAllByText(/recent sign-in with a second factor/)).not.toHaveLength(0)
   })
 })

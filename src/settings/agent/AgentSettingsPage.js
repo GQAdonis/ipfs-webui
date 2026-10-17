@@ -11,6 +11,7 @@ import { ConnectionSection } from './ConnectionSection.js'
 import { FeaturesSection } from './FeaturesSection.js'
 import { failureText } from './failure-text.js'
 import { useSettingsClient } from './use-settings-client.js'
+import { useSession } from '../../agent-chat/use-session.js'
 import './agent-settings.css'
 
 /** @param {string | undefined} iso */
@@ -24,6 +25,7 @@ const timeOf = (iso) => (iso ? new Date(iso).toLocaleTimeString([], { hour: '2-d
 const Header = () => {
   const { t } = useTranslation('agentSettings')
   const { state, actions, meta } = useAgentSettings()
+  const session = useSession()
   const chatOn = useChatOn()
   const chat = chatOn ? t('header.chatOn') : t('header.chatOff')
   const backend = state.server?.backend
@@ -35,7 +37,11 @@ const Header = () => {
   } else if (state.phase === 'needs-connection') {
     line = <StatusLine tone='warn' word={t('header.needsConnection.word')}>{t('header.needsConnection.text')}</StatusLine>
   } else if (state.phase === 'unauthorized') {
-    line = <StatusLine tone='err' word={t('header.unauthorized.word')}>{t('header.unauthorized.text')}</StatusLine>
+    line = session
+      ? <StatusLine tone='err' word={t('header.sessionExpired.word')}>{t('header.sessionExpired.text')}</StatusLine>
+      : <StatusLine tone='err' word={t('header.unauthorized.word')}>{t('header.unauthorized.text')}</StatusLine>
+  } else if (state.phase === 'step-up') {
+    line = <StatusLine tone='warn' word={t('header.stepUp.word')}>{t('header.stepUp.text')}</StatusLine>
   } else if (state.phase === 'unavailable') {
     line = <StatusLine tone='warn' word={t('header.unavailable.word')}>{t('header.unavailable.text')}</StatusLine>
   } else if (state.phase === 'error') {
@@ -66,7 +72,7 @@ const Header = () => {
 const Body = () => {
   const { state } = useAgentSettings()
   // When the only thing the person can do is connect or sign in, Connection comes first.
-  const connectFirst = state.phase === 'needs-connection' || state.phase === 'unauthorized'
+  const connectFirst = state.phase === 'needs-connection' || state.phase === 'unauthorized' || state.phase === 'step-up'
   return (
     <>
       <Header />

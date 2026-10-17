@@ -32,5 +32,24 @@
     "loadError": "The chat could not be loaded. Press the button to try again.",
     "errorWord": "Not loaded"
   },
-  "desktopManaged": "IPFS Desktop manages the agent chat connection. The endpoint and token are set up by the app, so there is nothing to configure here."
+  "desktopManaged": "IPFS Desktop manages the agent chat connection. The endpoint and token are set up by the app, so there is nothing to configure here.",
+  "session": {
+    "signedIn": {
+      "word": "Signed in",
+      "as": "as {email}.",
+      "anonymous": "to this console."
+    },
+    "expired": {
+      "word": "Session ended",
+      "text": "Your sign-in has ended. Sign in again to keep working."
+    },
+    "stepUp": {
+      "word": "Verify again",
+      "text": "Agent settings need a recent sign-in with a second factor. Sign in again and complete the second factor, or sign out."
+    },
+    "help": "This console signs you in, so there is no endpoint or token to enter here. This page keeps no credential.",
+    "signInAgain": "Sign in again",
+    "signOut": "Sign out",
+    "signOutNote": "Signing out here ends this console session only. It does not sign you out of know-me.tools. That is a separate step on that site."
+  }
 }
