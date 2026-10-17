@@ -9,6 +9,8 @@ import { readSetting, writeSetting } from './local-storage.js'
 import { localGatewayToKuboGateway, DEFAULT_KUBO_GATEWAY } from './gateway.js'
 import { contextBridge } from '../helpers/context-bridge'
 import { createSelector } from 'redux-bundler'
+import { isSessionMode } from '../agent-chat/session.js'
+import { apiAddressHasCredential } from '../agent-chat/api-address.js'
 
 /**
  * @typedef {import('kubo-rpc-client').KuboRPCClient} IPFSService
@@ -450,7 +452,8 @@ const actions = {
    */
   doUpdateIpfsApiAddress: (address) => async (context) => {
     const apiAddress = asAPIOptions(address)
-    if (apiAddress == null) {
+    // Console session mode holds no credential: an address that carries one is refused, not saved.
+    if (apiAddress == null || (isSessionMode() && apiAddressHasCredential(JSON.stringify(apiAddress)))) {
       context.dispatch({ type: ACTIONS.IPFS_API_ADDRESS_INVALID })
       return false
     } else {
