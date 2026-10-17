@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react'
+import { isSessionMode } from '../../agent-chat/session.js'
 import { useAgentChatSettings } from '../../agent-chat/use-agent-chat-settings.js'
 import { createDesktopSettingsClient } from './core/desktop-client.js'
 import { createHttpSettingsClient } from './core/http-client.js'
@@ -20,6 +21,8 @@ export function useSettingsClient () {
   const { root: tokenRoot, version } = useAdminTokenState()
   const desktop = useMemo(() => createDesktopSettingsClient(), [])
   const root = settingsRootFromEndpoint(settings.endpoint)
+  // Session mode: the cookie session is the credential, so there is no token to bind and none is asked for.
+  const session = !desktop && isSessionMode()
   const bound = root !== undefined && tokenRoot === root
 
   // The endpoint changed: the bearer belongs to the node it was typed for.
@@ -29,9 +32,10 @@ export function useSettingsClient () {
 
   const client = useMemo(() => {
     if (desktop) return desktop
+    if (session) return root ? createHttpSettingsClient({ root, getToken: () => undefined, session: true }) : undefined
     return root && bound ? createHttpSettingsClient({ root, getToken: () => getAdminToken(root) }) : undefined
     // `version` makes a replaced token a new client, so the page reloads with it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [desktop, root, bound, version])
+  }, [desktop, root, bound, version, session])
   return { client, managed: desktop !== undefined, root }
 }

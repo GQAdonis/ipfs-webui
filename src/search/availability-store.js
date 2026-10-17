@@ -90,7 +90,7 @@ export function createAvailabilityStore ({ resolve = resolveConnection, makeClie
     const { signal } = controller
     set({ phase: 'checking', status: state.status, error: undefined, connection: 'ready' })
     try {
-      const status = await makeClient({ root: connection.root, getToken: connection.getToken }).status({ signal })
+      const status = await makeClient({ root: connection.root, getToken: connection.getToken, session: connection.session === true }).status({ signal })
       if (mine !== sequence) return
       set({ phase: status.configured ? 'available' : 'unconfigured', status, error: undefined, connection: 'ready' })
     } catch (e) {

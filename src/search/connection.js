@@ -7,12 +7,13 @@
 
 import { getBridge } from '../agent-chat/bridge.js'
 import { validateEndpoint } from '../agent-chat/endpoint.js'
+import { isSessionMode } from '../agent-chat/session.js'
 import { getSettings as getChatSettings, getToken as getChatToken } from '../agent-chat/settings-store.js'
 
 const AGUI_SUFFIX = '/agui'
 
 /**
- * @typedef {{ ok: true, root: string, getToken: () => string | undefined | Promise<string | undefined> }
+ * @typedef {{ ok: true, root: string, getToken: () => string | undefined | Promise<string | undefined>, session?: boolean }
  *   | { ok: false, reason: 'no-endpoint' | 'no-token' }} Connection
  */
 
@@ -43,6 +44,8 @@ export async function resolveConnection (seams = {}) {
   }
   const endpoint = validateEndpoint(settings.endpoint)
   if (!endpoint.ok) return { ok: false, reason: 'no-endpoint' }
+  // Session mode: the cookie session is the credential and the endpoint is the page's own origin.
+  if (isSessionMode()) return { ok: true, root: rootOf(endpoint.value), getToken: () => undefined, session: true }
   if (!token) return { ok: false, reason: 'no-token' }
   return { ok: true, root: rootOf(endpoint.value), getToken: getChatToken }
 }

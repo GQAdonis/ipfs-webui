@@ -5,6 +5,7 @@ import { ELEMENT_TAG, loadIsland as defaultLoadIsland } from './island-loader.js
 import { validateEndpoint } from './endpoint.js'
 import { useAgentChatSettings } from './use-agent-chat-settings.js'
 import { getBridge } from './bridge.js'
+import { isSessionMode } from './session.js'
 import { StatusLine } from '../promethity/components/index.js'
 import { useTheme } from '../promethity/use-theme.js'
 import './launcher.css'
@@ -70,8 +71,11 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
   }, [])
 
   // The token goes by property only: the bridge's provider under Desktop, else the in-memory token.
+  // In console session mode the cookie session is the credential: the element sends the page's own
+  // cookies and no Authorization header, and is given no token.
   const applyToken = useCallback((el) => {
     if (bridge) el.tokenProvider = bridge.getToken
+    else if (isSessionMode()) el.session = true
     else el.token = token
   }, [bridge, token])
 

@@ -59,7 +59,7 @@ export function useSearch ({ resolve = resolveConnection, makeClient = createSea
         if (!connection.ok) {
           throw new SearchError('unauthenticated', 'No connection to the node is set up.')
         }
-        const answer = await makeClient({ root: connection.root, getToken: connection.getToken }).search({ ...req, query }, { signal: mine.signal })
+        const answer = await makeClient({ root: connection.root, getToken: connection.getToken, session: connection.session === true }).search({ ...req, query }, { signal: mine.signal })
         if (!mine.signal.aborted) dispatch({ type: 'done', model: answer.model, results: answer.results })
       } catch (e) {
         if (mine.signal.aborted || /** @type {any} */ (e)?.name === 'AbortError') return

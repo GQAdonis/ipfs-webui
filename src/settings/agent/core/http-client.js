@@ -4,10 +4,15 @@
 // change stream. The admin token comes from a getter called per request. It
 // travels in the Authorization header only: never in a URL, a cookie (credentials
 // are omitted), a log line or an error. Nothing here reads or writes storage.
+//
+// In session mode (console-session-auth) the page's cookie session is the credential: the
+// request goes to the page's own origin with same-origin credentials, carries no Authorization
+// header, and needs no token. A 401 then means the sign-in ended, and tells the session store.
 
 import { SettingsError, isServerErrorCode } from './errors.js'
 import { readShape } from './read-shape.js'
 import { readSse } from './sse.js'
+import { markSessionExpired } from '../../../agent-chat/session.js'
 
 export const ROUTES = Object.freeze({
   settings: '/agent/settings',
@@ -26,12 +31,13 @@ const isObject = (v) => typeof v === 'object' && v !== null && !Array.isArray(v)
  * @param {Object} options
  * @param {string} options.root the settings API root: the listener origin plus any path prefix
  * @param {() => string | undefined | Promise<string | undefined>} options.getToken
+ * @param {boolean} [options.session] session mode: same-origin cookie, no Authorization header, getToken unused
  * @param {typeof fetch} [options.fetch] test seam
  * @param {() => number} [options.now] test seam, epoch ms
  * @param {(ms: number) => Promise<void>} [options.sleep] test seam for the reconnect wait
  * @returns {import('./types.js').SettingsClient}
  */
-export function createHttpSettingsClient ({ root, getToken, fetch: fetchImpl, now = Date.now, sleep = defaultSleep }) {
+export function createHttpSettingsClient ({ root, getToken, session = false, fetch: fetchImpl, now = Date.now, sleep = defaultSleep }) {
   const doFetch = fetchImpl ?? ((/** @type {any[]} */ ...a) => /** @type {any} */ (globalThis.fetch)(...a))
   /** @type {import('./types.js').AppliedRecord | undefined} */
   let applied
@@ -44,12 +50,12 @@ export function createHttpSettingsClient ({ root, getToken, fetch: fetchImpl, no
    * @param {{ body?: unknown, ifMatch?: string, query?: Record<string, string>, signal?: AbortSignal, accept?: string }} opts
    */
   async function request (method, path, { body, ifMatch, query, signal, accept = 'application/json' } = {}) {
-    const token = await getToken()
-    if (!token) throw new SettingsError('not_configured', 'No admin token is set.')
+    const token = session ? undefined : await getToken()
+    if (!session && !token) throw new SettingsError('not_configured', 'No admin token is set.')
     const url = new URL(root + path)
     for (const [k, v] of Object.entries(query ?? {})) url.searchParams.set(k, v)
     /** @type {Record<string, string>} */
-    const headers = { authorization: `Bearer ${token}`, accept }
+    const headers = { accept, ...(!session && { authorization: `Bearer ${token}` }) }
     if (body !== undefined) headers['content-type'] = 'application/json'
     if (ifMatch !== undefined) headers['if-match'] = `"${ifMatch}"`
     let res
@@ -58,7 +64,7 @@ export function createHttpSettingsClient ({ root, getToken, fetch: fetchImpl, no
         method,
         headers,
         body: body === undefined ? undefined : JSON.stringify(body),
-        credentials: 'omit',
+        credentials: session ? 'same-origin' : 'omit',
         redirect: 'error',
         referrerPolicy: 'no-referrer',
         cache: 'no-store',
@@ -69,7 +75,9 @@ export function createHttpSettingsClient ({ root, getToken, fetch: fetchImpl, no
       throw new SettingsError('network', 'Cannot reach the node. Check that ipfs mcp is running and that this page may connect to it.')
     }
     if (res.ok) return res
-    throw await errorFromResponse(res)
+    const failure = await errorFromResponse(res)
+    if (session && failure.kind === 'unauthorized') markSessionExpired()
+    throw failure
   }
 
   /** @param {Response} res */
