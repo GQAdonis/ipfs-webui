@@ -18,6 +18,7 @@ import { HeliaProvider, ExploreProvider } from 'ipld-explorer-components/provide
 import { ContextBridgeProvider } from './helpers/context-bridge.jsx'
 import { initTheme } from './promethity/theme.js'
 import { migrateAgentDefaults } from './agent-chat/boot.js'
+import { bootSession } from './agent-chat/session-boot.js'
 
 // Apply the persisted Promethity theme (D16) before first render.
 initTheme()
@@ -31,6 +32,9 @@ const gitRevision = process.env.REACT_APP_GIT_REV
 console.log(`IPFS Web UI - v${appVersion} - https://github.com/ipfs-shipyard/ipfs-webui/commit/${gitRevision}`)
 
 async function render () {
+  // Console session mode (kubo ADR-0013): one same-origin probe before the store reads the saved
+  // API address. Anything but a 200 session report changes nothing.
+  await bootSession()
   const initialData = await bundleCache.getAll()
   if (initialData && process.env.NODE_ENV !== 'production') {
     console.log('intialising store with data from cache', initialData)

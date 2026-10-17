@@ -65,6 +65,8 @@
     "src/bundles/experiments.js",
     "src/bundles/ipfs-desktop.js",
     "src/bundles/ipfs-provider.js",
+    "src/agent-chat/session.js",
+    "src/agent-chat/api-address.js",
     "src/bundles/retry-init.js",
     "src/bundles/local-storage.js",
     "src/bundles/task.js",
