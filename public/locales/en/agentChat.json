@@ -41,7 +41,7 @@
     },
     "expired": {
       "word": "Session ended",
-      "text": "Your sign-in has ended. Sign in again to keep working."
+      "text": "Your sign-in has ended. Sign in again to keep working. Unsent chat text is cleared."
     },
     "stepUp": {
       "word": "Verify again",

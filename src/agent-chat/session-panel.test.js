@@ -125,3 +125,13 @@ describe('M2 an ended sign-in and the chat', () => {
     expect(screen.getByRole('button', { name: 'Agent chat' })).toBeInTheDocument()
   })
 })
+
+// m7: the chat is removed when the sign-in ends and the island keeps no draft, so the banner says so.
+describe('m7 unsent chat text on expiry', () => {
+  it('the ended-sign-in banner says unsent chat text is cleared', () => {
+    enterSession({ ...REPORT, admin: 'ok' })
+    render(<SessionBanner />)
+    act(() => { markSessionExpired() })
+    expect(screen.getByRole('alert')).toHaveTextContent('Unsent chat text is cleared.')
+  })
+})

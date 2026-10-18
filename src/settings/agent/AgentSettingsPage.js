@@ -31,6 +31,8 @@ const Header = () => {
   const backend = state.server?.backend
   const applied = meta.status?.applied
 
+  // Session ended: the app-wide banner (role=alert) is the one announcement, so this line stays out of a live region.
+  const sessionEnded = Boolean(session) && state.phase === 'unauthorized'
   let line
   if (state.phase === 'loading') {
     line = <StatusLine tone='info' word={t('header.loading.word')}>{t('header.loading.text')}</StatusLine>
@@ -63,7 +65,7 @@ const Header = () => {
     <header className='as-header'>
       <a className='as-back' href='#/settings'>{t('header.back')}</a>
       <h1 className='as-h1'>{t('title')}</h1>
-      <div aria-live='polite'>{line}</div>
+      <div aria-live={sessionEnded ? undefined : 'polite'}>{line}</div>
       {state.phase === 'error'
         ? <Button buttonType='button' bg='bg-charcoal' minWidth={120} onClick={() => void actions.load()}>{t('header.retry')}</Button>
         : null}

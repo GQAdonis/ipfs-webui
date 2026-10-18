@@ -18,7 +18,8 @@ import { SettingsError } from './core/errors.js'
 import { resetAdminTokenForTests, getAdminToken, getAdminTokenRoot, setAdminToken } from './core/admin-token.js'
 import { STORAGE_KEY as CHAT_KEY, resetForTests as resetChat, getSettings as getChat, updateSettings as updateChat } from '../../agent-chat/settings-store.js'
 import { STORAGE_KEY as WEBMCP_KEY, resetForTests as resetWebMcp } from '../../webmcp/settings-store.js'
-import { enterSession, resetSessionForTests } from '../../agent-chat/session.js'
+import { enterSession, markSessionExpired, resetSessionForTests } from '../../agent-chat/session.js'
+import SessionBanner from '../../agent-chat/SessionBanner.js'
 
 // Box wraps its children in an error boundary imported as .js from a .tsx file, which webpack
 // resolves and jest does not. The panel markup is all this test needs.
@@ -1240,6 +1241,20 @@ describe('console session mode', () => {
     expect(screen.getByRole('button', { name: 'Sign in again' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
     expect(missing).toEqual([])
+  })
+
+  // m2 of the group 3 UI review: the settings 401 and the app-wide banner are one state, so a screen
+  // reader hears one message (the banner's alert), and the page's own line sits outside a live region.
+  it('announces an ended sign-in once: the banner alerts, the page line is not live', async () => {
+    const client = fakeClient({ get: jest.fn(async () => { throw new SettingsError('unauthorized', 'no', { status: 401 }) }) })
+    render(<><SessionBanner /><AgentSettingsPage client={client} /></>)
+    await waitFor(() => expect(screen.queryByText('Reading the settings from the node.')).toBeNull())
+    act(() => { markSessionExpired() })
+    expect(screen.getAllByRole('alert')).toHaveLength(1)
+    expect(screen.getByRole('alert')).toHaveTextContent('Session ended')
+    const line = screen.getByText('The settings did not load because your sign-in has ended.')
+    expect(line.closest('[aria-live]')).toBeNull()
+    expect(line.closest('[role=alert], [role=status]')).toBeNull()
   })
 
   it('explains a 403 step_up_required and offers sign in and sign out', async () => {
