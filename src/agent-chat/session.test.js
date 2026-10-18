@@ -264,6 +264,12 @@ describe('3.3 same-origin calls with no Authorization header', () => {
     expect(getSession().expired).toBe(true)
   })
 
+  it('a plain 403 is "forbidden" in session mode and unchanged ("http") in token mode', async () => {
+    const res403 = jest.fn(async () => ({ ok: false, status: 403, text: async () => 'Forbidden', headers: { get: () => null } }))
+    await expect(createHttpSettingsClient({ root: ORIGIN, getToken: () => undefined, session: true, fetch: res403 }).get()).rejects.toMatchObject({ kind: 'forbidden' })
+    await expect(createHttpSettingsClient({ root: ORIGIN, getToken: () => 'tok', fetch: res403 }).get()).rejects.toMatchObject({ kind: 'http' })
+  })
+
   it('the launcher gives the element session mode, not a token', async () => {
     class StubChat extends HTMLElement {
       static tokens = []
@@ -359,12 +365,12 @@ describe('3.4 states: sign in again, step-up, signed in as, sign out', () => {
     expect(fetchImpl).not.toHaveBeenCalled()
   })
 
-  it('the panel explains step-up and offers sign in and sign out', async () => {
+  it('the panel explains step-up and offers the sign-out that starts a fresh login', async () => {
     await bootSession({ fetch: fakeFetch(200, { ...REPORT, admin: 'step_up_required' }) })
     render(<SessionPanel phase='step-up' />)
     expect(screen.getByText(/recent sign-in with a second factor/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Sign in again' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Sign in again' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Sign out and verify again' })).toBeInTheDocument()
   })
 
   it('a 403 step_up_required body is a step_up_required settings error', () => {

@@ -9,7 +9,7 @@ import { validateBackendUrl, hostOf } from './url.js'
 /** @typedef {{ kind: string, message: string, detail?: string }} Failure */
 /**
  * @typedef {Object} FormState
- * @property {'loading' | 'ready' | 'needs-connection' | 'unauthorized' | 'step-up' | 'unavailable' | 'error'} phase
+ * @property {'loading' | 'ready' | 'needs-connection' | 'unauthorized' | 'step-up' | 'not-eligible' | 'unavailable' | 'error'} phase
  * @property {Failure | undefined} failure
  * @property {import('./types.js').GetResponse | null} server
  * @property {Draft} draft

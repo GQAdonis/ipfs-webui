@@ -17,7 +17,7 @@ export const SERVER_ERROR_CODES = Object.freeze([
 ])
 
 /** @typedef {'backend_not_configured' | 'revision_conflict' | 'egress_confirmation_required' | 'secrets_not_accepted'} ServerErrorCode */
-/** @typedef {ServerErrorCode | 'unauthorized' | 'route_absent' | 'not_configured' | 'network' | 'http' | 'protocol' | 'unavailable'} SettingsErrorKind */
+/** @typedef {ServerErrorCode | 'unauthorized' | 'forbidden' | 'route_absent' | 'not_configured' | 'network' | 'http' | 'protocol' | 'unavailable'} SettingsErrorKind */
 
 const MAX_DETAIL = 300
 

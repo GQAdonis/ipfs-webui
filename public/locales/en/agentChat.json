@@ -45,7 +45,8 @@
     },
     "stepUp": {
       "word": "Verify again",
-      "text": "Agent settings need a recent sign-in with a second factor. Sign in again and complete the second factor, or sign out."
+      "text": "Agent settings need a recent sign-in with a second factor. A new sign-in starts from a signed-out console: sign out here, then sign in again and complete the second factor. If you stay signed in on know-me.tools, you may need to sign out there too.",
+      "action": "Sign out and verify again"
     },
     "help": "This console signs you in, so there is no endpoint or token to enter here. This page keeps no credential.",
     "signInAgain": "Sign in again",

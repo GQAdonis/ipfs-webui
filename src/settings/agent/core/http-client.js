@@ -75,7 +75,7 @@ export function createHttpSettingsClient ({ root, getToken, session = false, fet
       throw new SettingsError('network', 'Cannot reach the node. Check that ipfs mcp is running and that this page may connect to it.')
     }
     if (res.ok) return res
-    const failure = await errorFromResponse(res)
+    const failure = await errorFromResponse(res, session)
     if (session && failure.kind === 'unauthorized') markSessionExpired()
     throw failure
   }
@@ -217,8 +217,11 @@ function parseEvent (data) {
   return undefined
 }
 
-/** @param {Response} res */
-async function errorFromResponse (res) {
+/**
+ * @param {Response} res
+ * @param {boolean} [session] session mode: a 403 with no contract code is the node saying this account has no admin principal
+ */
+async function errorFromResponse (res, session = false) {
   if (res.status === 401) return new SettingsError('unauthorized', 'The admin token was refused.', { status: 401 })
   if (res.status === 404) return new SettingsError('route_absent', 'This node has no agent settings.', { status: 404 })
   let text = ''
@@ -239,6 +242,7 @@ async function errorFromResponse (res) {
   } catch (_) {
     // Not the JSON error shape: a plain-text answer from the server.
   }
+  if (session && res.status === 403) return new SettingsError('forbidden', 'This account may not change agent settings.', { status: 403 })
   return new SettingsError('http', `The node answered ${res.status}.`, { status: res.status, detail: text.trim() })
 }
 

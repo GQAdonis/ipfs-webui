@@ -53,8 +53,12 @@
       "text": "The settings did not load because your sign-in has ended."
     },
     "stepUp": {
-      "word": "Verify again",
-      "text": "Agent settings need a recent sign-in with a second factor. Use the buttons under Connection."
+      "word": "Settings locked",
+      "text": "Changing agent settings needs a recent second-factor sign-in. Use the button under Connection."
+    },
+    "notEligible": {
+      "word": "Not allowed",
+      "text": "This account may not read or change agent settings. Ask the person who runs this node to add you as an admin."
     }
   },
   "backend": {
@@ -286,7 +290,8 @@
     "egress_confirmation_required": "The node needs the new model host confirmed. Type {host} above.",
     "secrets_not_accepted": "This node does not accept keys through the settings page.",
     "serverSaid": "Detail: {detail}",
-    "step_up_required": "Agent settings need a recent sign-in with a second factor. Sign in again, then retry."
+    "step_up_required": "Agent settings need a recent sign-in with a second factor. Use the button under Connection, then retry.",
+    "forbidden": "This account may not change agent settings."
   },
   "features": {
     "title": "Features",

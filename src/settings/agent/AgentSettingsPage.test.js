@@ -1245,8 +1245,20 @@ describe('console session mode', () => {
   it('explains a 403 step_up_required and offers sign in and sign out', async () => {
     await open(fakeClient({ get: jest.fn(async () => { throw new SettingsError('step_up_required', 'verify', { status: 403 }) }) }))
     expect(screen.getAllByText(/recent sign-in with a second factor/)).not.toHaveLength(0)
-    expect(screen.getByRole('button', { name: 'Sign in again' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+    // A reload would return the same token, so the one action is the sign-out that starts a fresh login.
+    expect(screen.queryByRole('button', { name: 'Sign in again' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Sign out and verify again' })).toBeInTheDocument()
+    // One announcement per state: the header says it, the panel does not repeat it as a live region.
+    expect(screen.getAllByText('Verify again')).toHaveLength(1)
+    expect(screen.queryAllByRole('alert')).toHaveLength(0)
+    expect(missing).toEqual([])
+  })
+
+  it('says a 403 for an account with no admin principal once, with no Retry loop', async () => {
+    await open(fakeClient({ get: jest.fn(async () => { throw new SettingsError('forbidden', 'no', { status: 403 }) }) }))
+    expect(screen.getByText(/may not read or change agent settings/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Apply' })).toBeNull()
     expect(missing).toEqual([])
   })
 
@@ -1257,7 +1269,7 @@ describe('console session mode', () => {
     fireEvent.change(model, { target: { value: 'other-model' } })
     fireEvent.keyDown(model, { key: 'Enter' })
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Sign in again' })).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Sign out and verify again' })).toBeInTheDocument())
     expect(screen.getAllByText(/recent sign-in with a second factor/)).not.toHaveLength(0)
   })
 })

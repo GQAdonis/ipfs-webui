@@ -38,10 +38,12 @@ const Header = () => {
     line = <StatusLine tone='warn' word={t('header.needsConnection.word')}>{t('header.needsConnection.text')}</StatusLine>
   } else if (state.phase === 'unauthorized') {
     line = session
-      ? <StatusLine tone='err' word={t('header.sessionExpired.word')}>{t('header.sessionExpired.text')}</StatusLine>
+      ? <StatusLine tone='err' word={t('header.sessionExpired.word')} announce={false}>{t('header.sessionExpired.text')}</StatusLine>
       : <StatusLine tone='err' word={t('header.unauthorized.word')}>{t('header.unauthorized.text')}</StatusLine>
   } else if (state.phase === 'step-up') {
-    line = <StatusLine tone='warn' word={t('header.stepUp.word')}>{t('header.stepUp.text')}</StatusLine>
+    line = <StatusLine tone='warn' word={t('header.stepUp.word')} announce={false}>{t('header.stepUp.text')}</StatusLine>
+  } else if (state.phase === 'not-eligible') {
+    line = <StatusLine tone='warn' word={t('header.notEligible.word')} announce={false}>{t('header.notEligible.text')}</StatusLine>
   } else if (state.phase === 'unavailable') {
     line = <StatusLine tone='warn' word={t('header.unavailable.word')}>{t('header.unavailable.text')}</StatusLine>
   } else if (state.phase === 'error') {
