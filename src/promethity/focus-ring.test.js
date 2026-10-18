@@ -26,4 +26,30 @@ describe('focus ring on filled controls', () => {
       expect(body).not.toMatch(/outline-offset:\s*-/)
     }
   })
+
+  // 3.7: N1 and the reviewer's nits. Selectors carry an extra class or attribute so they outrank (0,2,1).
+  it('draws the modal close ring inside the clipped modal, above the reset specificity', () => {
+    const body = rule(read('promethity/components.css'), '.prom-modal button.prom-modal-close:focus-visible')
+    expect(body).toContain('outline: var(--focus-ring)')
+    expect(body).toMatch(/outline-offset:\s*-2px/)
+    expect(body).toContain('box-shadow: none')
+    expect(read('promethity/components.css')).toMatch(/\.prom-modal \{[^}]*overflow: hidden/)
+  })
+
+  it('keeps the resting inset edge of the switch and chips through the halo', () => {
+    expect(rule(read('promethity/components/primitives.css'), 'button.pm-switch-track[aria-checked]:focus-visible'))
+      .toContain('box-shadow: inset 0 0 0 1px var(--text-muted), var(--focus-halo)')
+    const search = read('search/search.css')
+    expect(rule(search, '.sr-chips button.sr-chip:focus-visible')).toContain('box-shadow: inset 0 0 0 1px var(--text-muted), var(--focus-halo)')
+    expect(rule(search, '.sr-chips button.sr-chip.sr-chip-on:focus-visible')).toContain('box-shadow: inset 0 0 0 1px var(--accent-text), var(--focus-halo)')
+  })
+
+  it('removes the halo where the reset removes the outline', () => {
+    const reset = read('reset.css')
+    for (const sel of ['button.button-inside-focus:focus', 'button.hoverable-button:focus']) {
+      const body = rule(reset, sel)
+      expect(body).toContain('outline: none')
+      expect(body).toContain('box-shadow: none')
+    }
+  })
 })

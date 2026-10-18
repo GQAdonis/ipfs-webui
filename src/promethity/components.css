@@ -234,6 +234,14 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+/* The modal clips (overflow: hidden), so the ring sits inside the button. The extra ancestor class lifts
+   this above reset.css's button:not(.default):focus-visible (0,2,1), whose outside ring would be cut off. */
+.prom-modal button.prom-modal-close:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
 .prom-modal-actions {
   gap: var(--space-2);
   background-color: var(--raised);

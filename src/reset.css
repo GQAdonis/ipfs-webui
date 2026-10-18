@@ -19,6 +19,7 @@ button:not(.default):focus-visible {
 
 button.button-inside-focus:focus {
     outline: none;
+    box-shadow: none;
 }
 
 
@@ -32,4 +33,5 @@ button.hoverable-button:hover {
 
 button.hoverable-button:focus {
     outline: none;
+    box-shadow: none;
 }
