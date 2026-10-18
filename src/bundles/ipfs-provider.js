@@ -9,7 +9,7 @@ import { readSetting, writeSetting } from './local-storage.js'
 import { localGatewayToKuboGateway, DEFAULT_KUBO_GATEWAY } from './gateway.js'
 import { contextBridge } from '../helpers/context-bridge'
 import { createSelector } from 'redux-bundler'
-import { isSessionMode } from '../agent-chat/session.js'
+import { isSessionMode, reportUnauthorized } from '../agent-chat/session.js'
 import { apiAddressHasCredential } from '../agent-chat/api-address.js'
 
 /**
@@ -415,6 +415,7 @@ const actions = {
           try {
             await last(ipfs.stats.bw())
           } catch (err) {
+            reportUnauthorized(err)
             const error = /** @type {Error} */(err)
             const errorString = error.toString() || error.message || /** @type {string} */(/** @type {unknown} */(error))
             if (!/bandwidth reporter disabled in config/.test(errorString)) {

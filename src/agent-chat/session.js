@@ -130,6 +130,17 @@ export function markSessionExpired () {
 }
 
 /**
+ * A failed call to the node: a 401 from the Kubo RPC client (an HTTPError carries its response) means
+ * the sign-in ended. Outside session mode, and for every other failure, nothing happens.
+ *
+ * @param {unknown} error
+ */
+export function reportUnauthorized (error) {
+  const status = /** @type {any} */ (error)?.response?.status
+  if (state && status === 401) markSessionExpired()
+}
+
+/**
  * Re-check the sign-in. A fresh report replaces the old one (so the admin step-up state follows a
  * second-factor sign-in); a 401 marks the session expired; anything else changes nothing.
  *
