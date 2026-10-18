@@ -37,7 +37,7 @@ const rpcOrigin = () => {
  * those routes. Returns the list of requests the page made to the five route families, with the headers
  * the browser actually sent (cookies included).
  */
-export async function installConsole (page, { session = 200, report = REPORT, settings = 'ok', agui = 'ok', index = 'ok' } = {}) {
+export async function installConsole (page, { session = 200, report = REPORT, settings = 'ok', agui = 'ok', index = 'ok', api = 'ok' } = {}) {
   const calls = []
   const family = (p) => (p === '/auth/session' ? 'session' : p === '/agui' ? 'agui' : p === '/agent/settings' || p.startsWith('/agent/settings/') ? 'settings' : p.startsWith('/index/') ? 'index' : p.startsWith('/api/v0/') ? 'api' : undefined)
   page.on('request', async (request) => {
@@ -52,6 +52,7 @@ export async function installConsole (page, { session = 200, report = REPORT, se
     const f = family(url.pathname)
     if (f === 'session') return session === 200 ? json(route, 200, report) : route.fulfill({ status: session, body: '' })
     if (f === 'api') {
+      if (api === '401') return route.fulfill({ status: 401, body: '' })
       // A plain Node request: the page's Origin and Referer must not reach Kubo, which would apply its CORS check to them.
       const upstream = await fetch(`${rpcOrigin()}${url.pathname}${url.search}`, { method: request.method(), headers: { 'content-type': request.headers()['content-type'] ?? 'application/octet-stream' }, body: request.method() === 'GET' ? undefined : request.postDataBuffer() ?? undefined })
       const type = upstream.headers.get('content-type')
@@ -64,6 +65,7 @@ export async function installConsole (page, { session = 200, report = REPORT, se
     if (f === 'index') return index === 'ok' ? json(route, 200, { enabled: true, mode: 'embedded', store_reachable: true, model: 'bge-m3', dimensions: 1024, indexed_cids: 12, chunk_count: 80 }) : route.fulfill({ status: 404, body: '' })
     if (settings === '401') return route.fulfill({ status: 401, body: '' })
     if (settings === 'stepup') return json(route, 403, STEP_UP)
+    if (settings === 'forbidden') return route.fulfill({ status: 403, contentType: 'text/plain', body: 'forbidden' })
     if (url.pathname === '/agent/settings/events') return route.fulfill({ status: 200, contentType: 'text/event-stream', body: ': keepalive\n\n' })
     return json(route, 200, SETTINGS, { etag: '"rev-1"' })
   })

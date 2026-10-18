@@ -166,8 +166,9 @@ test.describe('console session mode', () => {
     await installConsole(page, { settings: 'stepup', report: { ...REPORT, admin: 'step_up_required' } })
     await page.goto('/#/settings/agent')
     await expect(page.getByText(/recent sign-in with a second factor/).first()).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Sign in again' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
+    // A reload would return the same token, so the one action is the sign-out that starts a fresh login.
+    await expect(page.getByRole('button', { name: 'Sign in again' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Sign out and verify again' })).toBeVisible()
     await shoot(page, 'step-up')
   })
 })
