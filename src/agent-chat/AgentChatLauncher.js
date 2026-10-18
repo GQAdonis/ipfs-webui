@@ -6,6 +6,7 @@ import { validateEndpoint } from './endpoint.js'
 import { useAgentChatSettings } from './use-agent-chat-settings.js'
 import { getBridge } from './bridge.js'
 import { isSessionMode } from './session.js'
+import { useSession } from './use-session.js'
 import { StatusLine } from '../promethity/components/index.js'
 import { useTheme } from '../promethity/use-theme.js'
 import './launcher.css'
@@ -42,7 +43,10 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
   }, [bridge])
   const endpoint = bridge ? null : (settings.enabled ? validateEndpoint(settings.endpoint) : null)
   const endpointValue = bridge ? bridgeEndpoint : (endpoint && endpoint.ok ? endpoint.value : null)
-  const available = endpointValue !== null
+  // An ended console sign-in leaves the chat unusable and its panel would cover the "Sign in again" bar
+  // (and its buttons), so the chat is taken away until the person signs in again.
+  const sessionEnded = useSession()?.expired === true
+  const available = endpointValue !== null && !sessionEnded
 
   /** @type {React.MutableRefObject<any>} */
   const elementRef = useRef(null)
