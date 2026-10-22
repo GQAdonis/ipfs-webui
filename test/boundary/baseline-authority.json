@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "frontend-baseline-authority-binding",
+  "incumbent": {
+    "root": "webui",
+    "path": "test/boundary/incumbent-source-authority.json",
+    "sha256": "f4920ff3b169f85dede9e0ae9a5c6106ffb58adf45fdab8b7f9b9d8e23d756a8",
+    "originalProvenance": ".kbd-orchestrator/phases/agentic-ui-implementation/source-baselines.json",
+    "semantics": "Retained original pre-production source/hash authority; dirty shared hashes require exact bytes, never committed HEAD substitution."
+  },
+  "importedPreF2": {
+    "root": "webui",
+    "path": "docs/design/baselines/react19-foundation-inputs/manifest.json",
+    "sha256": "604967274c356bd1000e0625e450f10c9ea8fe92b6220af5290559b077164016",
+    "semantics": "Already-modified imported pre-F2 source snapshot with prior migration/token work. Not untouched incumbent and not token-only parity acceptance."
+  }
+}

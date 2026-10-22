@@ -19,7 +19,7 @@ export function shortCid (value) {
   return `${start}…${end}`
 }
 
-const Cid = React.forwardRef(({ value, title, style, identicon = false, ...props }, ref) => {
+const Cid = React.forwardRef(function Cid ({ value, title, style, identicon = false, ...props }, ref) {
   style = Object.assign({}, {
     textDecoration: 'none',
     marginLeft: identicon ? '5px' : null

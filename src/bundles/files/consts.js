@@ -39,6 +39,8 @@ export const ACTIONS = {
   DISMISS_ERRORS: ('FILES_DISMISS_ERRORS'),
   /** @type {'FILES_CLEAR_ALL'} */
   CLEAR_ALL: ('FILES_CLEAR_ALL'),
+  /** @type {'FILES_CANCEL_UPLOAD'} */
+  CANCEL_UPLOAD: ('FILES_CANCEL_UPLOAD'),
   /** @type {'FILES_WRITE_UPDATED'} */
   WRITE_UPDATED: ('FILES_WRITE_UPDATED'),
   /** @type {'FILES_UPDATE_SORT'} */
@@ -46,6 +48,8 @@ export const ACTIONS = {
   /** @type {'FILES_READ'} */
   READ_FILE: ('FILES_READ')
 }
+
+export const UPLOAD_CANCELLED = 'ERR_FILES_UPLOAD_CANCELLED'
 
 export const SORTING = {
   /** @type {'name'} */
@@ -100,6 +104,7 @@ export const DEFAULT_STATE = {
   })(),
   pending: [],
   finished: [],
+  cancelled: [],
   failed: []
 }
 

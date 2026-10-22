@@ -6,13 +6,15 @@ import { debouncedProvide } from '../../lib/files.js'
 /**
  * @typedef {import('kubo-rpc-client').KuboRPCClient} IPFSService
  * @typedef {import('../../files/types').FileStream} FileStream
- * @typedef {import('./actions').Ext} Ext
+ * @typedef {import('./actions').ContextExt} Ext
  * @typedef {import('./actions').Extra} Extra
  * @typedef {import('multiformats/cid').CID} CID
  */
 
 /**
-  * @template State, Message, Ext, Extra
+  * @template State
+  * @template {{type: string}} Message
+  * @template Ext, Extra
   * @typedef {import('redux-bundler').Context<State, Message, Ext, Extra>} BundlerContext
   */
 
@@ -47,7 +49,8 @@ import { debouncedProvide } from '../../lib/files.js'
  */
 
 /**
- * @template Name, Message, Failure, Success, Init
+ * @template {string} Name
+ * @template Message, Failure, Success, Init
  * @typedef {import('../task').Spawn<Name, Message, Failure, Success, Init>} Spawn
  */
 
@@ -103,7 +106,8 @@ export const spawn = (type, task, ...[init]) => async (context) => {
 }
 
 /**
- * @template Name, Failure, Success, Init
+ * @template {string} Name
+ * @template Failure, Success, Init
  * @typedef {import('../task').Perform<Name, Failure, Success, Init>} Perform
  */
 
@@ -144,7 +148,7 @@ export const perform = (type, task, ...[init]) => async (context) => {
 
 /**
  * Creates an action creator that just dispatches given action.
- * @template T
+ * @template {{type: string}} T
  * @param {T} action
  * @returns {(context:BundlerContext<any, T, any, any>) => Promise<void>}
  */
@@ -155,7 +159,7 @@ export const send = (action) => async ({ store }) => {
 /**
  * @typedef {Object} Sorting
  * @property {boolean} [asc]
- * @property {import('./consts').SORTING} [by]
+ * @property {(typeof SORTING)[keyof typeof SORTING]} [by]
  */
 
 /**

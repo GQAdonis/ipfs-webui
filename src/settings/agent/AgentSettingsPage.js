@@ -1,5 +1,4 @@
 import React from 'react'
-import { Helmet } from 'react-helmet'
 import { useTranslation } from 'react-i18next'
 import Button from '../../components/button/button.tsx'
 import { StatusLine } from '../../promethity/components/index.js'
@@ -11,6 +10,10 @@ import { ConnectionSection } from './ConnectionSection.js'
 import { FeaturesSection } from './FeaturesSection.js'
 import { failureText } from './failure-text.js'
 import { useSettingsClient } from './use-settings-client.js'
+import { useOriginPolicy } from '../../agent-chat/use-origin-policy.js'
+import { OriginGuardNotice } from '../../agent-chat/OriginGuardNotice.js'
+import { PresentationPreferences } from './PresentationPreferences.js'
+import { useSession } from '../../agent-chat/use-session.js'
 import './agent-settings.css'
 
 /** @param {string | undefined} iso */
@@ -24,18 +27,27 @@ const timeOf = (iso) => (iso ? new Date(iso).toLocaleTimeString([], { hour: '2-d
 const Header = () => {
   const { t } = useTranslation('agentSettings')
   const { state, actions, meta } = useAgentSettings()
+  const session = useSession()
   const chatOn = useChatOn()
   const chat = chatOn ? t('header.chatOn') : t('header.chatOff')
   const backend = state.server?.backend
   const applied = meta.status?.applied
 
+  // Session ended: the app-wide banner (role=alert) is the one announcement, so this line stays out of a live region.
+  const sessionEnded = Boolean(session) && state.phase === 'unauthorized'
   let line
   if (state.phase === 'loading') {
     line = <StatusLine tone='info' word={t('header.loading.word')}>{t('header.loading.text')}</StatusLine>
   } else if (state.phase === 'needs-connection') {
     line = <StatusLine tone='warn' word={t('header.needsConnection.word')}>{t('header.needsConnection.text')}</StatusLine>
   } else if (state.phase === 'unauthorized') {
-    line = <StatusLine tone='err' word={t('header.unauthorized.word')}>{t('header.unauthorized.text')}</StatusLine>
+    line = session
+      ? <StatusLine tone='err' word={t('header.sessionExpired.word')} announce={false}>{t('header.sessionExpired.text')}</StatusLine>
+      : <StatusLine tone='err' word={t('header.unauthorized.word')}>{t('header.unauthorized.text')}</StatusLine>
+  } else if (state.phase === 'step-up') {
+    line = <StatusLine tone='warn' word={t('header.stepUp.word')} announce={false}>{t('header.stepUp.text')}</StatusLine>
+  } else if (state.phase === 'not-eligible') {
+    line = <StatusLine tone='warn' word={t('header.notEligible.word')} announce={false}>{t('header.notEligible.text')}</StatusLine>
   } else if (state.phase === 'unavailable') {
     line = <StatusLine tone='warn' word={t('header.unavailable.word')}>{t('header.unavailable.text')}</StatusLine>
   } else if (state.phase === 'error') {
@@ -55,7 +67,7 @@ const Header = () => {
     <header className='as-header'>
       <a className='as-back' href='#/settings'>{t('header.back')}</a>
       <h1 className='as-h1'>{t('title')}</h1>
-      <div aria-live='polite'>{line}</div>
+      <div aria-live={sessionEnded ? undefined : 'polite'}>{line}</div>
       {state.phase === 'error'
         ? <Button buttonType='button' bg='bg-charcoal' minWidth={120} onClick={() => void actions.load()}>{t('header.retry')}</Button>
         : null}
@@ -64,9 +76,12 @@ const Header = () => {
 }
 
 const Body = () => {
+  const { origin } = useOriginPolicy()
+  const { t } = useTranslation('agentSettings')
   const { state } = useAgentSettings()
+  if (!origin.allowed) return <><h1 className='as-h1'>{t('title')}</h1><OriginGuardNotice /><PresentationPreferences /></>
   // When the only thing the person can do is connect or sign in, Connection comes first.
-  const connectFirst = state.phase === 'needs-connection' || state.phase === 'unauthorized'
+  const connectFirst = state.phase === 'needs-connection' || state.phase === 'unauthorized' || state.phase === 'step-up'
   return (
     <>
       <Header />
@@ -88,13 +103,14 @@ const Body = () => {
 export const AgentSettingsPage = ({ client: injected, managed: injectedManaged, now }) => {
   const { t } = useTranslation('agentSettings')
   const picked = useSettingsClient()
-  const client = injected ?? picked.client
+  const { origin } = useOriginPolicy()
+  const client = origin.allowed ? injected ?? picked.client : undefined
   const managed = injectedManaged ?? picked.managed
   return (
     <div data-id='AgentSettingsPage' className='mw8 center as-page'>
-      <Helmet>
+      <>
         <title>{titleWithBrand(t('title'))}</title>
-      </Helmet>
+      </>
       <AgentSettingsProvider client={client} connectionKey={picked.root} managed={managed} now={now}>
         <Body />
       </AgentSettingsProvider>

@@ -3,3 +3,8 @@ build
 storybook-static
 public/agent-chat
 src/webmcp/vendor
+# Immutable upstream archive and generated artifacts; maintained fork src stays linted.
+vendor/ipld-explorer-components/upstream/
+vendor/ipld-explorer-components/dist/
+# Archived design prototype, retained as design input only.
+docs/design/prototype/

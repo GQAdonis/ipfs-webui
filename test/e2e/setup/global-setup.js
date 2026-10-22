@@ -1,12 +1,7 @@
 import { chromium } from '@playwright/test'
 import path from 'node:path'
 import fs from 'node:fs'
-import { fileURLToPath } from 'url'
-import getPort from 'aegir/get-port'
-import { run } from './ipfs-backend.js'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+import { run, stop } from './ipfs-backend.js'
 
 // make sure that ipfs-backend is fully running
 const ensureKuboDaemon = async (apiOpts) => {
@@ -29,31 +24,8 @@ const ensureKuboDaemon = async (apiOpts) => {
 }
 
 const globalSetup = async config => {
-  const backendJsonPath = path.join(__dirname, 'ipfs-backend.json')
-
-  let port = await getPort(5001, '0.0.0.0')
-
-  if (process.env.E2E_API_URL) {
-    const url = new URL(process.env.E2E_API_URL)
-    port = url.port
-  }
-
-  await run(port)
-
-  // Wait for ipfs-backend.json to be created
-  let attempts = 0
-  const maxAttempts = 10
-
-  while (!fs.existsSync(backendJsonPath) && attempts < maxAttempts) {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    attempts++
-  }
-
-  if (!fs.existsSync(backendJsonPath)) {
-    throw new Error('ipfs-backend.json was not created within 10 seconds')
-  }
-
-  const backendConfig = JSON.parse(fs.readFileSync(backendJsonPath))
+  const { baseURL, storageState } = config.projects[0].use
+  const backendConfig = await run([new URL(baseURL).origin])
   const { rpcAddr, id, agentVersion, apiOpts, kuboGateway } = backendConfig
 
   process.env.IPFS_RPC_ADDR = rpcAddr
@@ -61,25 +33,31 @@ const globalSetup = async config => {
   process.env.IPFS_RPC_VERSION = agentVersion
   process.env.IPFS_GATEWAY_PORT = String(kuboGateway.port)
 
-  await ensureKuboDaemon(apiOpts)
-
-  const { baseURL, storageState } = config.projects[0].use
-
-  const browser = await chromium.launch()
-  const page = await browser.newPage()
-
-  await page.goto(baseURL)
-
-  const rpcEndpoint = `${apiOpts.protocol}://${apiOpts.host}:${apiOpts.port}`
-
-  await page.evaluate(({ kuboGateway, rpcEndpoint }) => {
-    localStorage.setItem('kuboGateway', JSON.stringify({ ...kuboGateway, trustlessBlockBrokerConfig: { init: { allowInsecure: true, allowLocal: true } } }))
-    localStorage.setItem('ipfsApi', JSON.stringify(rpcEndpoint))
-    localStorage.setItem('explore.ipld.gatewayEnabled', 'false')
-  }, { rpcEndpoint, kuboGateway })
-
-  await page.context().storageState({ path: storageState })
-  await browser.close()
+  let browser
+  try {
+    await ensureKuboDaemon(apiOpts)
+    browser = await chromium.launch()
+    const context = await browser.newContext()
+    const rpcEndpoint = `${apiOpts.protocol}://${apiOpts.host}:${apiOpts.port}`
+    await context.route('**/*', route => {
+      const url = new URL(route.request().url())
+      if (['http:', 'https:'].includes(url.protocol) && ![new URL(baseURL).origin, rpcEndpoint, `http://${kuboGateway.host}:${kuboGateway.port}`].includes(url.origin)) return route.abort('blockedbyclient')
+      return route.continue()
+    })
+    await context.addInitScript(({ kuboGateway, rpcEndpoint }) => {
+      localStorage.setItem('kuboGateway', JSON.stringify({ ...kuboGateway, trustlessBlockBrokerConfig: { init: { allowInsecure: true, allowLocal: true } } }))
+      localStorage.setItem('ipfsApi', JSON.stringify(rpcEndpoint))
+      localStorage.setItem('explore.ipld.gatewayEnabled', 'false')
+    }, { rpcEndpoint, kuboGateway })
+    const page = await context.newPage()
+    await page.goto(baseURL)
+    fs.mkdirSync(path.dirname(storageState), { recursive: true })
+    await context.storageState({ path: storageState })
+    return async () => { await stop(); fs.rmSync(storageState, { force: true }) }
+  } catch (error) {
+    await stop()
+    throw error
+  } finally { await browser?.close() }
 }
 
 export default globalSetup

@@ -91,7 +91,7 @@ ShortcutSection.propTypes = {
   platform: PropTypes.string.isRequired
 }
 
-const ShortcutModal = ({ onLeave, className, ...props }) => {
+const ShortcutModal = ({ onLeave, className = '', ...props }) => {
   const [platform, setPlatform] = useState('other')
   const { t } = useTranslation('files')
 
@@ -176,10 +176,6 @@ const ShortcutModal = ({ onLeave, className, ...props }) => {
 ShortcutModal.propTypes = {
   onLeave: PropTypes.func.isRequired,
   className: PropTypes.string
-}
-
-ShortcutModal.defaultProps = {
-  className: ''
 }
 
 export default ShortcutModal

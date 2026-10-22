@@ -129,7 +129,7 @@ const TopControls: React.FC<TopControlsProps> = ({ onClear, isExpanded, setIsExp
 export interface LogViewerProps {
   logEntries: LogEntryType[]
   isStreaming: boolean
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>
   style?: React.CSSProperties
   startStreaming: () => void
   stopStreaming: () => void
@@ -140,7 +140,7 @@ interface LogEntryProps {
   logEntry: LogEntryType
 }
 const ROW_GAP = '0.3rem' as const
-const LogEntry = React.memo<LogEntryProps>(({ logEntry }) => {
+const LogEntry = React.memo<LogEntryProps>(function LogEntry ({ logEntry }) {
   const { timestamp, level, subsystem, message, id } = logEntry
   return (
     <div key={`${timestamp}-${subsystem}-${id}`} className="lh-copy ml2 pb3 mb3 row">

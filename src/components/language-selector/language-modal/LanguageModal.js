@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../../lib/react-store.js'
 import i18n, { localesList } from '../../../i18n.js'
 
 // Components
@@ -8,7 +8,7 @@ import { Modal, ModalBody, ModalActions } from '../../modal/modal'
 import { PublishIcon as SpeakerIcon } from '../../../promethity/icons.js'
 import Button from '../../button/button.tsx'
 
-const LanguageModal = ({ t, tReady, onLeave, link, className, isIpfsDesktop, doDesktopUpdateLanguage, ...props }) => {
+const LanguageModal = ({ t, tReady, onLeave, link, className = '', isIpfsDesktop, doDesktopUpdateLanguage, ...props }) => {
   const handleClick = (lang) => {
     i18n.changeLanguage(lang)
     if (isIpfsDesktop) {
@@ -48,10 +48,6 @@ LanguageModal.propTypes = {
   onLeave: PropTypes.func.isRequired,
   t: PropTypes.func.isRequired,
   tReady: PropTypes.bool
-}
-
-LanguageModal.defaultProps = {
-  className: ''
 }
 
 export default connect(

@@ -1,5 +1,4 @@
-import { action } from '@storybook/addon-actions'
-import { withKnobs, boolean } from '@storybook/addon-knobs'
+import { action } from 'storybook/actions'
 import i18nDecorator from '../../i18n-decorator.js'
 import DndDecorator from '../../dnd-decorator.js'
 import FilesList from './FilesList.js'
@@ -18,11 +17,11 @@ const updateSorting = (by, asc) => send({
 })
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Files/Files List',
-  decorators: [i18nDecorator, DndDecorator, withKnobs],
+  decorators: [i18nDecorator, DndDecorator],
   component: FilesList,
   parameters: {
     actions: {
@@ -38,7 +37,7 @@ export default {
     failedPins: [],
     selected: [],
     onSelect: action('Select'),
-    filesIsFetching: boolean('filesIsFetching', false),
+    filesIsFetching: false,
     onShare: action('Share'),
     onInspect: action('Inspect'),
     onRename: action('Rename'),
@@ -59,7 +58,7 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ListWith10Files = {
   name: 'List with 10 files',
@@ -69,7 +68,7 @@ export const ListWith10Files = {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ListWith100Files = {
   name: 'List with 100 files',
@@ -79,7 +78,7 @@ export const ListWith100Files = {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ListWith1000Files = {
   name: 'List with 1000 files',
@@ -89,7 +88,7 @@ export const ListWith1000Files = {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ListWith5000Files = {
   name: 'List with 5000 Files',

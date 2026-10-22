@@ -10,9 +10,8 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as crypto from 'crypto'
 import { test as baseTest, expect } from '@playwright/test'
-import { createNode } from 'ipfsd-ctl'
 import { create } from 'kubo-rpc-client'
-import { path as kuboPath } from 'kubo'
+import { startOwnedKubo } from '../../helpers/owned-kubo.mjs'
 
 const istanbulCLIOutput = path.join(process.cwd(), '.nyc_output')
 
@@ -26,6 +25,11 @@ export function generateUUID () {
 export const test = baseTest.extend({
   // Coverage collection context (same as original coverage.js)
   context: async ({ context }, use) => {
+    await context.route('**/*', route => {
+      const url = new URL(route.request().url())
+      if (['http:', 'https:'].includes(url.protocol) && (!['127.0.0.1', 'localhost', '[::1]', 'custom-gw-test.localhost'].includes(url.hostname) || ['4001', '5001', '8080', '3001'].includes(url.port))) return route.abort('blockedbyclient')
+      return route.continue()
+    })
     await context.addInitScript(() =>
       window.addEventListener('beforeunload', () =>
         window.collectIstanbulCoverage(JSON.stringify(window.__coverage__))
@@ -66,15 +70,8 @@ export const test = baseTest.extend({
    */
   // eslint-disable-next-line no-empty-pattern
   peerNode: [async ({}, use) => {
-    const node = await createNode({
-      type: 'kubo',
-      bin: process.env.IPFS_GO_EXEC || kuboPath(),
-      rpc: create,
-      test: true,
-      disposable: true
-    })
-    await use(node)
-    await node.stop()
+    const node = await startOwnedKubo()
+    try { await use(node) } finally { await node.stop() }
   }, { scope: 'worker' }],
 
   /**

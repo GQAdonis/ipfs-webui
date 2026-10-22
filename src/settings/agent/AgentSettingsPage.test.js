@@ -1,9 +1,10 @@
+import { vi } from 'vitest'
 // webui-agent-settings-page 1.7: every state of the page, against a fake
 // SettingsClient (the page never learns which transport it has), in both themes.
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act, cleanup, within } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import { initReactI18next } from 'react-i18next'
 import i18n from 'i18next'
 import ICU from 'i18next-icu'
@@ -12,16 +13,18 @@ import agentSettingsEn from '../../../public/locales/en/agentSettings.json'
 import agentChatEn from '../../../public/locales/en/agentChat.json'
 import webmcpEn from '../../../public/locales/en/webmcp.json'
 import searchEn from '../../../public/locales/en/search.json'
+import { getOriginPolicy } from '../../agent-chat/origin-policy.js'
 import { AgentSettingsPage } from './AgentSettingsPage.js'
 import AgentSettingsSummary from './AgentSettingsSummary.js'
 import { SettingsError } from './core/errors.js'
 import { resetAdminTokenForTests, getAdminToken, getAdminTokenRoot, setAdminToken } from './core/admin-token.js'
 import { STORAGE_KEY as CHAT_KEY, resetForTests as resetChat, getSettings as getChat, updateSettings as updateChat } from '../../agent-chat/settings-store.js'
 import { STORAGE_KEY as WEBMCP_KEY, resetForTests as resetWebMcp } from '../../webmcp/settings-store.js'
+import { enterSession, markSessionExpired, resetSessionForTests } from '../../agent-chat/session.js'
+import SessionBanner from '../../agent-chat/SessionBanner.js'
 
-// Box wraps its children in an error boundary imported as .js from a .tsx file, which webpack
-// resolves and jest does not. The panel markup is all this test needs.
-jest.mock('../../components/box/Box.js', () => ({
+// Keep the page fixture focused on panel markup; error boundaries have their own fixtures.
+vi.mock('../../components/box/Box.js', () => ({
   __esModule: true,
   default: ({ className, children }) => <section className={className}>{children}</section>
 }))
@@ -42,25 +45,25 @@ i18n.use(ICU).use(initReactI18next).init({
 const SERVER = (backend = null, revision = 'rev-1') => ({ revision, backend, system_prompt: { safety_prefix: 'p', custom: '' } })
 const OPENAI = { kind: 'openai', base_url: 'http://127.0.0.1:4000/v1', model: 'qwen3:8b', api_key: { set: false } }
 
-/** A SettingsClient whose every method is a recorded jest.fn. */
+/** A SettingsClient whose every method is a recorded vi.fn. */
 function fakeClient ({ server = SERVER(null), status = { transport: 'http', managed_by_desktop: false }, ...over } = {}) {
   let current = server
   const listeners = new Set()
   const client = {
-    get: jest.fn(async () => current),
-    set: jest.fn(async (req) => {
+    get: vi.fn(async () => current),
+    set: vi.fn(async (req) => {
       const b = { ...(current.backend ?? { kind: 'openai', api_key: { set: false } }), ...req.backend }
       current = SERVER(b, 'rev-2')
       return current
     }),
-    testConnection: jest.fn(async () => ({ ok: true, latency_ms: 12, models: ['qwen3:8b', 'llama3.1', 'mistral'] })),
-    setApiKey: jest.fn(async () => {
+    testConnection: vi.fn(async () => ({ ok: true, latency_ms: 12, models: ['qwen3:8b', 'llama3.1', 'mistral'] })),
+    setApiKey: vi.fn(async () => {
       current = SERVER(current.backend && { ...current.backend, api_key: { set: true, source: 'settings_api' } }, 'rev-k')
       return { revision: 'rev-k', api_key: { set: true, source: 'settings_api' } }
     }),
-    clearApiKey: jest.fn(async () => ({ revision: 'rev-c', api_key: { set: false } })),
-    status: jest.fn(async () => status),
-    onChange: jest.fn((cb) => { listeners.add(cb); return () => listeners.delete(cb) }),
+    clearApiKey: vi.fn(async () => ({ revision: 'rev-c', api_key: { set: false } })),
+    status: vi.fn(async () => status),
+    onChange: vi.fn((cb) => { listeners.add(cb); return () => listeners.delete(cb) }),
     emit: (e) => listeners.forEach((cb) => cb(e)),
     ...over
   }
@@ -184,7 +187,7 @@ describe('OpenAI-compatible form', () => {
   })
 
   it('reports a failed test with the node detail; the model stays off until a test is tried, then can be typed because the key goes with Apply', async () => {
-    const client = fakeClient({ testConnection: jest.fn(async () => ({ ok: false, detail: 'the server answered 401. Check the key.' })) })
+    const client = fakeClient({ testConnection: vi.fn(async () => ({ ok: false, detail: 'the server answered 401. Check the key.' })) })
     await open(client)
     chooseOpenAi()
     type('Base URL', 'https://llm.example/v1')
@@ -197,7 +200,7 @@ describe('OpenAI-compatible form', () => {
   })
 
   it('accepts a free-text model when the backend hides its list', async () => {
-    const client = fakeClient({ testConnection: jest.fn(async () => ({ ok: true, latency_ms: 3 })) })
+    const client = fakeClient({ testConnection: vi.fn(async () => ({ ok: true, latency_ms: 3 })) })
     await open(client)
     chooseOpenAi()
     type('Base URL', 'https://llm.example/v1')
@@ -266,7 +269,7 @@ describe('the stored key and Test connection (security)', () => {
   })
 
   it('shows "reachable, key not sent" as its own state, not as success', async () => {
-    const client = fakeClient({ server: SERVER(STORED), testConnection: jest.fn(async () => ({ ok: true, latency_ms: 9, key_sent: false, models: [] })) })
+    const client = fakeClient({ server: SERVER(STORED), testConnection: vi.fn(async () => ({ ok: true, latency_ms: 9, key_sent: false, models: [] })) })
     await open(client)
     type('Base URL', 'https://llm.example/v1')
     confirmHost('llm.example')
@@ -277,7 +280,7 @@ describe('the stored key and Test connection (security)', () => {
   })
 
   it('says the key was sent when the node reports it', async () => {
-    const client = fakeClient({ server: SERVER(STORED), testConnection: jest.fn(async () => ({ ok: true, latency_ms: 9, key_sent: true, models: ['a'] })) })
+    const client = fakeClient({ server: SERVER(STORED), testConnection: vi.fn(async () => ({ ok: true, latency_ms: 9, key_sent: true, models: ['a'] })) })
     await open(client)
     fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
     expect(await screen.findByText(/The stored key was sent\./)).toBeInTheDocument()
@@ -285,7 +288,7 @@ describe('the stored key and Test connection (security)', () => {
   })
 
   it('says nothing about a key when none is stored', async () => {
-    const client = fakeClient({ server: SERVER(OPENAI), testConnection: jest.fn(async () => ({ ok: true, latency_ms: 9, key_sent: false, models: [] })) })
+    const client = fakeClient({ server: SERVER(OPENAI), testConnection: vi.fn(async () => ({ ok: true, latency_ms: 9, key_sent: false, models: [] })) })
     await open(client)
     fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
     expect(await screen.findByText(/answered in 9 ms/)).toBeInTheDocument()
@@ -325,7 +328,7 @@ describe('the stored key and Test connection (security)', () => {
     })
 
     it('shows "The key for the old host is not sent to the new host", that it was removed, and prompts for a new key', async () => {
-      const set = jest.fn(async (req) => ({ ...SERVER({ ...STORED, ...req.backend, api_key: { set: false } }, 'rev-2'), key_not_carried: { reason: 'host_changed', cleared: true } }))
+      const set = vi.fn(async (req) => ({ ...SERVER({ ...STORED, ...req.backend, api_key: { set: false } }, 'rev-2'), key_not_carried: { reason: 'host_changed', cleared: true } }))
       await open(fakeClient({ server: SERVER(STORED), set }))
       type('Base URL', 'https://new.example/v1')
       confirmHost('new.example')
@@ -347,7 +350,7 @@ describe('the stored key and Test connection (security)', () => {
     })
 
     it('says a provider change is a server configuration edit on a node that does not accept keys', async () => {
-      const client = fakeClient({ server: SERVER(OPENAI), setApiKey: jest.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') }) })
+      const client = fakeClient({ server: SERVER(OPENAI), setApiKey: vi.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') }) })
       await open(client)
       fireEvent.change(screen.getByLabelText('API key'), { target: { value: 'sk-test-fake-1' } })
       fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
@@ -421,7 +424,7 @@ describe('the stored key and Test connection (security)', () => {
   })
 
   it('says a hidden model list needs the key when the key was withheld', async () => {
-    const client = fakeClient({ server: SERVER(STORED), testConnection: jest.fn(async () => ({ ok: true, latency_ms: 9, key_sent: false })) })
+    const client = fakeClient({ server: SERVER(STORED), testConnection: vi.fn(async () => ({ ok: true, latency_ms: 9, key_sent: false })) })
     await open(client)
     type('Base URL', 'https://llm.example/v1')
     confirmHost('llm.example')
@@ -447,7 +450,7 @@ describe('the stored key and Test connection (security)', () => {
 
 describe('OpenAI-compatible endpoint that needs a key, first run in the browser', () => {
   it('lets a model be typed after a refused test, and Apply sends the key with the URL and model', async () => {
-    const client = fakeClient({ testConnection: jest.fn(async () => ({ ok: false, detail: 'the server answered 401. Check the key.' })) })
+    const client = fakeClient({ testConnection: vi.fn(async () => ({ ok: false, detail: 'the server answered 401. Check the key.' })) })
     await open(client)
     chooseOpenAi()
     expect(screen.queryByRole('button', { name: 'Save key' })).toBeNull()
@@ -517,7 +520,7 @@ describe('the API key', () => {
   it('replaces the field with "Set on the server" on secrets_not_accepted', async () => {
     const client = fakeClient({
       server: SERVER(OPENAI),
-      setApiKey: jest.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') })
+      setApiKey: vi.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') })
     })
     await open(client)
     fireEvent.change(screen.getByLabelText('API key'), { target: { value: 'sk-test-fake-123' } })
@@ -531,7 +534,7 @@ describe('the API key', () => {
   it('shows the node sentence when the settings directory is missing', async () => {
     const client = fakeClient({
       server: SERVER(OPENAI),
-      setApiKey: jest.fn(async () => { throw new SettingsError('http', 'x', { status: 400, detail: 'no settings directory is configured' }) })
+      setApiKey: vi.fn(async () => { throw new SettingsError('http', 'x', { status: 400, detail: 'no settings directory is configured' }) })
     })
     await open(client)
     fireEvent.change(screen.getByLabelText('API key'), { target: { value: 'sk-test-fake-123' } })
@@ -582,7 +585,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('tests the connection as kind uar and reports the result without a model list', async () => {
-    const client = fakeClient({ testConnection: jest.fn(async () => ({ ok: true, latency_ms: 21 })) })
+    const client = fakeClient({ testConnection: vi.fn(async () => ({ ok: true, latency_ms: 21 })) })
     await open(client)
     chooseUar()
     type('Instance URL', 'https://uar.example')
@@ -596,7 +599,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('reports an unreachable or misconfigured runtime with the node detail', async () => {
-    const client = fakeClient({ testConnection: jest.fn(async () => ({ ok: false, detail: 'the instance answered 401. Check the credential.' })) })
+    const client = fakeClient({ testConnection: vi.fn(async () => ({ ok: false, detail: 'the instance answered 401. Check the credential.' })) })
     await open(client)
     chooseUar()
     type('Instance URL', 'https://uar.example')
@@ -607,7 +610,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('never says the key was withheld: the UAR test sends none, with a key stored on the current instance', async () => {
-    const client = fakeClient({ server: SERVER(UAR), testConnection: jest.fn(async () => ({ ok: true })) })
+    const client = fakeClient({ server: SERVER(UAR), testConnection: vi.fn(async () => ({ ok: true })) })
     await open(client)
     fireEvent.click(screen.getByRole('button', { name: 'Test connection' }))
     expect(await screen.findByText('Reachable')).toBeInTheDocument()
@@ -742,7 +745,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('maps secrets_not_accepted from Apply into the server-managed statement and retries without a key', async () => {
-    const set = jest.fn()
+    const set = vi.fn()
       .mockRejectedValueOnce(new SettingsError('secrets_not_accepted', 'no'))
       .mockImplementationOnce(async (req) => SERVER({ kind: 'uar', ...req.backend, api_key: { set: false } }, 'rev-2'))
     await open(fakeClient({ set }))
@@ -770,7 +773,7 @@ describe('Universal Agent Runtime form', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
     expect(screen.getByText(/A key this node reads from the server is sent to this instance/)).toBeInTheDocument()
     cleanup()
-    await open(fakeClient({ server: SERVER(UAR), setApiKey: jest.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') }) }))
+    await open(fakeClient({ server: SERVER(UAR), setApiKey: vi.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') }) }))
     fireEvent.click(screen.getByRole('button', { name: 'Replace key' }))
     type('API key', 'k')
     fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
@@ -818,7 +821,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('moving to another instance asks for its host on Apply but does not hold Test back: the probe carries no key', async () => {
-    const client = fakeClient({ server: SERVER(UAR), testConnection: jest.fn(async () => ({ ok: true, latency_ms: 4 })) })
+    const client = fakeClient({ server: SERVER(UAR), testConnection: vi.fn(async () => ({ ok: true, latency_ms: 4 })) })
     await open(client)
     type('Instance URL', 'https://other.example')
     expect(screen.getByRole('button', { name: 'Test connection' })).not.toBeDisabled()
@@ -831,7 +834,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('says so when the node moved the backend and withheld the credential', async () => {
-    const set = jest.fn(async () => ({ ...SERVER({ kind: 'uar', base_url: 'https://other.example', api_key: { set: false } }, 'rev-2'), key_not_carried: { reason: 'host_changed', cleared: true } }))
+    const set = vi.fn(async () => ({ ...SERVER({ kind: 'uar', base_url: 'https://other.example', api_key: { set: false } }, 'rev-2'), key_not_carried: { reason: 'host_changed', cleared: true } }))
     await open(fakeClient({ server: SERVER(UAR), set }))
     type('Instance URL', 'https://other.example')
     confirmHost('other.example')
@@ -840,7 +843,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('shows the failure with the runtime lead and the node detail, and Retry stays available', async () => {
-    const set = jest.fn(async () => { throw new SettingsError('http', 'x', { status: 502, detail: 'the runtime refused the agent: bad credential' }) })
+    const set = vi.fn(async () => { throw new SettingsError('http', 'x', { status: 502, detail: 'the runtime refused the agent: bad credential' }) })
     await open(fakeClient({ set }))
     chooseUar()
     type('Instance URL', 'https://uar.example')
@@ -855,7 +858,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('does not blame the runtime for a network failure', async () => {
-    const set = jest.fn(async () => { throw new SettingsError('network', 'x') })
+    const set = vi.fn(async () => { throw new SettingsError('network', 'x') })
     await open(fakeClient({ set }))
     chooseUar()
     type('Instance URL', 'https://uar.example')
@@ -867,7 +870,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('recovers from a stale revision and retries on the current one', async () => {
-    const set = jest.fn()
+    const set = vi.fn()
       .mockRejectedValueOnce(new SettingsError('revision_conflict', 'stale', { details: { current_revision: 'rev-7' } }))
       .mockImplementationOnce(async (req) => SERVER({ kind: 'uar', ...req.backend, api_key: { set: false } }, 'rev-8'))
     const client = fakeClient({ set })
@@ -887,7 +890,7 @@ describe('Universal Agent Runtime form', () => {
   })
 
   it('shows the key as set on the server when the node refuses keys through this page', async () => {
-    const setApiKey = jest.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') })
+    const setApiKey = vi.fn(async () => { throw new SettingsError('secrets_not_accepted', 'no') })
     await open(fakeClient({ server: SERVER({ kind: 'uar', base_url: 'https://uar.example', api_key: { set: false } }), setApiKey }))
     type('API key', 'cred')
     fireEvent.click(screen.getByRole('button', { name: 'Save key' }))
@@ -905,7 +908,7 @@ describe('apply states', () => {
 
   it('shows Applying with the form still readable, then the failure with what stayed unchanged and focus on it', async () => {
     let reject
-    const client = fakeClient({ server: SERVER(OPENAI), set: jest.fn(() => new Promise((_resolve, _reject) => { reject = _reject })) })
+    const client = fakeClient({ server: SERVER(OPENAI), set: vi.fn(() => new Promise((_resolve, _reject) => { reject = _reject })) })
     await dirtyOpenAi(client)
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
     expect(await screen.findByText('Applying', { selector: 'strong' })).toBeInTheDocument()
@@ -920,7 +923,7 @@ describe('apply states', () => {
   })
 
   it('recovers from a stale revision: reloads, keeps the edits, and the retry carries the new revision', async () => {
-    const set = jest.fn()
+    const set = vi.fn()
       .mockRejectedValueOnce(new SettingsError('revision_conflict', 'stale', { details: { current_revision: 'rev-7' } }))
       .mockImplementationOnce(async (req) => SERVER({ ...OPENAI, ...req.backend }, 'rev-8'))
     const client = fakeClient({ server: SERVER(OPENAI), set })
@@ -939,7 +942,7 @@ describe('apply states', () => {
   })
 
   it('Reload settings after a conflict takes the node values', async () => {
-    const client = fakeClient({ server: SERVER(OPENAI), set: jest.fn(async () => { throw new SettingsError('revision_conflict', 'stale') }) })
+    const client = fakeClient({ server: SERVER(OPENAI), set: vi.fn(async () => { throw new SettingsError('revision_conflict', 'stale') }) })
     await dirtyOpenAi(client)
     client.get.mockResolvedValue(SERVER({ ...OPENAI, model: 'node-model' }, 'rev-7'))
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
@@ -986,7 +989,7 @@ describe('connection states (HTTP)', () => {
   })
 
   it('says "Sign in again" on a 401 and offers the token field', async () => {
-    const client = fakeClient({ get: jest.fn(async () => { throw new SettingsError('unauthorized', 'no', { status: 401 }) }) })
+    const client = fakeClient({ get: vi.fn(async () => { throw new SettingsError('unauthorized', 'no', { status: 401 }) }) })
     render(<AgentSettingsPage client={client} />)
     expect((await screen.findAllByText('Sign in again')).length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: 'Sign in again' })).toBeInTheDocument()
@@ -994,13 +997,13 @@ describe('connection states (HTTP)', () => {
   })
 
   it('explains an absent route', async () => {
-    const client = fakeClient({ get: jest.fn(async () => { throw new SettingsError('route_absent', 'no', { status: 404 }) }) })
+    const client = fakeClient({ get: vi.fn(async () => { throw new SettingsError('route_absent', 'no', { status: 404 }) }) })
     render(<AgentSettingsPage client={client} />)
     expect(await screen.findByText(/serves no agent settings/)).toBeInTheDocument()
   })
 
   it('shows a load error with a retry', async () => {
-    const get = jest.fn().mockRejectedValueOnce(new SettingsError('network', 'x')).mockResolvedValue(SERVER(null))
+    const get = vi.fn().mockRejectedValueOnce(new SettingsError('network', 'x')).mockResolvedValue(SERVER(null))
     render(<AgentSettingsPage client={fakeClient({ get })} />)
     expect(await screen.findByText('Could not load')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
@@ -1015,7 +1018,7 @@ describe('connection states (HTTP)', () => {
   })
 
   it('keeps the draft when a new token for the same node replaces a refused one', async () => {
-    const refused = fakeClient({ server: SERVER(OPENAI), testConnection: jest.fn(async () => { throw new SettingsError('unauthorized', 'no', { status: 401 }) }) })
+    const refused = fakeClient({ server: SERVER(OPENAI), testConnection: vi.fn(async () => { throw new SettingsError('unauthorized', 'no', { status: 401 }) }) })
     const view = render(<AgentSettingsPage client={refused} />)
     await waitFor(() => expect(screen.queryByText('Reading the settings from the node.')).toBeNull())
     const model = screen.getByRole('combobox', { name: 'Model' })
@@ -1128,7 +1131,7 @@ describe('under IPFS Desktop', () => {
   })
 
   it('shows the confirmation switch when Desktop exposes one, and writes through it', async () => {
-    const sw = { get: jest.fn(async () => true), set: jest.fn(async () => {}) }
+    const sw = { get: vi.fn(async () => true), set: vi.fn(async () => {}) }
     globalThis.ipfsDesktop = { desktopConfirm: sw }
     await open(fakeClient({ server: SERVER(OPENAI), status: desktopStatus }), { managed: true })
     const toggle = await screen.findByRole('switch', { name: 'Desktop confirmation window' })
@@ -1139,7 +1142,7 @@ describe('under IPFS Desktop', () => {
   })
 
   it('shows a stopped service as a state, not a crash', async () => {
-    const get = jest.fn(async () => { throw new SettingsError('unavailable', 'x', { detail: 'the agent service is not running' }) })
+    const get = vi.fn(async () => { throw new SettingsError('unavailable', 'x', { detail: 'the agent service is not running' }) })
     await open(fakeClient({ get, status: { ...desktopStatus, sidecar: { running: false } } }), { managed: true })
     expect(await screen.findByText('Could not load')).toBeInTheDocument()
     expect(screen.getByText(/the agent service is not running/)).toBeInTheDocument()
@@ -1149,7 +1152,7 @@ describe('under IPFS Desktop', () => {
 
 describe('the Settings summary row', () => {
   it('is a status and a link to the agent page, and makes no request', () => {
-    const fetchSpy = jest.fn()
+    const fetchSpy = vi.fn()
     globalThis.fetch = fetchSpy
     render(<AgentSettingsSummary />)
     const link = screen.getByRole('link', { name: 'Open agent settings' })
@@ -1180,10 +1183,10 @@ describe.each(['dark', 'light'])('accessibility in the %s theme', (theme) => {
   })
 
   it('has no violations in the Universal Agent Runtime form: empty, tested, unreachable and failed', async () => {
-    const testConnection = jest.fn()
+    const testConnection = vi.fn()
       .mockResolvedValueOnce({ ok: true, latency_ms: 9 })
       .mockResolvedValueOnce({ ok: false, detail: 'the instance did not answer' })
-    const set = jest.fn(async () => { throw new SettingsError('http', 'x', { detail: 'the runtime refused the agent' }) })
+    const set = vi.fn(async () => { throw new SettingsError('http', 'x', { detail: 'the runtime refused the agent' }) })
     const { container } = await open(fakeClient({ testConnection, set }))
     fireEvent.click(screen.getByRole('radio', { name: /Universal Agent Runtime/ }))
     expect(await violations(container)).toEqual([])
@@ -1202,7 +1205,7 @@ describe.each(['dark', 'light'])('accessibility in the %s theme', (theme) => {
   })
 
   it('has no violations in the failed and signed-out states', async () => {
-    const failing = fakeClient({ server: SERVER(OPENAI), set: jest.fn(async () => { throw new SettingsError('http', 'x', { detail: 'boom' }) }) })
+    const failing = fakeClient({ server: SERVER(OPENAI), set: vi.fn(async () => { throw new SettingsError('http', 'x', { detail: 'boom' }) }) })
     const { container } = await open(failing)
     const model = screen.getByRole('combobox', { name: 'Model' })
     fireEvent.change(model, { target: { value: 'x' } })
@@ -1211,8 +1214,93 @@ describe.each(['dark', 'light'])('accessibility in the %s theme', (theme) => {
     await screen.findByTestId('apply-failure')
     expect(await violations(container)).toEqual([])
     cleanup()
-    const signedOut = render(<AgentSettingsPage client={fakeClient({ get: jest.fn(async () => { throw new SettingsError('unauthorized', 'x') }) })} />)
+    const signedOut = render(<AgentSettingsPage client={fakeClient({ get: vi.fn(async () => { throw new SettingsError('unauthorized', 'x') }) })} />)
     await screen.findByRole('button', { name: 'Sign in again' })
     expect(await violations(signedOut.container)).toEqual([])
   })
+})
+
+// console-session-auth 3.4: in session mode the Connection section is the sign-in panel (no endpoint or
+// token fields), a 401 says "Sign in again", and a 403 step_up_required explains the second factor.
+describe('console session mode', () => {
+  const REPORT = { principals: [{ name: 'operator', kind: 'admin' }], email: 'ada@example.org', exp: 1900000000, admin: 'ok' }
+  beforeEach(() => { enterSession(REPORT) })
+  afterEach(() => { resetSessionForTests() })
+
+  it('replaces the endpoint and token fields with who is signed in and the sign-out note', async () => {
+    await open(fakeClient())
+    expect(screen.getAllByRole('status').some((el) => el.textContent === 'Signed in as ada@example.org.')).toBe(true)
+    expect(screen.getByText(/does not sign you out of know-me\.tools/)).toBeInTheDocument()
+    expect(screen.queryByLabelText('Access token')).toBeNull()
+    expect(screen.queryByLabelText('Admin token')).toBeNull()
+    expect(missing).toEqual([])
+  })
+
+  it('says "Sign in again" on a 401, with the sign-in action first', async () => {
+    await open(fakeClient({ get: vi.fn(async () => { throw new SettingsError('unauthorized', 'no', { status: 401 }) }) }))
+    expect(screen.getAllByText('The settings did not load because your sign-in has ended.')).not.toHaveLength(0)
+    expect(screen.getByRole('button', { name: 'Sign in again' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+    expect(missing).toEqual([])
+  })
+
+  // m2 of the group 3 UI review: the settings 401 and the app-wide banner are one state, so a screen
+  // reader hears one message (the banner's alert), and the page's own line sits outside a live region.
+  it('announces an ended sign-in once: the banner alerts, the page line is not live', async () => {
+    const client = fakeClient({ get: vi.fn(async () => { throw new SettingsError('unauthorized', 'no', { status: 401 }) }) })
+    render(<><SessionBanner /><AgentSettingsPage client={client} /></>)
+    await waitFor(() => expect(screen.queryByText('Reading the settings from the node.')).toBeNull())
+    act(() => { markSessionExpired() })
+    expect(screen.getAllByRole('alert')).toHaveLength(1)
+    expect(screen.getByRole('alert')).toHaveTextContent('Session ended')
+    const line = screen.getByText('The settings did not load because your sign-in has ended.')
+    expect(line.closest('[aria-live]')).toBeNull()
+    expect(line.closest('[role=alert], [role=status]')).toBeNull()
+  })
+
+  it('explains a 403 step_up_required and offers sign in and sign out', async () => {
+    await open(fakeClient({ get: vi.fn(async () => { throw new SettingsError('step_up_required', 'verify', { status: 403 }) }) }))
+    expect(screen.getAllByText(/recent sign-in with a second factor/)).not.toHaveLength(0)
+    // A reload would return the same token, so the one action is the sign-out that starts a fresh login.
+    expect(screen.queryByRole('button', { name: 'Sign in again' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Sign out and verify again' })).toBeInTheDocument()
+    // One announcement per state: the header says it, the panel does not repeat it as a live region.
+    expect(screen.getAllByText('Verify again')).toHaveLength(1)
+    expect(screen.queryAllByRole('alert')).toHaveLength(0)
+    expect(missing).toEqual([])
+  })
+
+  it('says a 403 for an account with no admin principal once, with no Retry loop', async () => {
+    await open(fakeClient({ get: vi.fn(async () => { throw new SettingsError('forbidden', 'no', { status: 403 }) }) }))
+    expect(screen.getByText(/may not read or change agent settings/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Apply' })).toBeNull()
+    expect(missing).toEqual([])
+  })
+
+  it('moves to the step-up state when Apply is refused for a missing second factor', async () => {
+    const client = fakeClient({ server: SERVER(OPENAI), set: vi.fn(async () => { throw new SettingsError('step_up_required', 'verify', { status: 403 }) }) })
+    await open(client)
+    const model = screen.getByRole('combobox', { name: 'Model' })
+    fireEvent.change(model, { target: { value: 'other-model' } })
+    fireEvent.keyDown(model, { key: 'Enter' })
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Sign out and verify again' })).toBeInTheDocument())
+    expect(screen.getAllByText(/recent sign-in with a second factor/)).not.toHaveLength(0)
+  })
+})
+
+it('keeps local preferences usable on a shared path but never loads admin state or exposes credential/apply controls', async () => {
+  const previous = location.href; const client = fakeClient({ server: SERVER(OPENAI) })
+  try {
+    history.replaceState(null, '', '/ipfs/bafyfixture/'); getOriginPolicy().refresh()
+    render(<AgentSettingsPage client={client} />)
+    await act(async () => { await Promise.resolve() })
+    expect(screen.getByText(agentChatEn.originGuard.shared)).toBeInTheDocument()
+    expect(screen.getByRole('switch', { name: agentChatEn.presentation.decisions.label })).toBeEnabled()
+    expect(screen.queryByRole('button', { name: 'Apply' })).toBeNull()
+    expect(screen.queryByLabelText(/Admin token/)).toBeNull()
+    expect(client.get).not.toHaveBeenCalled(); expect(client.onChange).not.toHaveBeenCalled()
+    expect(client.set).not.toHaveBeenCalled(); expect(client.testConnection).not.toHaveBeenCalled()
+  } finally { cleanup(); history.replaceState(null, '', previous); getOriginPolicy().refresh() }
 })

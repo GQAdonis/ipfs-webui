@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 
 interface TooltipProps {
-  children: React.ReactElement
+  children: React.ReactElement<React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> }>
   text: string
 }
 
@@ -22,11 +22,23 @@ const Tooltip: React.FC<TooltipProps> = ({ children, text, ...props }) => {
   useEffect(() => {
     window.addEventListener('resize', onResize)
     onResize()
-
     return () => {
       window.removeEventListener('resize', onResize)
     }
   }, [onResize])
+
+  const childRef = children.props.ref
+  const attach = useCallback((node: HTMLElement | null) => {
+    el.current = node
+    const dispose = typeof childRef === 'function' ? childRef(node) : undefined
+    if (childRef && typeof childRef !== 'function') childRef.current = node
+    return () => {
+      el.current = null
+      if (typeof dispose === 'function') dispose()
+      else if (typeof childRef === 'function') childRef(null)
+      else if (childRef) childRef.current = null
+    }
+  }, [childRef])
 
   const onMouseOver = () => {
     setShow(true)
@@ -47,13 +59,7 @@ const Tooltip: React.FC<TooltipProps> = ({ children, text, ...props }) => {
         onBlur={onMouseLeave}
         className='overflow-hidden'
       >
-        {React.Children.map(children, (c) =>
-          React.cloneElement(c, {
-            ref: (n: HTMLElement) => {
-              el.current = n
-            }
-          })
-        )}
+        {React.cloneElement(children, { ref: attach })}
       </div>
 
       <div

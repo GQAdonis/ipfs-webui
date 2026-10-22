@@ -1143,5 +1143,17 @@ export const EXCLUDED_TOOLS = [
     {
         "name": "ipfs_index_reconcile",
         "reason": "The search index lives in the ipfs mcp server process; the Web UI has no embedding index."
+    },
+    {
+        "name": "ipfs_index_bulk_start",
+        "reason": "The search index lives in the ipfs mcp server process; the Web UI has no embedding index."
+    },
+    {
+        "name": "ipfs_index_bulk_status",
+        "reason": "The search index lives in the ipfs mcp server process; the Web UI has no embedding index."
+    },
+    {
+        "name": "ipfs_index_bulk_cancel",
+        "reason": "The search index lives in the ipfs mcp server process; the Web UI has no embedding index."
     }
 ];

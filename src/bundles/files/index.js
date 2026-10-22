@@ -1,5 +1,5 @@
 import { sortFiles } from './utils.js'
-import { DEFAULT_STATE, ACTIONS, SORTING } from './consts.js'
+import { DEFAULT_STATE, ACTIONS, SORTING, UPLOAD_CANCELLED } from './consts.js'
 import selectors from './selectors.js'
 import actions from './actions.js'
 
@@ -46,6 +46,8 @@ const resortContent = (state) => {
 }
 
 const createFilesBundle = () => {
+  // Controllers belong to this store's uploads, never to Redux or another store.
+  const uploads = new Map()
   return {
     name: 'files',
 
@@ -72,6 +74,14 @@ const createFilesBundle = () => {
         }
         case ACTIONS.WRITE: {
           return updateJob(state, action.task, action.type)
+        }
+        case ACTIONS.CANCEL_UPLOAD: {
+          return {
+            ...state,
+            pending: state.pending.map(job => job.type === ACTIONS.WRITE && job.init?.uploadToken === action.token
+              ? { ...job, cancelRequested: true }
+              : job)
+          }
         }
         case ACTIONS.PIN_LIST: {
           const { task, type } = action
@@ -121,7 +131,7 @@ const createFilesBundle = () => {
             ...state,
             failed: [],
             finished: [],
-            pending: []
+            cancelled: []
           }
         }
         case ACTIONS.UPDATE_SORT: {
@@ -167,7 +177,7 @@ const createFilesBundle = () => {
         }
       }
     },
-    ...actions(),
+    ...actions(uploads),
     ...selectors()
   }
 }
@@ -228,6 +238,13 @@ const updateJob = (state, task, type) => {
           ]
         }
       } else {
+        if (type === ACTIONS.WRITE && 'code' in task.result.error && task.result.error.code === UPLOAD_CANCELLED) {
+          return {
+            ...state,
+            pending: rest,
+            cancelled: [...state.cancelled, { ...pending, ...task, end: Date.now(), status: 'Cancelled' }]
+          }
+        }
         return {
           ...state,
           pending: rest,

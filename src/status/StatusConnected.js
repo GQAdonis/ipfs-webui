@@ -1,6 +1,6 @@
 import React from 'react'
 import { withTranslation, Trans } from 'react-i18next'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 import { humanSize } from '../lib/files.js'
 
 export const StatusConnected = ({ t, peersCount, repoSize }) => {

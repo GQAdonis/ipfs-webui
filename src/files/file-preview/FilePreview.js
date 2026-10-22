@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { isBinary } from 'istextorbinary'
 import { Trans, withTranslation } from 'react-i18next'
 import typeFromExt from '../type-from-ext/index.js'
@@ -45,10 +45,11 @@ function truncateMiddle (filename, maxLength = 40) {
 
 const Drag = ({ name, size, cid, path, children }) => {
   const [, drag] = useDrag({
+    type: 'FILE',
     item: { name, size, cid, path, type: 'FILE' }
   })
 
-  return <div ref={drag}>
+  return <div ref={node => { drag(node) }}>
     { children }
   </div>
 }

@@ -1,13 +1,14 @@
-import React, { useRef, Fragment, useState, useEffect, useMemo, useCallback } from 'react'
-import { findDOMNode } from 'react-dom'
+import React, { useRef, Fragment, useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { Trans, withTranslation } from 'react-i18next'
 import classnames from 'classnames'
-import { join } from 'path'
 import { sorts } from '../../bundles/files/index.js'
-import { normalizeFiles } from '../../lib/files.js'
-import { List, WindowScroller, AutoSizer } from 'react-virtualized'
+import { List } from 'react-virtualized'
+import { useListWidth } from './list-width.js'
+import { addNativeFiles, reportDropError } from '../native-drop.js'
+import { selectedMoveOperations } from '../move-selection.js'
+import { ownsFileKeyboard } from '../keyboard-scope.js'
 // React DnD
 import { NativeTypes } from 'react-dnd-html5-backend'
 import { useDrop } from 'react-dnd'
@@ -17,11 +18,6 @@ import Checkbox from '../../components/checkbox/Checkbox.js'
 import File from '../file/File.js'
 import LoadingAnimation from '../../components/loading-animation/LoadingAnimation.js'
 import SearchFilter from '../search-filter/SearchFilter'
-
-const addFiles = async (filesPromise, onAddFiles) => {
-  const files = await filesPromise
-  onAddFiles(normalizeFiles(files))
-}
 
 const mergeRemotePinsIntoFiles = (files, remotePins = [], pendingPins = [], failedPins = []) => {
   const remotePinsCids = remotePins.map(id => id.split(':').at(-1))
@@ -51,16 +47,21 @@ const mergeRemotePinsIntoFiles = (files, remotePins = [], pendingPins = [], fail
   })
 }
 
+const emptyPins = []
+
 export const FilesList = ({
-  className = '', files, pins, pinningServices, remotePins = [], pendingPins = [], failedPins = [], filesSorting, updateSorting, filesIsFetching, filesPathInfo, showLoadingAnimation,
+  className = '', files, pins = emptyPins, pinningServices, remotePins = emptyPins, pendingPins = emptyPins, failedPins = emptyPins, filesSorting, updateSorting, filesIsFetching, filesPathInfo, showLoadingAnimation,
   onShare, onSetPinning, selected, onSelect, onInspect, onDownload, onRemove, onRename, onNavigate, onRemotePinClick, onAddFiles, onMove, doFetchRemotePins, doDismissFailedPin, handleContextMenuClick, showSearch, filterRef, t
 }) => {
   const [focused, setFocused] = useState(null)
-  const [firstVisibleRow, setFirstVisibleRow] = useState(null)
-  const [allFiles, setAllFiles] = useState(mergeRemotePinsIntoFiles(files, remotePins, pendingPins, failedPins))
+  const allFiles = useMemo(() => mergeRemotePinsIntoFiles(files, remotePins, pendingPins, failedPins), [files, remotePins, pendingPins, failedPins])
   const [filter, setFilter] = useState(() => filterRef?.current || '')
-  const listRef = useRef()
-  const filesRefs = useRef([])
+  const listRef = useRef(null)
+  const keyboardScope = useRef(null)
+  const sizingRef = useRef(null)
+  const pendingFocus = useRef(null)
+  const filesRefs = useRef({})
+  const listWidth = useListWidth(sizingRef, !showLoadingAnimation)
   const refreshPinCache = true
 
   filesPathInfo = filesPathInfo ?? {}
@@ -70,12 +71,12 @@ export const FilesList = ({
       if (monitor.didDrop()) {
         return
       }
-      const { filesPromise } = monitor.getItem()
-      addFiles(filesPromise, onAddFiles)
+      void addNativeFiles(monitor.getItem(), onAddFiles).catch(reportDropError)
     },
     collect: (monitor) => ({
       isOver: monitor.isOver({ shallow: true }),
-      isDragging: monitor.isDragging
+      isDragging: monitor.getItemType() === NativeTypes.FILE,
+      canDrop: monitor.canDrop()
     }),
     canDrop: _ => filesPathInfo.isMfs
   })
@@ -129,6 +130,7 @@ export const FilesList = ({
   }, [onSelect])
 
   const keyHandler = useCallback((e) => {
+    if (!ownsFileKeyboard(e, keyboardScope.current)) return
     const focusedFile = filteredFiles.find(el => el.name === focused)
 
     // Disable keyboard controls if fetching files
@@ -142,7 +144,7 @@ export const FilesList = ({
       return listRef.current?.forceUpdateGrid?.()
     }
 
-    if (e.key === 'F2' && focused !== null) {
+    if (e.key === 'F2' && focusedFile) {
       return onRename([focusedFile])
     }
 
@@ -152,10 +154,10 @@ export const FilesList = ({
 
     if (e.key === ' ' && focused !== null) {
       e.preventDefault()
-      return toggleOne(focused, true)
+      return toggleOne(focused, !selected.includes(focused))
     }
 
-    if ((e.key === 'Enter' || (e.key === 'ArrowRight' && e.metaKey)) && focused !== null) {
+    if ((e.key === 'Enter' || (e.key === 'ArrowRight' && e.metaKey)) && focusedFile) {
       return onNavigate({ path: focusedFile.path, cid: focusedFile.cid })
     }
 
@@ -172,26 +174,18 @@ export const FilesList = ({
         return
       }
 
-      let name = filteredFiles[index].name
-
-      // If the file we are going to focus is out of view (removed
-      // from the DOM by react-virtualized), focus the first visible file
-      if (!filesRefs.current[name]) {
-        name = filteredFiles[firstVisibleRow]?.name
-      }
-
-      setFocused(name)
+      if (!filteredFiles[index]) return
+      setFocused(filteredFiles[index].name)
     }
   }, [
     filteredFiles,
     focused,
-    firstVisibleRow,
     filesIsFetching,
     onNavigate,
     onRemove,
     onRename,
     onSelect,
-    selected.length,
+    selected,
     selectedFiles,
     toggleOne,
     listRef
@@ -204,10 +198,6 @@ export const FilesList = ({
     }
   }, [keyHandler])
 
-  useEffect(() => {
-    setAllFiles(mergeRemotePinsIntoFiles(files, remotePins, pendingPins, failedPins))
-  }, [files, remotePins, filesSorting, pendingPins, failedPins])
-
   const toggleAll = (checked) => {
     if (checked) {
       onSelect(filteredFiles.map(file => file.name), true)
@@ -217,30 +207,9 @@ export const FilesList = ({
   }
 
   const move = (src, dst) => {
-    if (selectedFiles.length > 0) {
-      const parts = dst.split('/')
-      parts.pop()
-      let basepath = parts.join('/')
-
-      if (basepath === '') {
-        basepath = '/'
-      }
-
-      const toMove = selectedFiles.map(({ name, path }) => ([
-        path,
-        join(basepath, name)
-      ]))
-
-      const res = toMove.find(a => a[0] === src)
-      if (!res) {
-        toMove.push([src, dst])
-      }
-
-      toggleAll(false)
-      toMove.forEach(op => onMove(...op))
-    } else {
-      onMove(src, dst)
-    }
+    const operations = selectedMoveOperations(selectedFiles, src, dst)
+    if (selectedFiles.length) toggleAll(false)
+    return Promise.all(operations.map(([from, to]) => onMove(from, to)))
   }
 
   const sortByIcon = (order) => {
@@ -285,6 +254,14 @@ export const FilesList = ({
     )
   }
 
+  const focusPendingRow = useCallback((name) => {
+    if (pendingFocus.current !== name) return
+    const node = filesRefs.current[name]
+    if (!node) return
+    node.querySelector('input[type="checkbox"]')?.focus({ preventScroll: true })
+    pendingFocus.current = null
+  }, [])
+
   const rowRenderer = ({ index, key, style }) => {
     const pinsString = pins.map(p => p.toString())
     const listItem = filteredFiles[index]
@@ -297,7 +274,12 @@ export const FilesList = ({
     }
 
     return (
-      <div key={key} style={style} ref={r => { filesRefs.current[filteredFiles[index].name] = r }}>
+      <div key={key} style={style} ref={node => {
+        if (node) {
+          filesRefs.current[listItem.name] = node
+          focusPendingRow(listItem.name)
+        } else delete filesRefs.current[listItem.name]
+      }}>
         <File
           {...listItem}
           pinned={pinsString.includes(listItem.cid.toString())}
@@ -317,32 +299,24 @@ export const FilesList = ({
     )
   }
 
-  const onRowsRendered = ({ startIndex }) => setFirstVisibleRow(startIndex)
-
-  const allSelected = selected.length !== 0 && selected.length === filteredFiles.length
+  const allSelected = filteredFiles.length > 0 && filteredFiles.every(file => selected.includes(file.name))
   const rowCount = filteredFiles.length
   const checkBoxCls = classnames({
     'o-1': allSelected,
     'o-70': !allSelected
   }, ['pl2 w2 glow'])
 
-  // Add a separate useEffect to handle scrolling when focus changes
-  const currentFilesRef = filesRefs.current[focused]
-  useEffect(() => {
-    if (focused) {
-      const domNode = currentFilesRef && findDOMNode(currentFilesRef)
-      if (domNode) {
-        domNode.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        const checkbox = domNode.querySelector('input[type="checkbox"]')
-        if (checkbox) checkbox.focus()
-      }
-
-      listRef.current?.forceUpdateGrid?.()
-    }
-  }, [currentFilesRef, focused, listRef])
+  useLayoutEffect(() => {
+    if (focused === null) { pendingFocus.current = null; return }
+    const index = filteredFiles.findIndex(file => file.name === focused)
+    if (index < 0) return
+    pendingFocus.current = focused
+    listRef.current?.scrollToRow({ index, align: 'auto' })
+    focusPendingRow(focused)
+  }, [focused, filteredFiles, focusPendingRow])
 
   return (
-    <section ref={drop} className={classnames('FilesList no-select sans-serif border-box w-100 flex flex-column', className)} data-testid="files-list">
+    <section ref={node => { keyboardScope.current = node; drop(node) }} className={classnames('FilesList no-select sans-serif border-box w-100 flex flex-column', className)} data-testid="files-list">
       { showLoadingAnimation
         ? <LoadingAnimation />
         : <Fragment>
@@ -382,31 +356,12 @@ export const FilesList = ({
             filteredCount={filteredFiles.length}
             totalCount={allFiles.length}
           />}
-          <WindowScroller>
-            {({ height, isScrolling, onChildScroll, scrollTop }) => (
-              <div className='flex-auto'>
-                <AutoSizer disableHeight>
-                  {({ width }) => (
-                    <List
-                      ref={listRef}
-                      autoHeight
-                      width={width}
-                      height={height}
-                      className='outline-0'
-                      aria-label={ t('filesListLabel')}
-                      rowCount={rowCount}
-                      rowHeight={55}
-                      rowRenderer={rowRenderer}
-                      noRowsRenderer={emptyRowsRenderer}
-                      onRowsRendered={onRowsRendered}
-                      isScrolling={isScrolling}
-                      onScroll={onChildScroll}
-                      scrollTop={scrollTop}/>
-                  )}
-                </AutoSizer>
-              </div>
-            )}
-          </WindowScroller>
+          <div className='flex-auto' ref={sizingRef}>
+            <List ref={listRef} scrollElement='window' width={listWidth}
+              className='outline-0' aria-label={t('filesListLabel')}
+              rowCount={rowCount} rowHeight={55} rowRenderer={rowRenderer}
+              noRowsRenderer={emptyRowsRenderer} />
+          </div>
         </Fragment>}
     </section>
   )

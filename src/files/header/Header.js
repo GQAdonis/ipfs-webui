@@ -1,6 +1,6 @@
 import React from 'react'
 import classNames from 'classnames'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
 import { humanSize } from '../../lib/files.js'
 // Components

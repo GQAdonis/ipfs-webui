@@ -1,0 +1,41 @@
+/* Praxis semantic roles, with the confirmed Promethity values and local fonts.
+   Role names: kubo docs/design/openspec/praxis-visual-roles/proposal.md.
+   Mapping: kubo docs/design/DESIGN-PROPOSAL.md, Visual system (UI-01).
+   Promethity has two text tiers: subtle and muted both use text-muted, as the
+   prototype's hints, eyebrows and metadata do. AI is informational, never a
+   control color. These aliases also follow the existing system theme through
+   tokens.css; no palette, font or incumbent component declaration changes. */
+:root,
+:root[data-theme='dark'] {
+  --role-canvas: var(--ground);
+  --role-chrome: var(--surface);
+  --role-surface: var(--surface);
+  --role-raised: var(--raised);
+  --role-hover: var(--control);
+  --role-muted: var(--control);
+  --role-text: var(--text);
+  --role-text-muted: var(--text-muted);
+  --role-text-subtle: var(--text-muted);
+  --role-action: var(--accent);
+  --role-ai: var(--info);
+  --role-ok: var(--ok);
+  --role-warn: var(--warn);
+  --role-err: var(--err);
+}
+
+:root[data-theme='light'] {
+  --role-canvas: var(--ground);
+  --role-chrome: var(--surface);
+  --role-surface: var(--surface);
+  --role-raised: var(--raised);
+  --role-hover: var(--control);
+  --role-muted: var(--control);
+  --role-text: var(--text);
+  --role-text-muted: var(--text-muted);
+  --role-text-subtle: var(--text-muted);
+  --role-action: var(--accent);
+  --role-ai: var(--info);
+  --role-ok: var(--ok);
+  --role-warn: var(--warn);
+  --role-err: var(--err);
+}

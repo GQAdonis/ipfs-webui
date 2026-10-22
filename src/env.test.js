@@ -1,16 +1,14 @@
 /* global describe, it, expect, afterEach */
 // @ts-check
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { getDeploymentEnv } from './env.js'
 
 describe('env.js', function () {
   describe('getDeploymentEnv', function () {
-    const fetchMock = jest.fn()
+    const fetchMock = vi.fn()
     function testOriginAndEnv (url, fetchImpl, expectedEnv, numberOfFetchCalls) {
       it(`${url} returns env ${expectedEnv}`, async () => {
-        const { origin } = new URL(url)
-        // @ts-expect-error
-        jest.spyOn(globalThis, 'location', 'get').mockReturnValue({ origin })
+        globalThis.jsdom.reconfigure({ url })
         fetchMock.mockImplementation(fetchImpl)
         expect(await getDeploymentEnv()).toBe(expectedEnv)
         expect(fetchMock.mock.calls.length).toBe(numberOfFetchCalls)
@@ -22,7 +20,8 @@ describe('env.js', function () {
     })
 
     afterEach(function () {
-      jest.clearAllMocks()
+      vi.clearAllMocks()
+      globalThis.jsdom.reconfigure({ url: 'http://localhost:3000/' })
     })
     afterAll(() => {
       globalThis.fetch = originalFetch

@@ -1,8 +1,7 @@
 import React from 'react'
-import { Helmet } from 'react-helmet'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 import { withTranslation, Trans } from 'react-i18next'
-import ReactJoyride from 'react-joyride'
+import ReactJoyride from '../components/tour/Tour.js'
 // Tour
 import { settingsTour } from '../lib/tours.js'
 import withTour from '../components/tour/withTour.js'
@@ -41,9 +40,10 @@ export const SettingsPage = ({
   toursEnabled, handleJoyrideCallback, isCliTutorModeEnabled, doToggleCliTutorMode, command
 }) => (
   <div data-id='SettingsPage' className='mw9 center'>
-    <Helmet>
+    <>
       <title>{titleWithBrand(t('title'))}</title>
-    </Helmet>
+      <h1 className='clip'>{t('title')}</h1>
+    </>
 
     {/* Enable a full screen loader after updating to a new Kubo RPC address.
       * Will not show on consequent retries after a failure.
@@ -149,7 +149,7 @@ export const SettingsPage = ({
         <Checkbox className='dib' onChange={doToggleCliTutorMode} checked={isCliTutorModeEnabled}
           label={<span className='f5 lh-copy'>{t('cliToggle.label')}</span>}/>
         <Trans i18nKey='cliDescription' t={t}>
-          <p className='f6 mv2'>Enable this option to display a "view code" <CodeIcon className='dib v-mid mh1' /> icon next to common IPFS commands. Clicking it opens a modal with that command's CLI code, so you can paste it into the IPFS command-line interface in your terminal.</p>
+          <p className='f6 mv2'>Enable this option to display a &quot;view code&quot; <CodeIcon className='dib v-mid mh1' /> icon next to common IPFS commands. Clicking it opens a modal with that command&apos;s CLI code, so you can paste it into the IPFS command-line interface in your terminal.</p>
         </Trans>
       </div>
     </Box>

@@ -140,13 +140,13 @@ const bundle = {
 
   /**
    * @param {string} url
-   * @returns {function({dispatch: Function}): any}
+   * @returns {(arg0: {dispatch: Function}) => any}
    */
   doSetAvailableGateway: url => ({ dispatch }) => dispatch({ type: 'SET_AVAILABLE_GATEWAY', payload: url }),
 
   /**
    * @param {string} address
-   * @returns {function({dispatch: Function, store: any}): Promise<void>}
+   * @returns {(arg0: {dispatch: Function, store: any}) => Promise<void>}
    */
   doUpdatePublicGateway: (address) => async ({ dispatch, store }) => {
     await writeSetting('ipfsPublicGateway', address)
@@ -160,7 +160,7 @@ const bundle = {
 
   /**
    * @param {string} address
-   * @returns {function({dispatch: Function, store: any}): Promise<void>}
+   * @returns {(arg0: {dispatch: Function, store: any}) => Promise<void>}
    */
   doUpdatePublicSubdomainGateway: (address) => async ({ dispatch, store }) => {
     await writeSetting('ipfsPublicSubdomainGateway', address)
@@ -172,7 +172,7 @@ const bundle = {
 
   /**
    * @param {string} url
-   * @returns {function({dispatch: Function}): Promise<void>}
+   * @returns {(arg0: {dispatch: Function}) => Promise<void>}
    */
   doUpdateIpfsCheckUrl: (url) => async ({ dispatch }) => {
     await writeSetting('ipfsCheckUrl', url)
@@ -181,7 +181,7 @@ const bundle = {
 
   /**
    * @param {string} address
-   * @returns {function({dispatch: Function, store: any}): Promise<void>}
+   * @returns {(arg0: {dispatch: Function, store: any}) => Promise<void>}
    */
   doUpdateLocalGateway: (address) => async ({ dispatch, store }) => {
     // Normalize: remove trailing slashes
@@ -256,7 +256,7 @@ const bundle = {
 
   /**
    * @param {string} type - a SHARE_LINK_TYPE value
-   * @returns {function({dispatch: Function, store: any}): Promise<void>}
+   * @returns {(arg0: {dispatch: Function, store: any}) => Promise<void>}
    */
   doUpdateShareLinkType: (type) => async ({ dispatch, store }) => {
     await writeSetting('ipfsShareLinkType', type)

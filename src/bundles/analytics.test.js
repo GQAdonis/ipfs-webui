@@ -1,14 +1,14 @@
 /* global describe, it, expect, beforeEach, afterEach */
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { composeBundlesRaw } from 'redux-bundler'
 import createAnalyticsBundle from './analytics.js'
 
 beforeEach(() => {
   global.Countly = {
     q: [],
-    opt_out: jest.fn(),
-    opt_in: jest.fn(),
-    init: jest.fn()
+    opt_out: vi.fn(),
+    opt_in: vi.fn(),
+    init: vi.fn()
   }
 })
 

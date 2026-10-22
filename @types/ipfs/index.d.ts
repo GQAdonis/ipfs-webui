@@ -4,12 +4,12 @@ declare module 'ipfs' {
   import type { Buffer } from 'buffer'
   import type { KuboRPCClient } from 'kubo-rpc-client'
 
-  declare export type UnixFSTime = {
+  export type UnixFSTime = {
     secs: number,
     nsecs: number
   }
 
-  declare export type UnixFSEntry = {
+  export type UnixFSEntry = {
     path: string,
     cid: CID,
     mode: number,
@@ -17,43 +17,43 @@ declare module 'ipfs' {
     size: number
   }
 
-  declare type FileContent =
+  type FileContent =
     | Uint8Array
     | Blob
     | String
     | AsyncIterable<Uint8Array>
     | ReadableStream<Uint8Array>
 
-  declare export type FileType =
+  export type FileType =
     | 'file'
     | 'directory'
 
-  declare type FileObject = {
+  type FileObject = {
     path?: string,
     content?: FileContent,
     mode?: number | string,
     mtime?: Date | UnixFSTime | [number, number]
   }
 
-  declare export type TimeoutOptions = {
+  export type TimeoutOptions = {
     timeout?: number,
     signal?: AbortSignal
   }
 
-  declare export type ListOptions = TimeoutOptions & {}
+  export type ListOptions = TimeoutOptions & {}
 
-  declare export type CatOptions = TimeoutOptions & {
+  export type CatOptions = TimeoutOptions & {
     offset?: number;
     length?: number;
   }
 
-  declare type LoadProgress = {
+  type LoadProgress = {
     total: number,
     loaded: number,
     lengthComputable: boolean
   }
 
-  declare export type AddOptions = TimeoutOptions & {
+  export type AddOptions = TimeoutOptions & {
     chunker?: string,
     cidVersion?: number,
     hashAlg?: number,
@@ -67,7 +67,7 @@ declare module 'ipfs' {
     onDownloadProgress?: (progress: LoadProgress) => void
   }
 
-    declare export type ListEntry = {
+    export type ListEntry = {
     depth: number,
     name: string,
     path: string,
@@ -80,7 +80,7 @@ declare module 'ipfs' {
     mtime: { secs: number, nsecs?: number }
   }
 
-  declare export interface CoreService {
+  export interface CoreService {
     // TODO: cat returns AsyncIterable<Uint8Array>. see https://github.com/ipfs/js-kubo-rpc-client/blob/1ab7941819dd1a48df653ee159e6983608e72132/src/index.ts#L353C50-L353C75
     cat(pathOrCID: string | CID, options?: CatOptions): AsyncIterable<Buffer>;
     ls(pathOrCID: string | CID, options?: ListOptions): AsyncIterable<ListEntry>;
@@ -88,54 +88,54 @@ declare module 'ipfs' {
     addAll(files: Iterable<FileContent | FileObject> | AsyncIterable<FileContent | FileObject> | ReadableStream<FileContent | FileObject>, options?: AddOptions): AsyncIterable<UnixFSEntry>;
   }
 
-  declare export type Pin = { cid: CID }
+  export type Pin = { cid: CID }
 
-  declare export type PinType =
+  export type PinType =
     | 'recursive'
     | 'direct'
     | 'indirect'
 
-  declare export type PinEntry = {
+  export type PinEntry = {
     cid: CID,
     typ: PinType
   }
 
-  declare export type PinListOptions = TimeoutOptions & {
+  export type PinListOptions = TimeoutOptions & {
     paths?: string | CID | string[] | CID[],
     type?: PinType
   }
 
-  declare export type PinRemoveOptions = TimeoutOptions & {
+  export type PinRemoveOptions = TimeoutOptions & {
     recursive?: boolean
   }
 
-  declare export type PinAddOptions = TimeoutOptions & {
+  export type PinAddOptions = TimeoutOptions & {
     recursive?: boolean,
   }
 
-  declare export interface RemotePinServicesOptions {
+  export interface RemotePinServicesOptions {
     cid: CID[];
     service: string;
   }
 
-  declare export interface RemotePinService {
+  export interface RemotePinService {
     rm(options: RemotePinServicesOptions): Promise<boolean>;
   }
 
-  declare export interface PinService {
+  export interface PinService {
     add(cid: CID, options?: PinAddOptions): Promise<Pin[]>;
     ls(options?: PinListOptions): AsyncIterable<PinEntry>;
     rm(cid: CID, options?: PinRemoveOptions): Promise<Pin[]>;
     remote: RemotePinService;
   }
 
-  declare export type FSStatOptions = TimeoutOptions & {
+  export type FSStatOptions = TimeoutOptions & {
     hash?: boolean,
     size?: boolean,
     withLocal?: boolean
   }
 
-  declare export interface FileStat {
+  export interface FileStat {
     cid: CID;
     size: number;
     cumulativeSize: number;
@@ -146,28 +146,28 @@ declare module 'ipfs' {
     sizeLocal: number;
   }
 
-  declare export type FSCopyOptions = TimeoutOptions & {
+  export type FSCopyOptions = TimeoutOptions & {
     parents?: boolean,
     flush?: boolean,
     hashAlg?: string,
     cidVersion?: number
   }
 
-  declare export type FSMoveOptions = TimeoutOptions & {
+  export type FSMoveOptions = TimeoutOptions & {
     parents?: boolean,
     flush?: boolean,
     hashAlg?: string,
     cidVersion?: number
   }
 
-  declare export type FSRemoveOptions = TimeoutOptions & {
+  export type FSRemoveOptions = TimeoutOptions & {
     recursive?: boolean,
     flush?: boolean,
     hashAlg?: string,
     cidVersion?: number
   }
 
-  declare export type FSMakDirectoryOptions = TimeoutOptions & {
+  export type FSMakDirectoryOptions = TimeoutOptions & {
     parents?: boolean,
     mode?: number,
     mtime?: UnixFSTime | Date | [number, number],
@@ -176,7 +176,7 @@ declare module 'ipfs' {
     cidVersion?: number
   }
 
-  declare export interface FileService {
+  export interface FileService {
     stat(path: string, options?: FSStatOptions): Promise<FileStat>;
     cp(from: string, to: string, options?: FSCopyOptions): Promise<void>;
     mv(from: string, to: string, options?: FSMoveOptions): Promise<void>;
@@ -184,42 +184,42 @@ declare module 'ipfs' {
     mkdir(path: string, options: FSMakDirectoryOptions): Promise<void>;
   }
 
-  declare export type NameResloveOptions = TimeoutOptions & {
+  export type NameResloveOptions = TimeoutOptions & {
     recursive?: boolean,
     nocache?: boolean
   }
 
-  declare export interface NameService {
+  export interface NameService {
     resolve(value: string, options?: NameResloveOptions): AsyncIterable<string>
   }
 
-  declare export type ObjectNewOptions = TimeoutOptions & {
+  export type ObjectNewOptions = TimeoutOptions & {
     template?: string,
     recursive?: boolean,
     nocache?: boolean
   }
 
-  declare export type DAGLink = {
+  export type DAGLink = {
     name: string,
     size: number,
     cid: CID
   }
 
-  declare export interface ObjectPatchService {
+  export interface ObjectPatchService {
     addLink(cid: CID, link: DAGLink, options?: TimeoutOptions): Promise<CID>
   }
 
-  declare export interface ObjectService {
+  export interface ObjectService {
     new: (options?: ObjectNewOptions) => Promise<CID>;
     patch: ObjectPatchService
   }
 
-  declare export interface ConfigProfiles {
+  export interface ConfigProfiles {
     list(options?: TimeoutOptions): Promise<Array<{ name: string, description: string }>>;
     apply(name: string, options?: { dryRun?: boolean } & TimeoutOptions): Promise<{ original: Object, updated: Object }>;
   }
 
-  declare export interface ConfigService {
+  export interface ConfigService {
     get(key: string, options?: TimeoutOptions): Promise<Object>;
     getAll(options?: TimeoutOptions): Promise<Object>;
     set(key: string, value: string | number | null | boolean | Object, options?: TimeoutOptions): Promise<void>;
@@ -228,7 +228,7 @@ declare module 'ipfs' {
     profiles: ConfigProfiles;
   }
 
-  declare export interface IPFSService extends CoreService {
+  export interface IPFSService extends CoreService {
     pin: PinService;
     files: FileService;
     name: NameService;
@@ -239,9 +239,9 @@ declare module 'ipfs' {
     stop(options?: TimeoutOptions): Promise<void>
   }
 
-  declare export interface SwarmService {
+  export interface SwarmService {
     connect(addr: Multiaddr, options?: TimeoutOptions): Promise<void>
   }
 
-  declare export let IPFS: IPFSService
+  export let IPFS: IPFSService
 }

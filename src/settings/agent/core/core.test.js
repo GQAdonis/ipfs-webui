@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 // The transport-free parts of the Agent settings page: URL rules, the form
 // reducer, the admin token store, the HTTP client against a fake fetch, and
 // the Desktop bridge wrapper.
@@ -318,7 +319,7 @@ describe('HTTP client', () => {
     text: async () => (typeof body === 'string' ? body : JSON.stringify(body))
   })
   const make = (handler, token = 'tok') => {
-    const fetch = jest.fn(async (url, init) => handler(new URL(url), init))
+    const fetch = vi.fn(async (url, init) => handler(new URL(url), init))
     return { fetch, client: createHttpSettingsClient({ root: ROOT, getToken: () => token, fetch, now: () => Date.parse('2026-10-14T12:00:00Z') }) }
   }
 
@@ -425,7 +426,7 @@ describe('HTTP client', () => {
         cancel: async () => { cancelled = true }
       })
     }
-    const fetch = jest.fn(async () => ({ ok: true, status: 200, headers: { get: () => null }, body }))
+    const fetch = vi.fn(async () => ({ ok: true, status: 200, headers: { get: () => null }, body }))
     const client = createHttpSettingsClient({ root: ROOT, getToken: () => 'tok', fetch, sleep: () => new Promise(() => {}) })
     const seen = []
     const off = client.onChange((e) => seen.push(e))
@@ -440,13 +441,13 @@ describe('HTTP client', () => {
 
 describe('Desktop bridge client', () => {
   const bridge = (over = {}) => ({
-    get: jest.fn(async () => SERVER(OPENAI)),
-    set: jest.fn(async () => SERVER(OPENAI, 'rev-2')),
-    testConnection: jest.fn(async () => ({ ok: true })),
-    setApiKey: jest.fn(async () => ({ revision: 'r', api_key: { set: true, source: 'settings_api' } })),
-    clearApiKey: jest.fn(async () => ({ revision: 'r', api_key: { set: false } })),
-    status: jest.fn(async () => ({ transport: 'desktop-bridge', managed_by_desktop: true, endpoint: 'http://127.0.0.1:50999/agui', sidecar: { running: true, port: 50999 } })),
-    onChange: jest.fn(() => () => {}),
+    get: vi.fn(async () => SERVER(OPENAI)),
+    set: vi.fn(async () => SERVER(OPENAI, 'rev-2')),
+    testConnection: vi.fn(async () => ({ ok: true })),
+    setApiKey: vi.fn(async () => ({ revision: 'r', api_key: { set: true, source: 'settings_api' } })),
+    clearApiKey: vi.fn(async () => ({ revision: 'r', api_key: { set: false } })),
+    status: vi.fn(async () => ({ transport: 'desktop-bridge', managed_by_desktop: true, endpoint: 'http://127.0.0.1:50999/agui', sidecar: { running: true, port: 50999 } })),
+    onChange: vi.fn(() => () => {}),
     ...over
   })
 
@@ -456,24 +457,26 @@ describe('Desktop bridge client', () => {
   })
 
   it('passes calls through and reads the contract error shape from a rejection', async () => {
-    const b = bridge({ set: jest.fn(async () => { throw { error: { code: 'revision_conflict', message: 'stale' } } }) }) // eslint-disable-line no-throw-literal
+    const b = bridge({ set: vi.fn(async () => { throw { error: { code: 'revision_conflict', message: 'stale' } } }) }) // eslint-disable-line no-throw-literal
     const client = createDesktopSettingsClient({ ipfsDesktop: { agentSettings: b } })
     expect((await client.get()).revision).toBe('rev-1')
     await expect(client.set({ revision: 'x', backend: { model: 'm' } })).rejects.toMatchObject({ kind: 'revision_conflict' })
   })
 
   it('turns a plain Error (Touch ID declined and the like) into an error state with its sentence', async () => {
-    const b = bridge({ set: jest.fn(async () => { throw new Error('Touch ID was declined') }) })
+    const b = bridge({ set: vi.fn(async () => { throw new Error('Touch ID was declined') }) })
     const client = createDesktopSettingsClient({ ipfsDesktop: { agentSettings: b } })
     const err = await client.set({ revision: 'x', backend: { model: 'm' } }).catch((e) => e)
     expect(err).toBeInstanceOf(SettingsError)
     expect(err).toMatchObject({ kind: 'unavailable', detail: 'Touch ID was declined' })
   })
 
-  it('offers the confirmation switch only when Desktop exposes it', () => {
+  it('offers the guarded confirmation switch only when Desktop exposes it', async () => {
     expect(getDesktopConfirmSwitch({ ipfsDesktop: { agentSettings: bridge() } })).toBeUndefined()
     const sw = { get: async () => true, set: async () => {} }
-    expect(getDesktopConfirmSwitch({ ipfsDesktop: { desktopConfirm: sw } })).toBe(sw)
+    const wrapper = getDesktopConfirmSwitch({ ipfsDesktop: { desktopConfirm: sw } })
+    expect(await wrapper.get()).toBe(true)
+    await wrapper.set(false)
   })
 
   it('normalises anything unrecognised without echoing it', () => {

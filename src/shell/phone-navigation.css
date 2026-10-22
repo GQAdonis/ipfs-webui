@@ -1,0 +1,74 @@
+:root { --praxis-phone-nav-clearance: 0px; }
+.praxis-phone-navigation-scope { display: none; }
+
+@media (max-width: 539px) {
+  :root { --praxis-phone-nav-clearance: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  .praxis-phone-navigation-scope { display: block; }
+  .praxis-phone-navigation {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    min-block-size: 72px;
+    padding: 4px max(4px, env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+    background: var(--role-chrome);
+    color: var(--role-text-muted);
+    box-shadow: 0 -1px 0 var(--role-hover);
+  }
+  .praxis-phone-navigation a,
+  .praxis-phone-navigation .praxis-phone-more-trigger {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-inline-size: 44px;
+    min-block-size: 56px;
+    padding: 6px 2px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.25;
+    text-decoration: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+  .praxis-phone-navigation a[aria-current='page'],
+  .praxis-phone-navigation .praxis-phone-more-trigger[data-active='true'],
+  .praxis-phone-navigation .praxis-phone-more-trigger[aria-expanded='true'] {
+    background: var(--role-hover);
+    color: var(--role-text);
+  }
+  .praxis-phone-navigation .praxis-phone-more-trigger {
+    /* Theme text and fill must switch together; interpolating either produces
+       unreadable intermediate pairs. Retain non-colour motion. */
+    transition-property: transform, opacity;
+  }
+  .praxis-phone-navigation a:focus-visible,
+  .praxis-phone-navigation .praxis-phone-more-trigger:focus-visible,
+  .praxis-phone-more-links a:focus-visible { outline: 2px solid var(--accent-text); outline-offset: -2px; }
+  [data-ipfs-ui] .praxis-phone-more {
+    padding-block-end: max(24px, env(safe-area-inset-bottom, 0px));
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  }
+  .praxis-phone-more-links { display: grid; gap: 4px; }
+  .praxis-phone-more-links a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-block-size: 48px;
+    min-inline-size: 44px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--role-text);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  .praxis-phone-more-links a[aria-current='page'],
+  .praxis-phone-more-links a:hover { background: var(--role-hover); }
+}

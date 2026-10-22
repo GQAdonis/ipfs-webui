@@ -41,13 +41,13 @@ const selectors = {
  * @typedef {import('redux-bundler').Actions<typeof actions>} Actions
  * @typedef {import('./ipfs-provider').Extra} Extra
  * @typedef {Selectors & Actions} Ext
- * @typedef {import('redux-bundler').Context<State, Message, Ext, Extra>} Context
+ * @typedef {import('redux-bundler').Context<State, Message, Selectors & {doPerformSaveConfig: (text: string) => Promise<void>, doMarkConfigAsOutdated: () => void}, Extra>} Context
  */
 
 const actions = {
   /**
    * @param {string} configStr
-   * @returns {function(Context):Promise<void>}
+   * @returns {(arg0: Context) => Promise<void>}
    */
   doSaveConfig: (configStr) => async ({ store }) => {
     if (store.selectConfigIsSaving()) {
@@ -59,7 +59,7 @@ const actions = {
 
   /**
    * @param {string} configStr
-   * @returns {function(Context):Promise<void>}
+   * @returns {(arg0: Context) => Promise<void>}
    */
   doPerformSaveConfig: (configStr) => perform('CONFIG_SAVE', async (context) => {
     const result = await attempt(async () => {

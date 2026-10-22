@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react'
+import React, { lazy, Suspense, useEffect } from 'react'
+import ComponentLoader from '../loader/ComponentLoader.js'
 import { useTranslation } from 'react-i18next'
 import LogsScreen from './logs-screen/logs-screen.js'
 import { LogsProvider } from '../contexts/logs/index'
@@ -7,6 +8,8 @@ import CheckScreen from './check-screen/check-screen.js'
 import { useBridgeSelector } from '../helpers/context-bridge'
 import { RouteInfo } from '../bundles/routes-types'
 import { ProvideProvider } from '../contexts/ProvideStat'
+
+const DhtProvideScreen = lazy(() => import('./dht-provide/dht-provide-screen'))
 
 type TabKey = 'logs' | 'retrieval' | 'provider'
 
@@ -85,11 +88,10 @@ const DiagnosticsContent: React.FC = () => {
           <CheckScreen cid={remainder} />
         )
       case 'provider': {
-        const DhtProvideScreen = require('./dht-provide/dht-provide-screen').default
         return (
           <IdentityProvider>
             <ProvideProvider>
-              <DhtProvideScreen />
+              <Suspense fallback={<ComponentLoader />}><DhtProvideScreen /></Suspense>
             </ProvideProvider>
           </IdentityProvider>
         )

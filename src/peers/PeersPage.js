@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'
-import { connect } from 'redux-bundler-react'
-import { Helmet } from 'react-helmet'
+import { connect } from '../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
-import ReactJoyride from 'react-joyride'
+import ReactJoyride from '../components/tour/Tour.js'
 import withTour from '../components/tour/withTour.js'
 import { peersTour } from '../lib/tours.js'
 import { getJoyrideLocales } from '../helpers/i8n.js'
@@ -33,9 +32,9 @@ const PeersPage = ({ t, toursEnabled, handleJoyrideCallback }) => {
 
   return (
   <div data-id='PeersPage' className='overflow-hidden'>
-    <Helmet>
+    <>
       <title>{titleWithBrand(t('title'))}</title>
-    </Helmet>
+    </>
 
     <div className='flex justify-end items-center mb3'>
       <CliTutorMode showIcon={true} command={cliCommandList[cliCmdKeys.ADD_NEW_PEER]()} t={t}/>

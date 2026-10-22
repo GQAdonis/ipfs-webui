@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import * as iconImports from './all.js'
 
 interface IconItem {
@@ -44,7 +44,7 @@ const List: FC<ListProps> = ({ iconFilter, size, fill, stroke }) => {
 const meta: Meta<ListProps> = {
   title: 'Icons',
   component: List,
-  // decorators: [withKnobs],
+  // decorators: [],
   argTypes: {
     iconFilter: {
       control: { type: 'text' }

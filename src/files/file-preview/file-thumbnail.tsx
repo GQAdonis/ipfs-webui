@@ -1,6 +1,6 @@
 import { CID } from 'multiformats/cid'
-import React, { useState, useEffect, useCallback, type FC } from 'react'
-import { connect } from 'redux-bundler-react'
+import { useState, useEffect, useCallback, type FC } from 'react'
+import { connect } from '../../lib/react-store.js'
 import typeFromExt from '../type-from-ext/index.js'
 import { toLoopbackIpUrl } from '../../lib/share-link.js'
 import './file-thumbnail.css'

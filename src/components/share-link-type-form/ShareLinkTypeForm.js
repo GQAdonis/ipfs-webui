@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { withTranslation, Trans } from 'react-i18next'
 import Radio from '../radio/radio.tsx'
 import PublicGatewayForm from '../public-gateway-form/PublicGatewayForm.js'

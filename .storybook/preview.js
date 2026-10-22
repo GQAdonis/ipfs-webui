@@ -1,5 +1,5 @@
-import React from 'react'
-import { Provider } from 'redux-bundler-react'
+import React, { useEffect, useState } from 'react'
+import { Provider } from '../src/lib/react-store.js'
 import { I18nextProvider } from 'react-i18next'
 import { DndProvider } from 'react-dnd'
 import 'react-virtualized/styles.css'
@@ -9,41 +9,17 @@ import getStore from '../src/bundles/index.js'
 import i18n from '../src/i18n.js'
 import DndBackend from '../src/lib/dnd-backend.js'
 import { HeliaProvider, ExploreProvider } from 'ipld-explorer-components/providers'
-import { ContextBridgeProvider } from '../src/helpers/context-bridge'
+import { ContextBridgeProvider } from '../src/helpers/context-bridge.tsx'
 
-/**
- * @type {import('@storybook/addons').BaseAnnotations}
- */
-const baseAnnotations = {
-  decorators: [
-    (Story) => (
-      <Provider store={getStore({ ipfs: { apiAddress: null, provider: null, failed: false, ready: false, invalidAddress: false, pendingFirstConnection: false } })}>
-        <ContextBridgeProvider>
-          <I18nextProvider i18n={i18n} >
-            <DndProvider backend={DndBackend}>
-              <HeliaProvider>
-                <ExploreProvider>
-                  <Story />
-                </ExploreProvider>
-              </HeliaProvider>
-            </DndProvider>
-          </I18nextProvider>
-        </ContextBridgeProvider>
-      </Provider>
-    )
-  ],
-  /**
-   * @see https://storybook.js.org/docs/react/essentials/actions#automatically-matching-args
-   */
-  argTypes: {
-    onChange: {
-      action: 'changed'
-    },
-    onClick: {
-      action: 'clicked'
-    }
-  }
+function StoryProviders ({ children }) {
+  const [store] = useState(() => getStore({ ipfs: { apiAddress: null, provider: null, failed: false, ready: false, invalidAddress: false, pendingFirstConnection: false } }))
+  useEffect(() => () => store.destroy(), [store])
+  return <Provider store={store}>
+    <ContextBridgeProvider><I18nextProvider i18n={i18n}><DndProvider backend={DndBackend}>
+      <HeliaProvider><ExploreProvider>{children}</ExploreProvider></HeliaProvider>
+    </DndProvider></I18nextProvider></ContextBridgeProvider>
+  </Provider>
 }
 
-export const decorators = baseAnnotations.decorators
-export const argTypes = baseAnnotations.argTypes
+export const decorators = [(Story) => <StoryProviders><Story /></StoryProviders>]
+export const argTypes = { onChange: { action: 'changed' }, onClick: { action: 'clicked' } }

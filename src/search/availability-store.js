@@ -16,11 +16,11 @@ import { createSearchClient } from './client.js'
 import { isSearchError } from './errors.js'
 import { resolveConnection } from './connection.js'
 import { getSettings as getSearchSettings, subscribe as subscribeSearch } from './settings-store.js'
-import { subscribe as subscribeChat } from '../agent-chat/settings-store.js'
+import { getConnectionStore } from '../agent-chat/connection-store.js'
 
 /**
  * @typedef {'disabled' | 'unconnected' | 'checking' | 'available' | 'unconfigured' | 'denied'} AvailabilityPhase
- * @typedef {{ phase: AvailabilityPhase, status: import('./client.js').IndexStatus | undefined, error: import('./errors.js').SearchError | undefined, connection: 'none' | 'no-endpoint' | 'no-token' | 'ready' }} Availability
+ * @typedef {{ phase: AvailabilityPhase, status: import('./client.js').IndexStatus | undefined, error: import('./errors.js').SearchError | undefined, connection: 'none' | 'no-endpoint' | 'no-token' | 'ready' | 'resolving' | 'session-expired' | 'signing-out', generation?: string }} Availability
  */
 
 /** @type {Availability} */
@@ -34,8 +34,9 @@ export const isNavVisible = (a) => a.phase === 'available' || a.phase === 'denie
  * @param {typeof resolveConnection} [seams.resolve]
  * @param {typeof createSearchClient} [seams.makeClient]
  * @param {() => boolean} [seams.isEnabled]
+ * @param {ReturnType<typeof getConnectionStore>} [seams.connectionStore]
  */
-export function createAvailabilityStore ({ resolve = resolveConnection, makeClient = createSearchClient, isEnabled = () => getSearchSettings().enabled } = {}) {
+export function createAvailabilityStore ({ resolve = resolveConnection, makeClient = createSearchClient, isEnabled = () => getSearchSettings().enabled, connectionStore } = {}) {
   /** @type {Availability} */
   let state = INITIAL
   /** @type {Set<() => void>} */
@@ -43,10 +44,13 @@ export function createAvailabilityStore ({ resolve = resolveConnection, makeClie
   let sequence = 0
   /** @type {AbortController | undefined} */
   let controller
+  let detachLifetime = () => {}
   let lastKey = ''
   let users = 0
   /** @type {Array<() => void>} */
   let unsubscribes = []
+  // Lazy: boot may still be detecting a validated console session at module import time.
+  const lifetimeStore = () => connectionStore ?? (resolve === resolveConnection ? getConnectionStore() : undefined)
 
   /** @param {Availability} next */
   function set (next) {
@@ -56,13 +60,15 @@ export function createAvailabilityStore ({ resolve = resolveConnection, makeClie
 
   function cancel () {
     sequence += 1
+    detachLifetime()
+    detachLifetime = () => {}
     controller?.abort()
     controller = undefined
   }
 
   /**
-   * Re-evaluate. Probes when the connection changed, when `force` is set, or
-   * while denied (a replaced token gets a fresh chance).
+ * Re-evaluate. Probe for a new opaque generation/root, an explicit refresh, or
+ * a denied connection. Root equality alone never establishes auth continuity.
    *
    * @param {{ force?: boolean }} [opts]
    */
@@ -73,32 +79,55 @@ export function createAvailabilityStore ({ resolve = resolveConnection, makeClie
       if (state.phase !== 'disabled') set({ phase: 'disabled', status: undefined, error: undefined, connection: 'none' })
       return
     }
-    const connection = await resolve()
-    if (!isEnabled()) return sync()
-    if (!connection.ok) {
-      cancel()
-      lastKey = ''
-      set({ phase: 'unconnected', status: undefined, error: undefined, connection: connection.reason })
-      return
-    }
-    const key = connection.root
-    if (!force && key === lastKey && state.phase !== 'denied' && state.phase !== 'unconnected' && state.phase !== 'disabled') return
-    lastKey = key
+    const source = lifetimeStore()
+    const generation = source?.getSnapshot().generation
+    const sourceRoot = source?.getSnapshot().root
+    const sourceKey = generation && sourceRoot ? JSON.stringify([generation, sourceRoot]) : ''
+    if (!force && sourceKey && sourceKey === lastKey && ['checking', 'available', 'unconfigured'].includes(state.phase)) return
+    // Fence before the first await: a late resolver must not restart an old probe.
     cancel()
     const mine = sequence
+    const retainedStatus = state.generation === generation ? state.status : undefined
+    let connection
+    try {
+      connection = await (resolve === resolveConnection ? resolve({ store: source }) : resolve())
+    } catch (e) {
+      if (mine !== sequence || !isEnabled() || (source && source.getSnapshot().generation !== generation)) return
+      lastKey = ''
+      set({ phase: 'unconfigured', status: undefined, error: isSearchError(e) ? e : undefined, connection: 'none', ...(generation && { generation }) })
+      return
+    }
+    if (mine !== sequence || !isEnabled() || (source && source.getSnapshot().generation !== generation)) return
+    if (!connection.ok) {
+      lastKey = ''
+      set({ phase: connection.reason === 'resolving' ? 'checking' : 'unconnected', status: undefined, error: undefined, connection: connection.reason, ...(generation && { generation }) })
+      return
+    }
+    if (connection.signal?.aborted || connection.isCurrent?.() === false) return
+    const selectedGeneration = connection.generation ?? generation
+    lastKey = JSON.stringify([selectedGeneration, connection.root])
     controller = new AbortController()
     const { signal } = controller
-    set({ phase: 'checking', status: state.status, error: undefined, connection: 'ready' })
+    const retire = () => {
+      if (mine !== sequence) return
+      cancel()
+      lastKey = ''
+      set({ ...INITIAL, ...(source && { generation: source.getSnapshot().generation }) })
+    }
+    connection.signal?.addEventListener('abort', retire, { once: true })
+    detachLifetime = () => connection.signal?.removeEventListener('abort', retire)
+    const current = () => mine === sequence && isEnabled() && !signal.aborted && connection.isCurrent?.() !== false && (!source || source.getSnapshot().generation === generation)
+    set({ phase: 'checking', status: retainedStatus, error: undefined, connection: 'ready', ...(selectedGeneration && { generation: selectedGeneration }) })
     try {
-      const status = await makeClient({ root: connection.root, getToken: connection.getToken }).status({ signal })
-      if (mine !== sequence) return
-      set({ phase: status.configured ? 'available' : 'unconfigured', status, error: undefined, connection: 'ready' })
+      const status = await makeClient({ root: connection.root, getToken: connection.getToken, session: connection.session === true }).status({ signal })
+      if (!current()) return
+      set({ phase: status.configured ? 'available' : 'unconfigured', status, error: undefined, connection: 'ready', ...(selectedGeneration && { generation: selectedGeneration }) })
     } catch (e) {
-      if (mine !== sequence) return
+      if (!current()) return
       if (/** @type {any} */ (e)?.name === 'AbortError') return
       const error = isSearchError(e) ? e : undefined
       const denied = error?.kind === 'unauthenticated' || error?.kind === 'forbidden'
-      set({ phase: denied ? 'denied' : 'unconfigured', status: undefined, error, connection: 'ready' })
+      set({ phase: denied ? 'denied' : 'unconfigured', status: undefined, error, connection: 'ready', ...(selectedGeneration && { generation: selectedGeneration }) })
     }
   }
 
@@ -119,22 +148,37 @@ export function createAvailabilityStore ({ resolve = resolveConnection, makeClie
     },
     /**
      * A component that needs the answer calls this on mount and the returned
-     * function on unmount. The first user starts listening to the two settings
-     * stores, the last one stops.
+     * function on unmount. The first user listens to Search's switch and the
+     * shared connection lifetime; the last one stops and clears cached status.
      */
     start () {
       users += 1
       if (users === 1) {
-        unsubscribes = [subscribeSearch(() => { void sync() }), subscribeChat(() => { void sync() })]
+        const source = lifetimeStore()
+        unsubscribes = [subscribeSearch(() => { void sync() })]
+        if (source) {
+          unsubscribes.push(source.subscribe(() => {
+            if (state.generation !== source.getSnapshot().generation) {
+              cancel()
+              lastKey = ''
+              set({ ...INITIAL, generation: source.getSnapshot().generation })
+            }
+            void sync()
+          }))
+        }
       }
       void sync()
+      let stopped = false
       return () => {
+        if (stopped) return
+        stopped = true
         users -= 1
         if (users === 0) {
           unsubscribes.forEach((off) => off())
           unsubscribes = []
           cancel()
           lastKey = ''
+          set(INITIAL)
         }
       }
     }

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "offline-contrast-assessment-files",
+  "acceptanceAuthority": false,
+  "files": [
+    {
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue10-clearance/contrast/analyze.py",
+      "sha256": "9c128cfab6d405bfbb107c3986ae245f42c7e037dc7aedf775182f0633bd0a97"
+    },
+    {
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue10-clearance/contrast/assessment.json",
+      "sha256": "b3046e335844e31871638e7777fb54671c69b10fee0c425f2fa8f9ad045825f8"
+    },
+    {
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue10-clearance/contrast/report.md",
+      "sha256": "3df0e6bd32b599a9eb7cfc9b432d0ce1ac73cc51a0fe4d19cbac640b27544f2b"
+    }
+  ]
+}

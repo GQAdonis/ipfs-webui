@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { STATUS } from 'react-joyride'
 
 /**
@@ -9,7 +9,7 @@ import { STATUS } from 'react-joyride'
 const withTour = WrappedComponent => {
   class WithTour extends React.Component {
     /**
-     * @param {import('react-joyride').CallBackProps} data
+     * @param {import('react-joyride').EventData} data
      */
     handleJoyrideCallback = (data) => {
       const { doDisableTours } = this.props

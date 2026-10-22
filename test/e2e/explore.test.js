@@ -79,7 +79,7 @@ async function loadBlockFixtures ({ ipfs, blockCid, blockPutArgs = { format: 'v0
     // check that the CID returned from block.put matches the given block fixture CID
     expect(result.toString()).toBe(blockCid)
   } catch (e) {
-    console.error(e)
+    throw new Error(`Unable to import required immutable Explore fixture ${blockCid}`, { cause: e })
   }
 }
 

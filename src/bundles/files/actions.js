@@ -11,7 +11,7 @@ import last from 'it-last'
 import { CID } from 'multiformats/cid'
 
 import { spawn, perform, send, ensureMFS, Channel, sortFiles, infoFromPath, dispatchAsyncProvide } from './utils.js'
-import { IGNORED_FILES, ACTIONS } from './consts.js'
+import { IGNORED_FILES, ACTIONS, UPLOAD_CANCELLED } from './consts.js'
 
 /**
  * @typedef {import('kubo-rpc-client').KuboRPCClient} IPFSService
@@ -152,29 +152,31 @@ const getPinCIDs = (ipfs) => map(getRawPins(ipfs), (pin) => pin.cid)
  * @typedef {import('../connected').Selectors} ConnectedSelectors
  *
  * @typedef {Object} ConfigSelectors
- * @property {function():string} selectApiUrl
- * @property {function():string} selectGatewayUrl
- * @property {function():string} selectLocalGatewayUrl
- * @property {function():string} selectPublicGateway
- * @property {function():string} selectPublicSubdomainGateway
- * @property {function():string} selectEffectiveShareLinkType
+ * @property {() => string} selectApiUrl
+ * @property {() => string} selectGatewayUrl
+ * @property {() => string} selectLocalGatewayUrl
+ * @property {() => string} selectPublicGateway
+ * @property {() => string} selectPublicSubdomainGateway
+ * @property {() => string} selectEffectiveShareLinkType
  *
  * @typedef {Object} UnkonwActions
- * @property {function(string):Promise<unknown>} doUpdateHash
+ * @property {(arg0: string) => Promise<unknown>} doUpdateHash
  * @typedef {Selectors & Actions & IPFSProviderStore & ConnectedSelectors & ConfigSelectors & UnkonwActions} Ext
  * @typedef {import('../ipfs-provider').Extra} Extra
  * @typedef {import('redux-bundler').Store<Model, Message, Ext>} Store
- * @typedef {import('redux-bundler').Context<Model, Message, Ext, Extra>} Context
+ * @typedef {Selectors & IPFSProviderStore & ConnectedSelectors & ConfigSelectors & UnkonwActions & {doFetch: (info: import('./utils').Info) => Promise<void>, doFilesFetch: () => Promise<void>, doPinsFetch: () => Promise<{pins: CID[]}>}} ContextExt
+ * @typedef {import('redux-bundler').Context<Model, Message, ContextExt, Extra>} Context
  * @typedef {import('./protocol').PageContent} PageContent
  *
  * @typedef {import('redux-bundler').Actions<ReturnType<typeof actions>>} Actions
  *
  */
 
-const actions = () => ({
+/** @param {Map<symbol, {controller: AbortController, cancelled: Error, completed: boolean}>} uploads */
+const actions = (uploads) => ({
   /**
    * Fetches list of pins and updates `state.pins` on successful completion.
-   * @returns {function(Context):Promise<{pins: CID[]}>}
+   * @returns {(arg0: Context) => Promise<{pins: CID[]}>}
    */
   doPinsFetch: () => perform(ACTIONS.PIN_LIST, async (ipfs) => {
     const cids = await all(getPinCIDs(ipfs))
@@ -184,7 +186,7 @@ const actions = () => ({
 
   /**
    * Syncs currently selected path file list.
-   * @returns {function(Context):Promise<void>}
+   * @returns {(arg0: Context) => Promise<void>}
    */
   doFilesFetch: () => async ({ store }) => {
     const isReady = store.selectIpfsReady()
@@ -225,7 +227,7 @@ const actions = () => ({
    * Fetches content for the currently selected path. And updates
    * `state.pageContent` on successful completion.
    * @param {Info} info
-   * @returns {function(Context): *}
+   * @returns {(arg0: Context) => *}
    */
   doFetch: ({ path, realPath, isMfs, isRoot }) => perform(ACTIONS.FETCH, async (ipfs, { store }) => {
     if (isRoot && !isMfs) {
@@ -324,74 +326,123 @@ const actions = () => ({
    * @param {FileStream[]} source
    * @param {string} root
    */
-  doFilesWrite: (source, root) => spawn(ACTIONS.WRITE, async function * (ipfs, { store }) {
-    const files = source
-      // Skip ignored files
-      .filter($ => !IGNORED_FILES.includes(basename($.path)))
-      // Dropped files come as absolute, those added by the file input come
-      // as relative paths, so normalize all to be relative.
-      .map($ => $.path[0] === '/' ? { ...$, path: $.path.slice(1) } : $)
-
-    const totalSize = files.reduce((prev, { size }) => prev + size, 0)
-
-    const entries = files.map(({ path, size }) => ({ path, size }))
-
-    yield { entries, progress: 0 }
-
-    const { result, progress } = importFiles(ipfs, files)
-
-    /** @type {null|{uploaded:number, offset:number, name:string}} */
-    let status = null
-
-    for await (const { name, offset } of progress) {
-      status = status == null
-        ? { uploaded: 0, offset, name }
-        : name === status.name
-          ? { uploaded: status.uploaded, offset, name }
-          : { uploaded: status.uploaded + status.offset, offset, name }
-      const progress = (status.uploaded + status.offset) / totalSize * 100
-
-      yield { entries, progress }
-    }
-
-    try {
-      const added = await result
-
-      const numberOfFiles = files.length
-      const numberOfDirs = countDirs(files)
-      const expectedResponseCount = numberOfFiles + numberOfDirs
-
-      if (added.length !== expectedResponseCount) {
-        // See https://github.com/ipfs/js-ipfs-api/issues/797
-        throw Object.assign(new Error('API returned a partial response.'), {
-          code: 'ERR_API_RESPONSE'
-        })
-      }
-
-      for (const { path, cid } of added) {
-        // Only go for direct children
-        if (path.indexOf('/') === -1 && path !== '') {
-          const src = `/ipfs/${cid}`
-          const dst = join(realMfsPath(root || '/files'), path)
-
+  doFilesWrite: (source, root) => {
+    const uploadToken = Symbol('Files upload')
+    const controller = new AbortController()
+    const cancelled = Object.assign(new Error('Upload cancelled'), { code: UPLOAD_CANCELLED })
+    const owner = { controller, cancelled, completed: false }
+    uploads.set(uploadToken, owner)
+    return async (/** @type {Context} */ context) => {
+      try {
+        return await spawn(ACTIONS.WRITE, async function * (ipfs, { store }) {
+          const checkActive = () => { if (controller.signal.aborted) throw cancelled }
+          let imported
+          let failed = false
           try {
-            await ipfs.files.cp(src, dst)
-          } catch (err) {
-            // TODO: Not sure why we do this. Perhaps a generic error is used
-            // to avoid leaking private information via Countly?
-            throw Object.assign(new Error('ipfs.files.cp call failed'), {
-              code: 'ERR_FILES_CP_FAILED'
-            })
-          }
-        }
-      }
+            const files = source
+              // Skip ignored files
+              .filter($ => !IGNORED_FILES.includes(basename($.path)))
+              // Dropped files come as absolute, those added by the file input come
+              // as relative paths, so normalize all to be relative.
+              .map($ => $.path[0] === '/' ? { ...$, path: $.path.slice(1) } : $)
 
-      yield { entries, progress: 100 }
-      return entries
-    } finally {
-      await store.doFilesFetch()
+            const totalSize = files.reduce((prev, { size }) => prev + size, 0)
+
+            const entries = files.map(({ path, size }) => ({ path, size }))
+
+            yield { entries, progress: 0 }
+            checkActive()
+
+            imported = importFiles(ipfs, files, controller.signal)
+            const { result, progress } = imported
+
+            /** @type {null|{uploaded:number, offset:number, name:string}} */
+            let status = null
+
+            for await (const { name, offset } of progress) {
+              checkActive()
+              status = status == null
+                ? { uploaded: 0, offset, name }
+                : name === status.name
+                  ? { uploaded: status.uploaded, offset, name }
+                  : { uploaded: status.uploaded + status.offset, offset, name }
+              const progress = (status.uploaded + status.offset) / totalSize * 100
+
+              yield { entries, progress }
+            }
+
+            checkActive()
+            const added = await result
+            checkActive()
+
+            const numberOfFiles = files.length
+            const numberOfDirs = countDirs(files)
+            const expectedResponseCount = numberOfFiles + numberOfDirs
+
+            if (added.length !== expectedResponseCount) {
+              // See https://github.com/ipfs/js-ipfs-api/issues/797
+              throw Object.assign(new Error('API returned a partial response.'), {
+                code: 'ERR_API_RESPONSE'
+              })
+            }
+
+            for (const { path, cid } of added) {
+              // Only go for direct children
+              if (path.indexOf('/') === -1 && path !== '') {
+                checkActive()
+                const src = `/ipfs/${cid}`
+                const dst = join(realMfsPath(root || '/files'), path)
+
+                try {
+                  await ipfs.files.cp(src, dst, { signal: controller.signal })
+                  checkActive()
+                } catch (err) {
+                  checkActive()
+                  // TODO: Not sure why we do this. Perhaps a generic error is used
+                  // to avoid leaking private information via Countly?
+                  throw Object.assign(new Error('ipfs.files.cp call failed'), {
+                    code: 'ERR_FILES_CP_FAILED'
+                  })
+                }
+              }
+            }
+
+            checkActive()
+            // Actual copies have completed. A later Cancel during the final
+            // progress notification or refresh cannot relabel completed work.
+            owner.completed = true
+            yield { entries, progress: 100, cancellable: false }
+            return entries
+          } catch (error) {
+            failed = true
+            throw controller.signal.aborted ? cancelled : error
+          } finally {
+            imported?.dispose()
+            await store.doFilesFetch().catch(error => { if (!failed) throw error })
+          }
+        }, { uploadToken })(context)
+      } catch (error) {
+        // Task.spawn has already published the terminal outcome. FilesPage
+        // intentionally does not await uploads; expected cancellation is handled.
+        if (error !== cancelled) throw error
+        return undefined
+      } finally {
+        uploads.delete(uploadToken)
+      }
     }
-  }),
+  },
+
+  /**
+   * @param {symbol} token
+   * @returns {(context: Context) => void}
+   */
+  doFilesCancelUpload: token => ({ store, dispatch }) => {
+    const owner = uploads.get(token)
+    const pending = store.selectFilesPending().some(job => job.init?.uploadToken === token)
+    if (!owner || !pending || owner.completed || owner.controller.signal.aborted) return
+    dispatch({ type: ACTIONS.CANCEL_UPLOAD, token })
+    owner.controller.abort(owner.cancelled)
+  },
 
   /**
    * Deletes `files` with provided paths. On completion (success or fail) will
@@ -503,7 +554,6 @@ const actions = () => ({
 
     const stream = carFile.content.stream()
     try {
-      // @ts-expect-error - https://github.com/ipfs/js-kubo-rpc-client/issues/278
       const result = await all(ipfs.dag.import(stream, {
         pinRoots: true
       }))
@@ -757,7 +807,7 @@ const actions = () => ({
     },
 
   /**
-   * @param {import('./consts').SORTING} by
+   * @param {(typeof import('./consts').SORTING)[keyof typeof import('./consts').SORTING]} by
    * @param {boolean} asc
    */
   doFilesUpdateSorting: (by, asc) => send({
@@ -766,7 +816,7 @@ const actions = () => ({
   }),
 
   /**
-   * Clears all the tasks (pending, complete and failed).
+   * Dismisses settled tasks without discarding live task bookkeeping.
    */
   doFilesClear: () => send({ type: ACTIONS.CLEAR_ALL }),
 
@@ -797,19 +847,27 @@ export default actions
  *
  * @param {IPFSService} ipfs
  * @param {FileStream[]} files
+ * @param {AbortSignal} signal
  */
-const importFiles = (ipfs, files) => {
+const importFiles = (ipfs, files, signal) => {
   /** @type {Channel<{ offset:number, name: string}>} */
   const channel = new Channel()
   const result = all(ipfs.addAll(files, {
     pin: false,
     wrapWithDirectory: false,
-    progress: (offset, name = '') => channel.send({ offset, name })
+    signal,
+    progress: (offset, name = '') => {
+      if (!signal.aborted && !channel.done) channel.send({ offset, name })
+    }
   }))
 
-  result.then(() => channel.close(), error => channel.close(error))
+  /** @param {Error} [error] */
+  const close = error => { if (!channel.done) channel.close(error) }
+  const abort = () => close(signal.reason)
+  signal.addEventListener('abort', abort, { once: true })
+  result.then(() => close(), error => close(error))
 
-  return { result, progress: channel }
+  return { result, progress: channel, dispose: () => signal.removeEventListener('abort', abort) }
 }
 
 /**

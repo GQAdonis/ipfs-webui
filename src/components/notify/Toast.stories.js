@@ -1,17 +1,17 @@
 import React from 'react'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 
 import Toast from './Toast.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Toast'
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = () => (
   <div style={{ height: '100vh' }}>
@@ -22,7 +22,7 @@ export const Default = () => (
 )
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Error = () => (
   <div style={{ height: '100vh' }}>

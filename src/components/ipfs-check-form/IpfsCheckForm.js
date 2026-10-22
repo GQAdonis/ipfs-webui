@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
 import Button from '../button/button.tsx'
 import { checkValidHttpUrl, DEFAULT_IPFS_CHECK_URL } from '../../bundles/gateway.js'

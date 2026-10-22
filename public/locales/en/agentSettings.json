@@ -47,7 +47,19 @@
     },
     "appliedHere": "Last applied here at {time}.",
     "retry": "Try again",
-    "back": "Settings"
+    "back": "Settings",
+    "sessionExpired": {
+      "word": "Not loaded",
+      "text": "The settings did not load because your sign-in has ended."
+    },
+    "stepUp": {
+      "word": "Settings locked",
+      "text": "Changing agent settings needs a recent second-factor sign-in. Use the button under Connection."
+    },
+    "notEligible": {
+      "word": "Not allowed",
+      "text": "This account may not read or change agent settings. Ask the person who runs this node to add you as an admin."
+    }
   },
   "backend": {
     "title": "Backend",
@@ -277,20 +289,22 @@
     "revision_conflict": "The settings changed while you were editing. They were reloaded; check the values, then try again.",
     "egress_confirmation_required": "The node needs the new model host confirmed. Type {host} above.",
     "secrets_not_accepted": "This node does not accept keys through the settings page.",
-    "serverSaid": "Detail: {detail}"
+    "serverSaid": "Detail: {detail}",
+    "step_up_required": "Agent settings need a recent sign-in with a second factor. Use the button under Connection, then retry.",
+    "forbidden": "This account may not change agent settings."
   },
   "features": {
     "title": "Features",
-    "lede": "Each switch applies as soon as you flip it and is kept in this browser. None of them is part of the backend that Apply sends.",
+    "lede": "Browser preferences apply immediately and are separate from backend Apply. Desktop-managed controls use the setting supplied by IPFS Desktop.",
     "managed": "Managed",
     "on": "On",
     "off": "Off",
     "chat": {
       "title": "Agent chat",
-      "help": "Shows the chat button. While off, the page loads nothing and sends no request.",
+      "help": "Stops chat requests and clears the current conversation and unsent draft. Turning it off also forgets the saved browser bearer token. Ordinary IPFS navigation has its own routes; Search and WebMCP have separate controls.",
       "needs": {
         "word": "Needs an endpoint",
-        "text": "The switch is on, but no valid /agui address is set, so the button stays hidden. Set one under Connection."
+        "text": "The switch is on, but no valid /agui address is set, so Ask is unavailable. Set an endpoint under Connection."
       }
     },
     "webmcp": {

@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue10-scoped-source-handoff",
+  "createdAt": "2026-10-21T22:35:48.737393+00:00",
+  "issue": "https://github.com/GQAdonis/ipfs-webui/issues/10",
+  "acceptanceAuthority": false,
+  "standalone": false,
+  "delivery": "Local exact-file source handoff; no commit, push, PR, merge, remote attachment or deployment is implied.",
+  "checkoutHeads": {
+    "kubo": "a3bd2fbbe3114e217730b514ef82732a369510ea",
+    "webui": "ac12af52cf461890d6bc2d4593b1ff4a77c029b9"
+  },
+  "sourceFileCount": 18,
+  "files": [
+    {
+      "root": "webui",
+      "path": "test/boundary/accessibility/contributions.test.js",
+      "sha256": "a8e39e6f0460522b0a472c519187fae6cde67fd996dc8f8cfe62ca75025834fc",
+      "bytes": 7173,
+      "bundlePath": "webui/test/boundary/accessibility/contributions.test.js",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "webui",
+      "path": "test/boundary/accessibility/registration.test.js",
+      "sha256": "6d5c36f82471dc2f8f2061bbe648e1266b548376f48629df37e26286c3b7bb1e",
+      "bytes": 10132,
+      "bundlePath": "webui/test/boundary/accessibility/registration.test.js",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "webui",
+      "path": "test/boundary/registrations/accessibility.mjs",
+      "sha256": "7f08d6d4d31c93ee781fde105ad35f4c9ed3be50750cf180b48d39eb32b9652e",
+      "bytes": 1411,
+      "bundlePath": "webui/test/boundary/registrations/accessibility.mjs",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "webui",
+      "path": "test/boundary/accessibility/contributions.mjs",
+      "sha256": "deecea28fece17fd9e4bd2bb471b146dfe721b454668e9ce237bcbd54cbc790a",
+      "bytes": 6332,
+      "bundlePath": "webui/test/boundary/accessibility/contributions.mjs",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "webui",
+      "path": "test/boundary/chat-runtime/shell-accessibility.mjs",
+      "sha256": "05a98ccf9a8a17de036105a2679a056c791f7651f382677005ef16312849beaf",
+      "bytes": 4158,
+      "bundlePath": "webui/test/boundary/chat-runtime/shell-accessibility.mjs",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "webui",
+      "path": "test/boundary/accessibility/REGISTRATION.md",
+      "sha256": "8853102f9385746927d31164f377b40d48efd23feeff611baace48def6a89385",
+      "bytes": 4844,
+      "bundlePath": "webui/test/boundary/accessibility/REGISTRATION.md",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "webui",
+      "path": "docs/PROMETHITY-FORK.md",
+      "sha256": "e4347f7392d04a248cd73a9e6fb6e7d1f3d3318b6a4c00cbb32cd4e72b26067e",
+      "bytes": 34747,
+      "bundlePath": "webui/docs/PROMETHITY-FORK.md",
+      "trackedAtCheckoutHead": true
+    },
+    {
+      "root": "kubo",
+      "path": "mcp/chat/src/island/Conversation.tsx",
+      "sha256": "57c677d09a07a0d367c2e8a90609a62e8a35c61cefe792a4ef28628183807cdf",
+      "bytes": 10488,
+      "bundlePath": "kubo/mcp/chat/src/island/Conversation.tsx",
+      "trackedAtCheckoutHead": true
+    },
+    {
+      "root": "kubo",
+      "path": "mcp/chat/src/island/BackendEmpty.tsx",
+      "sha256": "fbbf26712e96eec55726039bf7c13b130b120f88735fdd3f5b9222f1a6304f52",
+      "bytes": 2070,
+      "bundlePath": "kubo/mcp/chat/src/island/BackendEmpty.tsx",
+      "trackedAtCheckoutHead": true
+    },
+    {
+      "root": "kubo",
+      "path": "mcp/chat/src/island/RunInspector.tsx",
+      "sha256": "0793f97037a954ab67f5bf5b760f82390b308e7660714c71e1aeaadaa0953af1",
+      "bytes": 9975,
+      "bundlePath": "kubo/mcp/chat/src/island/RunInspector.tsx",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "kubo",
+      "path": "mcp/ui/src/chat/ToolCallCard.tsx",
+      "sha256": "6ade72a5aa0346c92464638213821baa1f9ac7892dbfa4ebc16e14f4a4827ef9",
+      "bytes": 6681,
+      "bundlePath": "kubo/mcp/ui/src/chat/ToolCallCard.tsx",
+      "trackedAtCheckoutHead": true
+    },
+    {
+      "root": "kubo",
+      "path": "mcp/ui/src/chat/ApprovalCard.tsx",
+      "sha256": "9f6724ca6357ae89a434160f07bdd0c0ae32cf872f7d71f5db9615bfeb32c04d",
+      "bytes": 3996,
+      "bundlePath": "kubo/mcp/ui/src/chat/ApprovalCard.tsx",
+      "trackedAtCheckoutHead": true
+    },
+    {
+      "root": "webui",
+      "path": "test/boundary/chat-runtime/browser.mjs",
+      "sha256": "72e2ffc68ff8e05c30e27b8b08ec7a200ecab0cb8bd465b4e27699adf8ddd468",
+      "bytes": 16384,
+      "bundlePath": "webui/test/boundary/chat-runtime/browser.mjs",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "webui",
+      "path": "test/boundary/chat-runtime/fixture.tsx",
+      "sha256": "ec9c73a874572910b39eb2a6a76d080a168427c4e00204e41f9e77c77e1e638b",
+      "bytes": 6715,
+      "bundlePath": "webui/test/boundary/chat-runtime/fixture.tsx",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "webui",
+      "path": "test/boundary/accessibility/contributions/inbox.mjs",
+      "sha256": "d8dc21f2a4525185538eea8559c3c0f4d9cc279e24cc63bcd7a3f33affb45894",
+      "bytes": 5886,
+      "bundlePath": "webui/test/boundary/accessibility/contributions/inbox.mjs",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "root": "webui",
+      "path": "test/boundary/host-fixtures/entry.jsx",
+      "sha256": "27b4c4df7f907e7c11cf6526d1ba6d25f3a74c4f6661f1f2521dc5ed338278c8",
+      "bytes": 9153,
+      "bundlePath": "webui/test/boundary/host-fixtures/entry.jsx",
+      "trackedAtCheckoutHead": false
+    },
+    {
+      "path": "mcp/ui/tests/chat/chat.test.tsx",
+      "sha256": "003e201f81956f911e6e893b85ec2682ca9a3d5475daadec7df7eaf5ddbdd852",
+      "root": "kubo",
+      "bytes": 28097,
+      "bundlePath": "kubo/mcp/ui/tests/chat/chat.test.tsx",
+      "trackedAtCheckoutHead": true
+    },
+    {
+      "path": "mcp/chat/tests/unit/run-inspector-view.test.tsx",
+      "sha256": "57f11882e0ab4bb9bb0d1ce29c2710ae6ae5c2b6124f5de63280edd1e6fae511",
+      "root": "kubo",
+      "bytes": 10065,
+      "bundlePath": "kubo/mcp/chat/tests/unit/run-inspector-view.test.tsx",
+      "trackedAtCheckoutHead": false
+    }
+  ],
+  "provenance": [
+    {
+      "path": "evidence/agentic-ui-frontend/correction-batch/frontend-accessibility-family-isolation/task2/final-source-freeze.json",
+      "sha256": "08c69c991d06dc6c0962d1861b45f7d00f05184421c35173532fe71fcb36b866"
+    },
+    {
+      "path": "evidence/agentic-ui-frontend/correction-batch/frontend-accessibility-family-isolation/task3/measured-correction/final-source-freeze.json",
+      "sha256": "c4b523ea5be5041d5bbd0140829b3a4bc3962f898d8265ba54540fea55f33176"
+    },
+    {
+      "path": "evidence/agentic-ui-frontend/correction-batch/frontend-accessibility-family-isolation/task3/measured-correction/confirmation-summary.json",
+      "sha256": "ca98a12ae4d3eec6bc798f6ca7b8727a2f8d938078c1f371db84bcb4d0fd3c23"
+    },
+    {
+      "path": "evidence/agentic-ui-frontend/correction-batch/frontend-accessibility-family-isolation/task2/green-command-receipt.json",
+      "sha256": "89d6fad7413a9e88bcf2c4b17056c5a837a80b5e0aa9f026304d64218e61f03e"
+    },
+    {
+      "path": "evidence/agentic-ui-frontend/correction-batch/frontend-accessibility-family-isolation/task2/green-vitest.json",
+      "sha256": "0aa43e49be9d1a3786c4a0a2055430d067d46d551207a3fce777b3b127f9447c"
+    }
+  ],
+  "limitations": [
+    "These are complete final file snapshots, not an isolated diff against origin. Files contain existing migration context.",
+    "Requires the existing isolated frontend migration, boundary runner and helpers, five family fixtures, manifests/locks and generated artifacts.",
+    "No backend binary, credentials, node_modules, generated build, Desktop source or broad migration dependency tree is packaged.",
+    "Whole UI-112 and full WCAG certification remain incomplete."
+  ]
+}

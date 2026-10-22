@@ -50,12 +50,12 @@ const selectors = {
 /**
  * @typedef {import('redux-bundler').Actions<typeof actions>} Actions
  * @typedef {Selectors & Actions} Ext
- * @typedef {import('redux-bundler').Context<State, Message, Ext>} Context
+ * @typedef {import('redux-bundler').Context<State, Message, Selectors>} Context
  */
 const actions = {
   /**
    * @param {boolean} value
-   * @returns {function(Context): void}
+   * @returns {(arg0: Context) => void}
    */
   doSetIsNodeInfoOpen: value => ({ dispatch }) => dispatch({ type: 'NODE_INFO_OPEN', payload: value })
 }

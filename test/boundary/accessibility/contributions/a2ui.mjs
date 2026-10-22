@@ -1,0 +1,2 @@
+import { accessibilityCase, CHAT_BROWSER_INPUTS } from '../../chat-runtime/browser.mjs'
+export default { schemaVersion: 1, family: 'a2ui', fixtures: [...CHAT_BROWSER_INPUTS, { root: 'kubo', path: 'mcp/contract/fixtures/agui/read-pin-ls-negotiated.json' }], slots: Object.fromEntries(['viewport-theme-matrix', 'keyboard-and-focus', 'axe', 'reduced-motion'].map(slot => [slot, ctx => accessibilityCase(ctx, 'a2ui', slot)])) }

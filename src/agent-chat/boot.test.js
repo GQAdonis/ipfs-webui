@@ -1,4 +1,5 @@
-/* eslint-env jest */
+import { vi } from 'vitest'
+/* eslint-env vitest */
 import * as chat from './settings-store.js'
 import * as webmcp from '../webmcp/settings-store.js'
 import { migrateAgentDefaults } from './boot.js'
@@ -50,7 +51,7 @@ describe('migrateAgentDefaults (D18: absent keys only)', () => {
   })
 
   it('survives blocked storage', () => {
-    const spy = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked') })
+    const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked') })
     try {
       expect(migrateAgentDefaults()).toEqual([false, false])
     } finally {
@@ -62,38 +63,38 @@ describe('migrateAgentDefaults (D18: absent keys only)', () => {
 // The real startup path: src/index.js with its heavy collaborators stubbed. The stores are
 // evaluated before the migration runs, as in the browser; a stored opt-out must survive.
 describe('app boot through src/index.js', () => {
-  const stubs = () => {
-    jest.doMock('react-dom', () => ({ render: jest.fn() }))
-    jest.doMock('./../App.js', () => () => null)
-    jest.doMock('../bundles/index.js', () => () => ({}))
-    jest.doMock('../lib/bundle-cache.js', () => ({ getAll: async () => ({}) }))
-    jest.doMock('../i18n.js', () => ({}))
-    jest.doMock('../lib/dnd-backend.js', () => ({}))
-    jest.doMock('../helpers/context-bridge.jsx', () => ({ ContextBridgeProvider: ({ children }) => children }), { virtual: true })
-    jest.doMock('ipld-explorer-components/providers', () => ({ HeliaProvider: ({ children }) => children, ExploreProvider: ({ children }) => children }), { virtual: true })
-    jest.doMock('redux-bundler-react', () => ({ Provider: ({ children }) => children }))
-    jest.doMock('react-dnd', () => ({ DndProvider: ({ children }) => children }))
-    jest.doMock('react-i18next', () => ({ I18nextProvider: ({ children }) => children }))
-    for (const css of ['./../index.css', 'react-virtualized/styles.css', '../promethity/fonts.css', '../promethity/tokens.css', '../promethity/theme-overrides.css', '../promethity/components.css']) {
-      jest.doMock(css, () => ({}), { virtual: true })
-    }
-  }
-
+  let mounted
   const boot = async (webmcpStored, chatStored) => {
-    jest.resetModules()
+    vi.resetModules()
     localStorage.clear()
     if (webmcpStored !== undefined) localStorage.setItem('ipfs-webui:webmcp', JSON.stringify(webmcpStored))
     if (chatStored !== undefined) localStorage.setItem('ipfs-webui:agent-chat', JSON.stringify(chatStored))
-    stubs()
-    jest.spyOn(console, 'log').mockImplementation(() => {})
-    require('../index.js')
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    return { chat: require('./settings-store.js'), webmcp: require('../webmcp/settings-store.js') }
+    const order = []
+    vi.doMock('react-dom/client', () => ({ createRoot: () => ({ render: () => order.push('render'), unmount: vi.fn() }) }))
+    vi.doMock('../App.js', () => ({ default: () => null }))
+    vi.doMock('../bundles/index.js', () => ({ default: () => { order.push('store'); return { destroy: vi.fn() } } }))
+    vi.doMock('../lib/bundle-cache.js', () => ({ default: { getAll: async () => { order.push('cache'); return {} } } }))
+    vi.doMock('./session-boot.js', () => ({ bootSession: async () => { order.push('session') } }))
+    vi.doMock('../i18n.js', () => ({ default: {} }))
+    vi.doMock('../lib/dnd-backend.js', () => ({ default: {} }))
+    vi.doMock('../helpers/context-bridge.js', () => ({ ContextBridgeProvider: ({ children }) => children, contextBridge: { clear: vi.fn() } }))
+    vi.doMock('ipld-explorer-components/providers', () => ({ HeliaProvider: ({ children }) => children, ExploreProvider: ({ children }) => children }))
+    vi.doMock('../lib/react-store.js', () => ({ Provider: ({ children }) => children }))
+    vi.doMock('react-dnd', () => ({ DndProvider: ({ children }) => children }))
+    vi.doMock('react-i18next', () => ({ I18nextProvider: ({ children }) => children }))
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+    document.body.innerHTML = '<div id="root"></div>'
+    mounted = await import('../index.js')
+    await mounted.startup
+    expect(order).toEqual(['session', 'cache', 'store', 'render'])
+    return { chat: await import('./settings-store.js'), webmcp: await import('../webmcp/settings-store.js') }
   }
 
   afterEach(() => {
-    jest.restoreAllMocks()
-    jest.dontMock('react-dom')
+    mounted?.unmount()
+    mounted = undefined
+    vi.restoreAllMocks()
+    for (const path of ['react-dom/client', '../App.js', '../bundles/index.js', '../lib/bundle-cache.js', './session-boot.js', '../i18n.js', '../lib/dnd-backend.js', '../helpers/context-bridge.js', 'ipld-explorer-components/providers', '../lib/react-store.js', 'react-dnd', 'react-i18next']) vi.doUnmock(path)
   })
 
   it('keeps a stored enabled: false for both features', async () => {

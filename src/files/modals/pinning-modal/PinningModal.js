@@ -7,7 +7,7 @@ import Checkbox from '../../../components/checkbox/Checkbox.js'
 import { PinnedIcon as GlyphPin, PinCloudIcon as Icon } from '../../../promethity/icons.js'
 import { Modal, ModalActions, ModalBody } from '../../../components/modal/modal'
 import { complianceReportsHomepage } from '../../../constants/pinning.js'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../../lib/react-store.js'
 import './PinningModal.css'
 
 const PinIcon = ({ icon, index }) => {
@@ -22,10 +22,13 @@ const PinIcon = ({ icon, index }) => {
   return <GlyphPin width={32} height={32} className={glyphClass}/>
 }
 
-export const PinningModal = ({ t, tReady, onCancel, onPinningSet, file, pinningServices, remotePins, notRemotePins, pendingPins, doGetFileSizeThroughCid, doSelectRemotePinsForFile, doFetchPinningServices, doFetchRemotePins, className, ...props }) => {
+export const PinningModal = ({ t, tReady, onCancel, onPinningSet, file, pinningServices, remotePins, notRemotePins, pendingPins, doGetFileSizeThroughCid, doSelectRemotePinsForFile, doFetchPinningServices, doFetchRemotePins, className = '', ...props }) => {
   const selectedRemoteServices = useMemo(() => doSelectRemotePinsForFile(file, remotePins, notRemotePins, pendingPins), [doSelectRemotePinsForFile, file, remotePins, notRemotePins, pendingPins])
   const [selectedServices, setSelectedServices] = useState([...selectedRemoteServices, ...[file.pinned && 'local']])
   const [size, setSize] = useState(null)
+  const localSelectionChanged = typeof file.pinned === 'boolean' && file.pinned !== selectedServices.includes('local')
+  const removesLocalPin = file.pinned && !selectedServices.includes('local')
+  const removesRemotePins = selectedRemoteServices.filter(name => pinningServices.some(service => service.name === name) && !selectedServices.includes(name))
 
   useEffect(() => {
     doFetchPinningServices()
@@ -65,6 +68,11 @@ export const PinningModal = ({ t, tReady, onCancel, onPinningSet, file, pinningS
             </button>
           ))}
         </div>
+        <div className='f6 charcoal' aria-live='polite'>
+          <p>{t('pinningModal.retentionHelp')}</p>
+          {typeof file.pinned !== 'boolean' ? <p>{t('pinningModal.localUnknown')}</p> : removesLocalPin ? <p>{t('pinningModal.localRemoval')}</p> : localSelectionChanged ? <p>{t('pinningModal.localAddition')}</p> : removesRemotePins.length > 0 ? <p>{t('pinningModal.remoteOnlyRemoval')}</p> : null}
+          {removesRemotePins.length > 0 ? <><p>{t('pinningModal.remoteRemoval')}</p><ul>{removesRemotePins.map(name => <li key={name}><code>{name}</code></li>)}</ul></> : null}
+        </div>
         {/* <p className='mh0 mt3 mb1 f6'>
           <Trans i18nKey='pinningModal.footer' t={t}>
             Need to add or configure a pinning service? Go to <a href="#/settings" className="link blue">Settings.</a>
@@ -87,10 +95,6 @@ PinningModal.propTypes = {
   onPinningSet: PropTypes.func.isRequired,
   t: PropTypes.func.isRequired,
   file: PropTypes.object.isRequired
-}
-
-PinningModal.defaultProps = {
-  className: ''
 }
 
 export default connect(

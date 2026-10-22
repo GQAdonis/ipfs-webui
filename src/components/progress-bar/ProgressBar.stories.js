@@ -2,14 +2,14 @@ import React from 'react'
 import ProgressBar from './ProgressBar.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Progress Bars'
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Colors = () => (
   <div className="ma2">

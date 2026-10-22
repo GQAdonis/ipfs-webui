@@ -1,7 +1,11 @@
 // @ts-check
 
+import { reportUnauthorized } from '../agent-chat/session.js'
+
 /**
-  * @template State, Message, Ext, Extra
+  * @template State
+  * @template {{type: string}} Message
+  * @template Ext, Extra
   * @typedef {import('redux-bundler').Context<State, Message, Ext, Extra>} BundlerContext
   */
 
@@ -225,6 +229,8 @@ export const perform = (type, task, ...[init]) =>
     }
   } catch (err) {
     const error = /** @type {Error} */(err)
+    // In console session mode a 401 from the RPC means "Sign in again"; elsewhere this does nothing.
+    reportUnauthorized(error)
     context.dispatch({
       type,
       task: {

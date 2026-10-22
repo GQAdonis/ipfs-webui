@@ -4,13 +4,14 @@ import QRCode from 'react-qr-code'
 import Button from '../../../components/button/button.tsx'
 import Checkbox from '../../../components/checkbox/Checkbox.js'
 import { withTranslation, Trans } from 'react-i18next'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { CopyToClipboard } from '../../../components/copy-to-clipboard/CopyToClipboard.js'
 import { Modal, ModalActions, ModalBody } from '../../../components/modal/modal'
 import { SHARE_LINK_TYPE } from '../../../lib/share-link.js'
 
 const COMPANION_URL = 'https://docs.ipfs.tech/install/ipfs-companion/'
 
-const ShareModal = ({ t, tReady, onLeave, link, type, localLink, subdomainLocalLink, className, ...props }) => {
+export const ShareModal = ({ t, tReady, onLeave, link, type = '', localLink = '', subdomainLocalLink = '', className = '', ...props }) => {
+  const helpId = React.useId()
   const [useLocalLink, setUseLocalLink] = useState(false)
   const [useSubdomains, setUseSubdomains] = useState(false)
 
@@ -67,10 +68,19 @@ const ShareModal = ({ t, tReady, onLeave, link, type, localLink, subdomainLocalL
         <div className='flex center w-90 pb2'>
           <input
             value={activeLink}
+            aria-label={t('shareModal.linkLabel')}
+            aria-describedby={helpId}
             readOnly
             className={'input-reset flex-grow-1 charcoal-muted ba br1 pa2 mr2 focus-outline'}
             type='text' />
         </div>
+        <details id={helpId} className='charcoal w-90 center f6 mb3'>
+          <summary>{t('shareModal.contentHelpTitle')}</summary>
+          <p>{t('shareModal.contentIdentity')}</p>
+          <p>{t('shareModal.availability')}</p>
+          <p>{t('shareModal.accessControl')}</p>
+          <p>{t('shareModal.encryption')}</p>
+        </details>
         {offerLocalLink && (
           <div className='flex center w-90 pb2'>
             <Checkbox
@@ -109,13 +119,6 @@ ShareModal.propTypes = {
   subdomainLocalLink: PropTypes.string,
   t: PropTypes.func.isRequired,
   tReady: PropTypes.bool.isRequired
-}
-
-ShareModal.defaultProps = {
-  className: '',
-  type: '',
-  localLink: '',
-  subdomainLocalLink: ''
 }
 
 export default withTranslation('files')(ShareModal)

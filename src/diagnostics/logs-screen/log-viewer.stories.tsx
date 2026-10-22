@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { LogViewer } from './log-viewer'
 import { LogsProvider } from '../../contexts/logs'
 import type { LogEntry } from '../../contexts/logs/api'

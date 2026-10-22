@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { findDOMNode } from 'react-dom'
-import { Helmet } from 'react-helmet'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 import { withTranslation, Trans } from 'react-i18next'
-import ReactJoyride from 'react-joyride'
+import ReactJoyride from '../components/tour/Tour.js'
 // Lib
 import { filesTour } from '../lib/tours.js'
 import { readSetting, writeSetting } from '../bundles/local-storage.js'
@@ -27,6 +25,7 @@ import FileImportStatus from './file-import-status/FileImportStatus.js'
 import { useExplore } from 'ipld-explorer-components/providers'
 import SelectedActions from './selected-actions/SelectedActions.js'
 import { titleWithBrand } from '../promethity/page-title.js'
+import { ownsFileKeyboard } from './keyboard-scope.js'
 
 const FilesPage = ({
   doFetchPinningServices, doFilesFetch, doPinsFetch, doFilesSizeGet, doFilesDownloadLink, doFilesDownloadCarLink, doFilesWrite, doAddCarFile, doFilesBulkCidImport, doFilesAddPath, doUpdateHash,
@@ -35,7 +34,9 @@ const FilesPage = ({
   files, pins, filesPathInfo, filesIsFetching, pinningServices, toursEnabled, handleJoyrideCallback, isCliTutorModeEnabled, cliOptions, filesSorting, t
 }) => {
   const { doExploreUserProvidedPath } = useExplore()
-  const contextMenuRef = useRef()
+  const contextMenuRef = useRef(null)
+  const keyboardScope = useRef(null)
+  const searchFocusFrame = useRef(null)
   const [modals, setModals] = useState({ show: null, files: null })
   const [contextMenu, setContextMenu] = useState({
     isOpen: false,
@@ -74,7 +75,7 @@ const FilesPage = ({
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      if (!ownsFileKeyboard(e, keyboardScope.current) || e.target.tagName === 'INPUT') {
         return
       }
 
@@ -91,7 +92,8 @@ const FilesPage = ({
         } else {
           // Open search and focus the input after React renders it.
           toggleSearch()
-          requestAnimationFrame(() => {
+          searchFocusFrame.current = requestAnimationFrame(() => {
+            searchFocusFrame.current = null
             document.getElementById('search-filter-input')?.focus()
           })
         }
@@ -101,6 +103,10 @@ const FilesPage = ({
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [toggleSearch, showSearch])
+
+  useEffect(() => () => {
+    if (searchFocusFrame.current !== null) cancelAnimationFrame(searchFocusFrame.current)
+  }, [])
 
   // Persist view mode changes to localStorage
   useEffect(() => {
@@ -176,10 +182,10 @@ const FilesPage = ({
     // and deal with the clicking on the ContextMenu options
     if (ev !== undefined && typeof ev !== 'string') {
       ev.preventDefault()
-      ev.persist()
     }
 
-    const ctxMenu = findDOMNode(contextMenuRef.current)
+    const ctxMenu = contextMenuRef.current
+    if (!ctxMenu) return
     const ctxMenuPosition = ctxMenu.getBoundingClientRect()
 
     let translateX = 0
@@ -212,18 +218,20 @@ const FilesPage = ({
     })
   }
 
-  const MainView = ({ t, files, remotePins, pendingPins, failedPins, doExploreUserProvidedPath }) => {
-    const selectedFiles = useMemo(() =>
-      selected
-        .map(name => files?.content?.find(el => el.name === name))
-        .filter(n => n)
-        .map(file => ({
-          ...file,
-          pinned: (pins || []).includes(file.cid.toString())
-        }))
-        /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    , [files?.content, pins, selected])
+  const selectedFiles = useMemo(() =>
+    selected
+      .map(name => files?.content?.find(el => el.name === name))
+      .filter(n => n)
+      .map(file => ({
+        ...file,
+        pinned: (pins || []).includes(file.cid.toString())
+      }))
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  , [files?.content, pins, selected])
 
+  // A render helper preserves the mounted List/Grid and its refs when selection
+  // changes; declaring a component type inside this render remounts it instead.
+  const renderMainView = () => {
     if (!files || files.type === 'file') return null
     // if file not found
     if (files.type === 'not-found') {
@@ -242,7 +250,7 @@ const FilesPage = ({
       return (
         <div>
           <Trans i18nKey='cidNotFileNorDir' t={t}>
-            The current link isn't a file, nor a directory. Try to <button className='link blue pointer' onClick={() => doExploreUserProvidedPath(path)}>inspect</button> it instead.
+            The current link isn&apos;t a file, nor a directory. Try to <button className='link blue pointer' onClick={() => doExploreUserProvidedPath(path)}>inspect</button> it instead.
           </Trans>
         </div>
       )
@@ -328,14 +336,14 @@ const FilesPage = ({
   }
 
   return (
-    <div data-id='FilesPage' className='mw9 center'>
-      <Helmet>
+    <div ref={keyboardScope} data-id='FilesPage' className='mw9 center'>
+      <>
         <title>{getTitle(filesPathInfo, t)}</title>
-      </Helmet>
+      </>
 
       <ContextMenu
         autofocus
-        ref={contextMenuRef}
+        menuRef={contextMenuRef}
         isOpen={contextMenu.isOpen}
         translateX={contextMenu.translateX}
         translateY={contextMenu.translateY}
@@ -403,7 +411,7 @@ const FilesPage = ({
         </div>
       </Header>
 
-      <MainView t={t} files={files} remotePins={remotePins} pendingPins={pendingPins} failedPins={failedPins} doExploreUserProvidedPath={doExploreUserProvidedPath}/>
+      {renderMainView()}
 
       <Preview files={files} onDownload={() => onDownload([files])} onClose={onClosePreview} />
 

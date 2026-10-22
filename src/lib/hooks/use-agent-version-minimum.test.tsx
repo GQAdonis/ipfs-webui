@@ -1,21 +1,21 @@
 import React from 'react'
 import { render } from '@testing-library/react'
-import { describe, it, expect, jest, beforeEach } from '@jest/globals'
-import '@testing-library/jest-dom'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import '@testing-library/jest-dom/vitest'
 import { useAgentVersionMinimum, type UseAgentVersionMinimumProps } from './use-agent-version-minimum'
 import { type AgentVersionObject } from '../parse-agent-version'
 import { useIdentity } from '../../contexts/identity-context'
 import * as compareVersionStringsModule from '../compare-version-strings'
 
 // Mock the identity context
-jest.mock('../../contexts/identity-context', () => ({
-  useIdentity: jest.fn()
+vi.mock('../../contexts/identity-context', () => ({
+  useIdentity: vi.fn()
 }))
 
-const mockUseIdentity = useIdentity as jest.MockedFunction<typeof useIdentity>
+const mockUseIdentity = useIdentity as import('vitest').MockedFunction<typeof useIdentity>
 
 // Spy on cmpVersionStrings to track calls while using real implementation
-const cmpVersionStringsSpy = jest.spyOn(compareVersionStringsModule, 'cmpVersionStrings')
+const cmpVersionStringsSpy = vi.spyOn(compareVersionStringsModule, 'cmpVersionStrings')
 
 /**
  * Test component to render the hook
@@ -58,7 +58,7 @@ const TEST_FLAVORS = {
 
 describe('useAgentVersionMinimum', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   /**
@@ -432,7 +432,7 @@ describe('useAgentVersionMinimum', () => {
       const mockAgentVersion = createMockAgentVersion({ version: TEST_VERSIONS.ABOVE_MINIMUM })
       setupMockIdentity(mockAgentVersion)
 
-      const customCmpVersionStrings = jest.fn().mockReturnValue(-1) // Always return "below minimum"
+      const customCmpVersionStrings = vi.fn().mockReturnValue(-1) // Always return "below minimum"
 
       const { getByTestId } = render(<TestComponent props={createBasicProps({
         cmpVersionStrings: customCmpVersionStrings as typeof compareVersionStringsModule.cmpVersionStrings

@@ -3,16 +3,53 @@
     transform: translateX(-50%);
 }
 
+.fileImportStatusPanel {
+    width: calc(100% - 32px);
+    max-width: 576px;
+}
+
 .fileImportStatusButton {
-    max-height: 3rem;
-    padding-right: 0;
+    padding: 4px;
+    gap: 4px;
+}
+
+.fileImportStatusToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.fileImportStatusTitle {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.fileImportStatusCancel {
+    flex: 0 0 40px;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+}
+
+.fileImportStatusArrow {
+    flex: 0 0 32px;
 }
 
 .fileImportStatusButton .fileImportStatusArrow {
     transition: transform 0.15s ease-in-out;
 }
 
-.fileImportStatusButton[aria-expanded="false"] .fileImportStatusArrow {
+.fileImportStatusToggle[aria-expanded="false"] .fileImportStatusArrow {
     transform: rotate(180deg) translateY(-2px);
 }
 
@@ -23,16 +60,34 @@
 .fileImportStatusRow {
     height: 153px;
     overflow: auto;
+    padding: 6px;
 
     transition: height 0.2s ease-in-out;
 }
 
 .fileImportStatusRow[aria-hidden="true"] {
-    height: 0
+    height: 0;
+    padding-block: 0;
+}
+
+.fileImportStatusRow li {
+    min-width: 0;
+}
+
+.fileImportStatusRow li > .gray,
+.fileImportStatusRow li > svg,
+.fileImportStatusRow li > .w2,
+.fileImportStatusOutcome {
+    flex-shrink: 0;
+}
+
+.fileImportStatusNotice {
+    overflow-wrap: anywhere;
 }
 
 .fileImportStatusIcon {
     width: 36px;
+    flex-shrink: 0;
 }
 
 .fileLoadingIndicator {
@@ -54,6 +109,42 @@
 
 .fileImportStatusName {
     flex: 1 1;
+    min-width: 0;
+}
+
+.fileImportStatusStop {
+    flex-shrink: 0;
+    min-width: 44px;
+    min-height: 32px;
+    margin: 4px 8px;
+    padding: 4px 8px;
+    border: 1px solid var(--text-muted);
+    border-radius: 4px;
+    background: var(--control);
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.fileImportStatusStop:focus-visible,
+.fileImportStatusToggle:focus-visible,
+.fileImportStatusCancel:focus-visible,
+.fileImportStatusRow:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.fileImportStatusStop:disabled {
+    cursor: default;
+    color: var(--text-muted);
+}
+
+.fileImportStatusOutcome, .fileImportStatusNotice {
+    color: var(--text);
+}
+
+.fileImportStatusCancelled {
+    color: var(--text-muted);
 }
 
 .fileImportStatusError {

@@ -1,5 +1,5 @@
 /* global it, expect */
-import DnDBackend from './dnd-backend.js'
+import { filesFromDataTransfer } from './dnd-backend.js'
 
 function makeEntry (item) {
   if (item.isFile) {
@@ -37,6 +37,7 @@ function makeDropEvent (items) {
       const entry = makeEntry(item)
 
       return {
+        kind: 'file',
         webkitGetAsEntry: () => entry,
         getAsEntry: () => entry
       }
@@ -46,23 +47,8 @@ function makeDropEvent (items) {
   return event
 }
 
-function getBackend (items) {
-  const backend = DnDBackend({
-    getActions: () => [],
-    getMonitor: () => ({
-      getItemType: () => ''
-    }),
-    getRegistry: () => {},
-    getContext: () => {},
-    handleTopDropCapture: () => {}
-  })
-
-  backend.currentNativeSource = {
-    item: {}
-  }
-
-  backend.handleTopDropCapture(makeDropEvent(items))
-  return backend
+function getFiles (items) {
+  return filesFromDataTransfer(makeDropEvent(items).dataTransfer)
 }
 
 function expectFile (toCheck, original) {
@@ -80,8 +66,7 @@ it('one file', async () => {
     name: 'test.txt'
   }]
 
-  const backend = getBackend(files)
-  const res = await backend.currentNativeSource.item.filesPromise
+  const res = await getFiles(files)
 
   expect(res.length).toBe(1)
   expectFile(res[0], files[0])
@@ -101,8 +86,7 @@ it('multiple files', async () => {
     name: 'testa.txt'
   }]
 
-  const backend = getBackend(files)
-  const res = await backend.currentNativeSource.item.filesPromise
+  const res = await getFiles(files)
 
   expect(res.length).toBe(files.length)
   expectFile(res[0], files[0])
@@ -123,8 +107,7 @@ it('one directory with a file', async () => {
     name: 'dir'
   }]
 
-  const backend = getBackend(files)
-  const res = await backend.currentNativeSource.item.filesPromise
+  const res = await getFiles(files)
 
   expect(res.length).toBe(1)
   expectFile(res[0], files[0].children[0])
@@ -162,8 +145,7 @@ it('multiple directories with some files', async () => {
     name: 'dir2'
   }]
 
-  const backend = getBackend(files)
-  const res = await backend.currentNativeSource.item.filesPromise
+  const res = await getFiles(files)
 
   expect(res.length).toBe(3)
   expectFile(res[0], files[0].children[0])
@@ -191,7 +173,6 @@ it('nested directories', async () => {
     name: 'dir'
   }]
 
-  const backend = getBackend(files)
-  const res = await backend.currentNativeSource.item.filesPromise
+  const res = await getFiles(files)
   expectFile(res[0], files[0].children[0].children[0])
 })

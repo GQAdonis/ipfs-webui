@@ -14,7 +14,7 @@ declare module 'redux-bundler' {
     <State, I1, I2, I3, I4, I5, O>(s1: (state: State) => I1, s2: (state: State) => I2, s3: (state: State) => I3, s4: (state: State) => I4, s5: (state: State) => I5, f: (i1: I1, i2: I2, i3: I3, i4: I4, i5: I5) => O): (state: State) => O
   }
 
-  declare export let createSelector: CreateSelector
+  export let createSelector: CreateSelector
 
   export type Selector<State, Data> =
     (state: State) => Data

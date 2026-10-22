@@ -1,4 +1,5 @@
 import { createRouteBundle } from 'redux-bundler'
+import { ActivityPage, HomeRoute } from '../shell/Home.jsx'
 import StatusPage from '../status/LoadableStatusPage.js'
 import FilesPage from '../files/LoadableFilesPage.js'
 import PinsPage from '../pins/LoadablePinsPage.js'
@@ -21,6 +22,7 @@ export default createRouteBundle({
   '/pins*': PinsPage,
   '/peers': PeersPage,
   '/search': SearchPage,
+  '/activity': ActivityPage,
   '/settings/analytics': AnalyticsPage,
   '/settings/agent': AgentSettingsPage,
   '/settings*': SettingsPage,
@@ -28,6 +30,6 @@ export default createRouteBundle({
   '/blank': BlankPage,
   '/diagnostics*': DiagnosticsPage,
   '/status*': StatusPage,
-  '/': StatusPage,
-  '': StatusPage
+  '/': HomeRoute,
+  '': HomeRoute
 }, { routeInfoSelector: 'selectHash' })

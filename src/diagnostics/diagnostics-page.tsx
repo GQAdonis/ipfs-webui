@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Helmet } from 'react-helmet'
 import IsNotConnected from '../components/is-not-connected/is-not-connected'
 import DiagnosticsContent from './diagnostics-content'
 import { useBridgeSelector } from '../helpers/context-bridge'
@@ -19,9 +18,9 @@ const DiagnosticsPage: React.FC = () => {
 
   return (
     <div data-id='DiagnosticsPage' className='mw9 center'>
-      <Helmet>
+      <>
         <title>{titleWithBrand(t('title'))}</title>
-      </Helmet>
+      </>
       <div className='flex'>
         <div className='flex-auto'>
           <Component key={ipfsConnected ? 'connected' : 'not-connected'} />

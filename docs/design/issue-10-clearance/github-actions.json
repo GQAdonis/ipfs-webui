@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "kind": "readback-verified-github-scoped-closure",
+  "verifiedAt": "2026-10-21T22:43:07.021Z",
+  "issueURL": "https://github.com/GQAdonis/ipfs-webui/issues/10",
+  "issueState": "closed",
+  "stateReason": "completed",
+  "closedAt": "2026-10-21T22:42:19Z",
+  "followupURL": "https://github.com/GQAdonis/ipfs-webui/issues/11",
+  "followupState": "open",
+  "commentURL": "https://github.com/GQAdonis/ipfs-webui/issues/10#issuecomment-6328170974",
+  "commentId": 6328170974,
+  "postedBodiesMatchLocalDrafts": true,
+  "commands": [
+    {
+      "argv": [
+        "gh",
+        "issue",
+        "create",
+        "--repo",
+        "GQAdonis/ipfs-webui",
+        "--title",
+        "Complete remaining UI-112 live-host and contrast evidence",
+        "--body-file",
+        "evidence/agentic-ui-frontend/issue10-clearance/followup-draft.md"
+      ],
+      "exitCode": 0,
+      "output": "https://github.com/GQAdonis/ipfs-webui/issues/11"
+    },
+    {
+      "argv": [
+        "gh",
+        "issue",
+        "comment",
+        "10",
+        "--repo",
+        "GQAdonis/ipfs-webui",
+        "--body-file",
+        "evidence/agentic-ui-frontend/issue10-clearance/closure-comment.md"
+      ],
+      "exitCode": 0,
+      "output": "https://github.com/GQAdonis/ipfs-webui/issues/10#issuecomment-6328170974"
+    },
+    {
+      "argv": [
+        "gh",
+        "issue",
+        "close",
+        "10",
+        "--repo",
+        "GQAdonis/ipfs-webui",
+        "--reason",
+        "completed"
+      ],
+      "exitCode": 0,
+      "readback": {
+        "state": "closed",
+        "stateReason": "completed"
+      }
+    }
+  ],
+  "readbacks": [
+    {
+      "path": "github-issue10-closed-readback.json",
+      "sha256": "04af5c86260145e110380fc2c1e834b5eaddd81f22c36579ccc382efe5b008e2"
+    },
+    {
+      "path": "github-comment-readback.json",
+      "sha256": "522a2d0baf31cd7dfba7bd4cc418e2f4d331dc12e7572f333b48af7381248bbe"
+    },
+    {
+      "path": "github-followup-final-readback.json",
+      "sha256": "81e51db296034c5abb09934a204cc5bd90d1c8677a620d6375da8dabdb343856"
+    }
+  ],
+  "limitation": "Local source/evidence handoff; no code publication, PR, merge, release or whole UI-112 certification."
+}

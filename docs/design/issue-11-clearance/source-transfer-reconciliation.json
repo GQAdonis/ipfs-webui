@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-transfer-reconciliation-after-normal-assembly",
+  "transferredFiles": 6617,
+  "stillIdentical": 6616,
+  "expectedNormalProducerChanges": [
+    {
+      "path": "ipfs-desktop/src/agent/confirm/ui/local-assembly.json",
+      "originSha256": "fa59c5e830d186be1cf9d28bf2f4c8342417844fa3dec72d98364216c102b6c6",
+      "copiedCurrentSha256": "b7158e4981d967a5072ea07d2cf44173d1bddf98fcf3bde3d7e871f5e1d73bae",
+      "destination": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/su-source-snapshot-final/ipfs-desktop/src/agent/confirm/ui/local-assembly.json"
+    }
+  ],
+  "reason": "The standard Desktop assembly regenerates its local-assembly provenance report for the actual copied current WebUI. No authored source changed; strict current assembly and runtime-source verification passed. The original worktrees remain unchanged.",
+  "currentArtifactSha256": "b9c25a7631a0d37d1353efd8f38be7a059f9f63c22f269a3112c1c7e3cc5d69c"
+}

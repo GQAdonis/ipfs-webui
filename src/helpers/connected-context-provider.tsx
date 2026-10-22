@@ -2,7 +2,7 @@
  * @see {@link ./REDUX-BUNDLER-MIGRATION-GUIDE.md} for more information
  */
 import React, { createContext, useContext, useMemo, ReactNode } from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 
 /**
  * Configuration for creating a connected context provider

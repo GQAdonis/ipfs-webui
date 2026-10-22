@@ -1,5 +1,5 @@
 import React from 'react'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 
 import Checkbox from './Checkbox.js'
 
@@ -9,14 +9,14 @@ const bigPicture = {
 }
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Checkbox'
 }
 
 /**
- * @type {import('@storybook/react').StoryFn}
+ * @type {import('@storybook/react-vite').StoryFn}
  */
 export const Default = () => (
   <div>
@@ -25,7 +25,7 @@ export const Default = () => (
 )
 
 /**
- * @type {import('@storybook/react').StoryFn}
+ * @type {import('@storybook/react-vite').StoryFn}
  */
 export const Disabled = () => (
   <div>
@@ -34,7 +34,7 @@ export const Disabled = () => (
 )
 
 /**
- * @type {import('@storybook/react').StoryFn}
+ * @type {import('@storybook/react-vite').StoryFn}
  */
 export const Big = () => (
   <div>

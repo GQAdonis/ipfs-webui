@@ -1,5 +1,5 @@
 import { parseAgentVersion, AgentVersionObject } from './parse-agent-version'
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 
 describe('parseAgentVersion', () => {
   describe('with kubo agent (supported provider)', () => {

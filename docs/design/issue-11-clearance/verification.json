@@ -1,0 +1,662 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped-issue11-clearance",
+  "scopedAcceptance": "PASS",
+  "wholePhase": "NOT_CERTIFIED",
+  "wholeUI112Certification": "NOT_CLAIMED: remaining decision axe incomplete inventory is unverified (#12)",
+  "artifactSha256": "b9c25a7631a0d37d1353efd8f38be7a059f9f63c22f269a3112c1c7e3cc5d69c",
+  "lanes": {
+    "webui": {
+      "manifest": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/manifest.json",
+      "sha256": "ae5c5af0966919a58c7f9cebed04ebe4d892d0276eb07949a9bde3f38eeebea6",
+      "packetStatus": "FAIL",
+      "ui112Status": "PASS"
+    },
+    "desktop": {
+      "manifest": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/desktop-2026-10-21T23-52-03-762Z-75027/manifest.json",
+      "sha256": "a38be27af68b625ea2a10b01c35d01e812529294797710acd3c1660173fcb1a0",
+      "packetStatus": "BLOCKED",
+      "ui112Status": "PASS"
+    }
+  },
+  "laneCounts": {
+    "webui": {
+      "PASS": 38,
+      "FAIL": 12,
+      "BLOCKED": 17
+    },
+    "desktop": {
+      "PASS": 7,
+      "BLOCKED": 2,
+      "NOT_EXERCISED": 1
+    }
+  },
+  "familyOutcomes": [
+    {
+      "family": "decisions",
+      "slot": "axe",
+      "status": "PASS",
+      "assertions": 210,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000011/accessibility-decisions-axe-outcome.json",
+      "sha256": "a13772cfc782f18ad36085a2f85545ec51048bc9d7ca72b9e900eef32a882768",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000010/accessibility-decisions-axe-binding.json",
+        "sha256": "6e8073fee8cd19792f24e57663d42ecedc970b6b4b5faf5d9b09505e3890895d"
+      }
+    },
+    {
+      "family": "shell",
+      "slot": "axe",
+      "status": "PASS",
+      "assertions": 22,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000094/accessibility-shell-axe-outcome.json",
+      "sha256": "0f71e1c8bb3bc97515aa62e05c53b60f8da8f7900f8cd0f0eacf0c09844d6693",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000093/accessibility-shell-axe-binding.json",
+        "sha256": "da4858391bc331bc4f0b99d0118d9214bdd9f46036ee10543b3ad44c90b0ddc7"
+      }
+    },
+    {
+      "family": "a2ui",
+      "slot": "axe",
+      "status": "PASS",
+      "assertions": 56,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000109/accessibility-a2ui-axe-outcome.json",
+      "sha256": "b988dbcc31e32cb44626668572302cc028faf213b2813eb7b0e7969326995a4d",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000108/accessibility-a2ui-axe-binding.json",
+        "sha256": "50482426e17a8828cab88d717db7e4a0765ead921088cf00c4e8ab386ab50ddf"
+      }
+    },
+    {
+      "family": "inbox",
+      "slot": "axe",
+      "status": "PASS",
+      "assertions": 4221,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000142/accessibility-inbox-axe-outcome.json",
+      "sha256": "4aa7f70cd5a0f4a3ceaa6a9270941666cb92c645dcd8aafff7094af295cd08cc",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000141/accessibility-inbox-axe-binding.json",
+        "sha256": "3fe1e70fb2cb844c5da9e5f8dbbb254faf0f7be04f61825dc58caccafad124be"
+      }
+    },
+    {
+      "family": "context",
+      "slot": "axe",
+      "status": "PASS",
+      "assertions": 60,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000157/accessibility-context-axe-outcome.json",
+      "sha256": "e11a3f9462fe31aff6d3d4914c3029fa857b6e781d7440796f00145c24c24f05",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000156/accessibility-context-axe-binding.json",
+        "sha256": "43ad0c06129cf33735e226cf598cdd585fb46310d6bc2d3fe80b387fd36fb552"
+      }
+    },
+    {
+      "family": "decisions",
+      "slot": "keyboard-and-focus",
+      "status": "PASS",
+      "assertions": 587,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000013/accessibility-decisions-keyboard-and-focus-outcome.json",
+      "sha256": "42e53eaef539c37b0d43e91714cffd05b6d7351c0024d09793c12397b092d9ab",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000012/accessibility-decisions-keyboard-and-focus-binding.json",
+        "sha256": "dc32e2c0d6540610a9a13f8a46678812b5abab8b26549985399f85e2a2a98f43"
+      }
+    },
+    {
+      "family": "shell",
+      "slot": "keyboard-and-focus",
+      "status": "PASS",
+      "assertions": 22,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000064/accessibility-shell-keyboard-and-focus-outcome.json",
+      "sha256": "371fb47c8be9d22be045fdb4ac266c4e9fd8128cdda662bbd6c80e87f1e90f4f",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000063/accessibility-shell-keyboard-and-focus-binding.json",
+        "sha256": "e6a815c06b2b8733d5b487a2172a110eaa956cdf596e47e84ebf00729791cc08"
+      }
+    },
+    {
+      "family": "a2ui",
+      "slot": "keyboard-and-focus",
+      "status": "PASS",
+      "assertions": 56,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000074/accessibility-a2ui-keyboard-and-focus-outcome.json",
+      "sha256": "ab3c1a72af22c8b5ffd7e05baf48208c6fb052a3244379a73d502d26bbc33bb9",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000073/accessibility-a2ui-keyboard-and-focus-binding.json",
+        "sha256": "6e6de41ac1f2f403a93ad5238624cdce5dd7505cb5cd81c8275eb75802621d90"
+      }
+    },
+    {
+      "family": "inbox",
+      "slot": "keyboard-and-focus",
+      "status": "PASS",
+      "assertions": 4237,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000090/accessibility-inbox-keyboard-and-focus-outcome.json",
+      "sha256": "90914e469e40d1becfee457a641aed3ac0a1179dba3952a90b8b886fa8e518d8",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000089/accessibility-inbox-keyboard-and-focus-binding.json",
+        "sha256": "bc60f6cc8523de6360053ec000a0161031738958a1e7296c1dacf163b01e191d"
+      }
+    },
+    {
+      "family": "context",
+      "slot": "keyboard-and-focus",
+      "status": "PASS",
+      "assertions": 60,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000100/accessibility-context-keyboard-and-focus-outcome.json",
+      "sha256": "87c4598fa82e196b6baab4e57643d934e62453a089243f2ccd4a216490c1731a",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/keyboard-and-focus/records/000099/accessibility-context-keyboard-and-focus-binding.json",
+        "sha256": "756ce626ce9938979d357a4e77d3d92ebe48aa368081599a83cf0464664fab54"
+      }
+    },
+    {
+      "family": "decisions",
+      "slot": "reduced-motion",
+      "status": "PASS",
+      "assertions": 212,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000010/accessibility-decisions-reduced-motion-outcome.json",
+      "sha256": "6879498152bf003b15d170c7d18946ce4027d93bfb50bc695d4028474be1223e",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000009/accessibility-decisions-reduced-motion-binding.json",
+        "sha256": "48913b2feb45762408429f92631b1807032246c8e54823f0b8a30bd36a781502"
+      }
+    },
+    {
+      "family": "shell",
+      "slot": "reduced-motion",
+      "status": "PASS",
+      "assertions": 22,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000061/accessibility-shell-reduced-motion-outcome.json",
+      "sha256": "ddceb2b44e0e076c529da763c7b952c1427b4fe39f974b9b9a654d3bcbab9d94",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000060/accessibility-shell-reduced-motion-binding.json",
+        "sha256": "ea940c6b796a68396d541e39f5195eaea63ee59ba0974278eedaf9b2e1fcb448"
+      }
+    },
+    {
+      "family": "a2ui",
+      "slot": "reduced-motion",
+      "status": "PASS",
+      "assertions": 60,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000071/accessibility-a2ui-reduced-motion-outcome.json",
+      "sha256": "b27e2e111a09b0024d63d951fea62191969b323a9bb3722ccc3e7dde1196e29b",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000070/accessibility-a2ui-reduced-motion-binding.json",
+        "sha256": "1853e3a03fe62333d03d874c606bc667703047e092aa7f4b530f845534a3c544"
+      }
+    },
+    {
+      "family": "inbox",
+      "slot": "reduced-motion",
+      "status": "PASS",
+      "assertions": 4229,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000087/accessibility-inbox-reduced-motion-outcome.json",
+      "sha256": "3d85133b7a8d04aa3acad8febf02bf32d1c91bf16351829419ab40a3c59c4e0b",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000086/accessibility-inbox-reduced-motion-binding.json",
+        "sha256": "48a505195a8b234ea47a935c13c7153a61589185473268fafdabaa503e255680"
+      }
+    },
+    {
+      "family": "context",
+      "slot": "reduced-motion",
+      "status": "PASS",
+      "assertions": 64,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000097/accessibility-context-reduced-motion-outcome.json",
+      "sha256": "87666b98816de324cf703ca206d85a8da8d78bec7c0f4e44e274dbf3efb26857",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/reduced-motion/records/000096/accessibility-context-reduced-motion-binding.json",
+        "sha256": "e9fd367fcd25a5cd417e672447ea3499638fd9347584104d5c13032a821aa31c"
+      }
+    },
+    {
+      "family": "decisions",
+      "slot": "viewport-theme-matrix",
+      "status": "PASS",
+      "assertions": 343,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000138/accessibility-decisions-viewport-theme-matrix-outcome.json",
+      "sha256": "1efca2ef33a5c96270940fb32612ceb74db58b3984a79ae7c80666a5934bd5d1",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000137/accessibility-decisions-viewport-theme-matrix-binding.json",
+        "sha256": "f77ba69b621e11b2f3a3fe7b08d769f2375768a3a93ab235967aa06378fb6954"
+      }
+    },
+    {
+      "family": "shell",
+      "slot": "viewport-theme-matrix",
+      "status": "PASS",
+      "assertions": 22,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000189/accessibility-shell-viewport-theme-matrix-outcome.json",
+      "sha256": "c2103104ee0ad72ab53a44ee1412b311f472ff24eb6ad600322fee88285aa64a",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000188/accessibility-shell-viewport-theme-matrix-binding.json",
+        "sha256": "4d15370aeb9e484acfc61a8ae5dca4f298c3b08f7336783dd7cc0ce0f31446fd"
+      }
+    },
+    {
+      "family": "a2ui",
+      "slot": "viewport-theme-matrix",
+      "status": "PASS",
+      "assertions": 56,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000199/accessibility-a2ui-viewport-theme-matrix-outcome.json",
+      "sha256": "65760e1ea16da278f06bfabc4e07bf2e20eba11c24c5e5b48f231ff26d78ae8c",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000198/accessibility-a2ui-viewport-theme-matrix-binding.json",
+        "sha256": "3a498d42ec50a73ed95ed5ef72e18ea13db99c21c4315cfa8e07d87b548cd71f"
+      }
+    },
+    {
+      "family": "inbox",
+      "slot": "viewport-theme-matrix",
+      "status": "PASS",
+      "assertions": 4237,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000215/accessibility-inbox-viewport-theme-matrix-outcome.json",
+      "sha256": "160cede47f7d47bee717efc0e31dac14b01b684dbd49558710e6c0a50e242759",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000214/accessibility-inbox-viewport-theme-matrix-binding.json",
+        "sha256": "de208673950ea1e6e82c2bb45dbf34a7a860f99b73edf8cc9b409daf60b6f29f"
+      }
+    },
+    {
+      "family": "context",
+      "slot": "viewport-theme-matrix",
+      "status": "PASS",
+      "assertions": 60,
+      "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000225/accessibility-context-viewport-theme-matrix-outcome.json",
+      "sha256": "25700115f00365666081a584f5ea9d899639084840e2398271b536b0fbd560eb",
+      "binding": {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/viewport-theme-matrix/records/000224/accessibility-context-viewport-theme-matrix-binding.json",
+        "sha256": "ba47d367b6f0749f07d3974aca43927c9ed52036ac0c6d5896b97c9344dd5548"
+      }
+    }
+  ],
+  "shell": {
+    "observedWidths": [
+      320,
+      375,
+      539,
+      540,
+      768,
+      1024,
+      1440,
+      1920
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "fullAxeReports": [
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000013/shell-actual-shell-axe-light-320.json",
+        "sha256": "c7fa2f1eaf57d9e952fd1cc2a81462c912ef2fbae74aaee9b4596fc10632f6ad",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000018/shell-actual-shell-axe-light-375.json",
+        "sha256": "6e5dcd7c3e3977ed0b3f72a1c50fb914566fc4384d6982e7b078fd1cb5d4eccd",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000023/shell-actual-shell-axe-light-539.json",
+        "sha256": "d7eb86bb9df41fa414e621337f0cc5a313b994d0a353256de730591ba310c348",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000028/shell-actual-shell-axe-light-540.json",
+        "sha256": "10d9e90433fd40f8b3b149f4a1c05f4ecc3fdbf1466aff2052d496a70413bb04",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000033/shell-actual-shell-axe-light-768.json",
+        "sha256": "752313d06a3ba74d3742d3719cc39e3161ef7414774f5ae31d004c486a4431f9",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000038/shell-actual-shell-axe-light-1024.json",
+        "sha256": "08ed0ac5e4cf86d2cc42bb4f32c5707c047fdc5778e7caf8b4303fa11027d29d",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000043/shell-actual-shell-axe-light-1440.json",
+        "sha256": "2659dd058bad3126bcb838938d182e8c2443848d5ddd76b36b0a9bc612cf7e6a",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000048/shell-actual-shell-axe-light-1920.json",
+        "sha256": "b5c3493e2f9e9197556144913fcad1299ff700c3e07973933539538812523c89",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000053/shell-actual-shell-axe-dark-320.json",
+        "sha256": "83102e0ef3944aa2bd3f855f6a20fb5a4e156905531026cfc21abc8eb395f58e",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000058/shell-actual-shell-axe-dark-375.json",
+        "sha256": "dc61d69cac8ce25277f9f8ee9cb6812526f702e4f2219cc059d5a2c75466dbe7",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000063/shell-actual-shell-axe-dark-539.json",
+        "sha256": "a61edd13d579df3bf6a23ae7964f285023ca2b4a436ce0a6846870351e7cc1f3",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000068/shell-actual-shell-axe-dark-540.json",
+        "sha256": "df482464c22b35c4e7f507a3cc83b43718b22075a03100d030eeda80fd41ce67",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000073/shell-actual-shell-axe-dark-768.json",
+        "sha256": "dd13f2bd6d4daabe9b2fb2f85911c77bb6e8d5814e3d38e19bc7614a0b62a00f",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000078/shell-actual-shell-axe-dark-1024.json",
+        "sha256": "47f72cee965873f802ac26c06f8bf39298dee13e26a53f55049b327472a9a17d",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000083/shell-actual-shell-axe-dark-1440.json",
+        "sha256": "753f31011c54aa732ae815465547141f0c32b1cf82e0f46ff95eb7124d702d4c",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      },
+      {
+        "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/UI-112/axe/records/000088/shell-actual-shell-axe-dark-1920.json",
+        "sha256": "94b61c80bd3e76449ea26ed62f9244241b65979217486cc1dffcde00b85d288e",
+        "violations": 0,
+        "incompleteOccurrences": 0
+      }
+    ]
+  },
+  "contrast": {
+    "summary": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/contrast/runtime-3/summary.json",
+    "sha256": "d682a4dae0d87ce333c4607171364b50de71b04e56e50e8270d4b7e204bd71dc",
+    "counts": {
+      "PASS": 384,
+      "FAIL": 0,
+      "UNKNOWN": 0
+    },
+    "artifactSha256": "b9c25a7631a0d37d1353efd8f38be7a059f9f63c22f269a3112c1c7e3cc5d69c"
+  },
+  "quality": {
+    "schemaVersion": 1,
+    "kind": "publication-checkout-validation",
+    "node": {
+      "executable": "/Users/gqadonis/.local/share/fnm/node-versions/v26.5.0/installation/bin/node",
+      "version": "v26.5.0",
+      "sha256": "cbee2298aee5cc476bf8d5441e7348b627254a39d869743a5b04489028c729d4"
+    },
+    "root": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/ipfs-webui-issue10-publication",
+    "checks": [
+      {
+        "id": "eslint",
+        "argv": [
+          "npm",
+          "run",
+          "eslint",
+          "--",
+          "--max-warnings",
+          "0"
+        ],
+        "cwd": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/ipfs-webui-issue10-publication",
+        "pid": 58408,
+        "startedAt": "2026-10-21T23:48:06.422Z",
+        "endedAt": "2026-10-21T23:48:15.047Z",
+        "exitCode": 0,
+        "signal": null,
+        "spawnError": null,
+        "status": "PASS",
+        "stdout": {
+          "path": "eslint.stdout.txt",
+          "sha256": "d310b428ee3c7ca70d87c43e7a28bc810540edbbf105d52c98cab3d71cbc3130"
+        },
+        "stderr": {
+          "path": "eslint.stderr.txt",
+          "sha256": "21781bfcceb07faa7feb7aaaf9fd41b036bc148157e7d86f3b870c6791816564"
+        }
+      },
+      {
+        "id": "typecheck",
+        "argv": [
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        "cwd": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/ipfs-webui-issue10-publication",
+        "pid": 58409,
+        "startedAt": "2026-10-21T23:48:06.423Z",
+        "endedAt": "2026-10-21T23:48:07.255Z",
+        "exitCode": 0,
+        "signal": null,
+        "spawnError": null,
+        "status": "PASS",
+        "stdout": {
+          "path": "typecheck.stdout.txt",
+          "sha256": "f43d247e5dcf6d82f72c003ad2e846f8017876d1a94dd064dd954c3dccf7c3e5"
+        },
+        "stderr": {
+          "path": "typecheck.stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "id": "depcheck",
+        "argv": [
+          "npm",
+          "run",
+          "dep-check"
+        ],
+        "cwd": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/ipfs-webui-issue10-publication",
+        "pid": 58410,
+        "startedAt": "2026-10-21T23:48:06.423Z",
+        "endedAt": "2026-10-21T23:48:09.663Z",
+        "exitCode": 0,
+        "signal": null,
+        "spawnError": null,
+        "status": "PASS",
+        "stdout": {
+          "path": "depcheck.stdout.txt",
+          "sha256": "6fe545dfc3486553bf310f4846c3d9563ade5d77be0d1ef86fa4ca767bdbeaaa"
+        },
+        "stderr": {
+          "path": "depcheck.stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "id": "webmcp-vendor",
+        "argv": [
+          "npm",
+          "run",
+          "webmcp:vendor:check"
+        ],
+        "cwd": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/ipfs-webui-issue10-publication",
+        "pid": 58411,
+        "startedAt": "2026-10-21T23:48:06.424Z",
+        "endedAt": "2026-10-21T23:48:06.694Z",
+        "exitCode": 0,
+        "signal": null,
+        "spawnError": null,
+        "status": "PASS",
+        "stdout": {
+          "path": "webmcp-vendor.stdout.txt",
+          "sha256": "b21a5513c9d8fa3c5ba0611992aafce23034ebe5ab46fd6181cdd457ece8fa76"
+        },
+        "stderr": {
+          "path": "webmcp-vendor.stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "id": "unit",
+        "argv": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile.json=/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue10-clearance/publication/issue11-final-checks-v3/unit-results.json"
+        ],
+        "cwd": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/ipfs-webui-issue10-publication",
+        "pid": 58744,
+        "startedAt": "2026-10-21T23:48:15.047Z",
+        "endedAt": "2026-10-21T23:48:45.153Z",
+        "exitCode": 0,
+        "signal": null,
+        "spawnError": null,
+        "status": "PASS",
+        "stdout": {
+          "path": "unit.stdout.txt",
+          "sha256": "f870c6e591d699a7f268ac8a672622852bc27be0d3cef445e718e71b48029b04"
+        },
+        "stderr": {
+          "path": "unit.stderr.txt",
+          "sha256": "28773da64d78978cc97f12f8b54a234bf358b1dd538d0d08deeeeb15befa1040"
+        }
+      },
+      {
+        "id": "build",
+        "argv": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "cwd": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/ipfs-webui-issue10-publication",
+        "pid": 59872,
+        "startedAt": "2026-10-21T23:48:45.156Z",
+        "endedAt": "2026-10-21T23:48:48.055Z",
+        "exitCode": 0,
+        "signal": null,
+        "spawnError": null,
+        "status": "PASS",
+        "stdout": {
+          "path": "build.stdout.txt",
+          "sha256": "99f647a4716d0ed88d2bba21250405fefbfe384a672a655fda733aa52f455301"
+        },
+        "stderr": {
+          "path": "build.stderr.txt",
+          "sha256": "01ff10d77e39bf8f6130d59e82fbcc2c682e31ec09a7762365e66247c7ce6e31"
+        }
+      }
+    ],
+    "unitSummary": {
+      "total": 2028,
+      "passed": 2022,
+      "failed": 0,
+      "pending": 6,
+      "success": true
+    },
+    "install": "Default npm ci failed at legacy kubo binary download (ETIMEDOUT). Frontend dependencies then installed with --ignore-scripts --no-audit, followed by explicit root postinstall patches.",
+    "limitation": "Uses existing matching sibling Kubo shared frontend artifacts; not standalone-clone CI, live-node or whole UI-112 acceptance."
+  },
+  "currentOrchestrationTests": {
+    "passed": 29,
+    "total": 29,
+    "source": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue10-clearance/publication/issue11-final-checks-v3/unit-results.json"
+  },
+  "focusedProvenanceTests": {
+    "passed": 32,
+    "total": 32,
+    "sourceFreeze": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/provenance-regression/source-freeze-v3.json"
+  },
+  "observerTests": {
+    "passed": 4,
+    "total": 4,
+    "includesPinnedBrowserGeometryRegression": true
+  },
+  "postRuntimeBuildValidation": {
+    "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/post-runtime-build-validation/receipt.json",
+    "status": "PASS",
+    "cleanup": []
+  },
+  "broaderWebuiFailures": [
+    {
+      "scenario": "UI-101",
+      "id": "production-relative-routes",
+      "reason": "/files loads relative production assets at light/375"
+    },
+    {
+      "scenario": "UI-102",
+      "id": "role-parity",
+      "reason": "/Users/gqadonis/.local/share/fnm/node-versions/v26.5.0/installation/bin/node exited 1; see /Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue11-clearance/boundary-final/runs/webui-2026-10-21T23-51-34-263Z-70341/commands/014-UI-102-real-surface-role-coverage.stderr.txt"
+    },
+    {
+      "scenario": "UI-102",
+      "id": "immutable-token-baseline",
+      "reason": "expect(locator).toBeVisible() failed\n\nLocator: getByText('visual-baseline.txt', { exact: true })\nExpected: visible\nError: strict mode violation: getByText('visual-baseline.txt', { exact: true }) resolved to 2 elements:\n    1) <div class=\"f6 truncate charcoal\">visual-baseline.txt</div> aka getByRole('button', { name: 'Select file visual-baseline.' })\n    2) <div class=\"white z-max bg-navy-muted br2 pa1 f6 absolute dn\">\u2026</div> aka getByRole('button', { name: 'Select file visual-baseline.' })\n\nCall log:\n  - Expect \"to.be.visible\" with timeout 5000ms\n  - waiting for getByText('visual-baseline.txt', { exact: true })\n"
+    },
+    {
+      "scenario": "UI-105",
+      "id": "composer-modes",
+      "reason": "Go uses the existing real Files route and owned node"
+    },
+    {
+      "scenario": "UI-105",
+      "id": "phone-navigation",
+      "reason": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 1450\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+    },
+    {
+      "scenario": "UI-114",
+      "id": "pins-real-controls",
+      "reason": "expect(locator).toHaveCount(expected) failed\n\nLocator:  getByRole('dialog')\nExpected: 0\nReceived: 1\nTimeout:  5000ms\n\nCall log:\n  - Expect \"to.have.count\" with timeout 5000ms\n  - waiting for getByRole('dialog')\n    9 \u00d7 locator resolved to 1 element\n      - unexpected value \"1\"\n"
+    },
+    {
+      "scenario": "UI-114",
+      "id": "virtual-keyboard-selection",
+      "reason": "expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('files-list').locator('[data-testid=\"file-row\"]:has(input:focus)')\nExpected substring: \"row-\"\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"to.have.text\" with timeout 5000ms\n  - waiting for getByTestId('files-list').locator('[data-testid=\"file-row\"]:has(input:focus)')\n"
+    },
+    {
+      "scenario": "UI-114",
+      "id": "native-modal",
+      "reason": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog')\nExpected: visible\nError: strict mode violation: getByRole('dialog') resolved to 2 elements:\n    1) <div role=\"dialog\" aria-modal=\"false\" data-joyride-step=\"0\" aria-labelledby=\"_r_9_\" class=\"react-joyride__tooltip\">\u2026</div> aka getByRole('dialog', { name: 'Click this button any time' })\n    2) <dialog open=\"\" aria-modal=\"true\" class=\"webui-overlay prom-scrim \">\u2026</dialog> aka locator('dialog')\n\nCall log:\n  - Expect \"to.be.visible\" with timeout 5000ms\n  - waiting for getByRole('dialog')\n"
+    },
+    {
+      "scenario": "UI-115",
+      "id": "explore-dag-codecs",
+      "reason": "expect(page).toHaveURL(expected) failed\n\nExpected pattern: /QmbQDovX7wRe9ek7u6QXe9zgCXkTzoUSsTFJEkrYV1HrVR/\nReceived string:  \"http://127.0.0.1:61423/ipfs/bafybeic35bqb6ypxmrzhubdgcbi6ichoqfavxg347ij4rrx6e6tcavx4yi/webui/#/explore/QmdmQXB2mzChmMeKY47C43LxUdg1NDJ5MWcKMKxDu7RgQm/1%20-%20Barrel%20-%20Part%201\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"to.have.url\" with timeout 5000ms\n    9 \u00d7 unexpected value \"http://127.0.0.1:61423/ipfs/bafybeic35bqb6ypxmrzhubdgcbi6ichoqfavxg347ij4rrx6e6tcavx4yi/webui/#/explore/QmdmQXB2mzChmMeKY47C43LxUdg1NDJ5MWcKMKxDu7RgQm/1%20-%20Barrel%20-%20Part%201\"\n"
+    },
+    {
+      "scenario": "UI-115",
+      "id": "peer-local-connection",
+      "reason": "locator.uncheck: Timeout 15000ms exceeded.\nCall log:\n  - waiting for getByRole('dialog').getByRole('checkbox')\n    - locator resolved to <input checked type=\"checkbox\" class=\"absolute\"/>\n  - attempting click action\n    2 \u00d7 waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - element is outside of the viewport\n    - retrying click action\n    - waiting 20ms\n    2 \u00d7 waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - element is outside of the viewport\n    - retrying click action\n      - waiting 100ms\n    29 \u00d7 waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - element is outside of the viewport\n     - retrying click action\n       - waiting 500ms\n"
+    },
+    {
+      "scenario": "UI-115",
+      "id": "diagnostics-real-status",
+      "reason": "expect(locator).toBeVisible() failed\n\nLocator: locator('.dht-provide__grid')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"to.be.visible\" with timeout 5000ms\n  - waiting for locator('.dht-provide__grid')\n"
+    },
+    {
+      "scenario": "UI-115",
+      "id": "settings-edit-restore",
+      "reason": "expect(locator).toContainText(expected) failed\n\nLocator: locator('.ace_editor')\nError: expected value must be a string or regular expression\nExpected has type:  object\nExpected has value: \"12D3KooWPpMHFgWwYCvrSD84zy2HoL4HPDVYuoDhdPx6EjsKmks1\"\n"
+    }
+  ],
+  "followUp": "https://github.com/GQAdonis/ipfs-webui/issues/12",
+  "delivery": "Draft WebUI source PR targeting main; matching sibling Kubo frontend packages remain an unpublished prerequisite; no release or merge.",
+  "sourceTransferReconciliation": {
+    "path": "source-transfer-reconciliation.json",
+    "sha256": "c2fc5af82918f05977083eaad240396b06d66a56c1f9f079ce887a971591086c",
+    "stillIdentical": 6616,
+    "expectedDerivedReportChanges": 1
+  }
+}

@@ -30,6 +30,22 @@
     "done": "Done",
     "checkRetrieval": "Check retrieval"
   },
+  "workspace": {
+    "modeLabel": "Workspace layout",
+    "paneLabel": "Assistant size",
+    "modes": {
+      "application": "IPFS application",
+      "conversation": "Conversation and canvas"
+    },
+    "panes": {
+      "closed": "Close assistant",
+      "docked": "Dock assistant",
+      "expanded": "Expand assistant",
+      "full": "Full width assistant"
+    },
+    "shortcutHint": "Use [ and ] to change the assistant size outside text fields. Layout choices are remembered on this device when browser storage is available.",
+    "responsiveFull": "Full width at this window size. Your saved pane size is unchanged."
+  },
   "cliModal": {
     "description": "Paste the following into your terminal to do this task in Kubo via the command line. Remember that you'll need to replace placeholders with your specific parameters."
   },
@@ -115,5 +131,6 @@
     "skip": "Skip",
     "tooltip": "Click this button any time for a guided tour on the current page."
   },
-  "startTourHelper": "Start tour"
+  "startTourHelper": "Start tour",
+  "clipboardFailed": "Could not copy. Select and copy the text manually."
 }

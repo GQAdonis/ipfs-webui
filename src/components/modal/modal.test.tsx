@@ -1,10 +1,10 @@
-import { describe, it, expect, jest } from '@jest/globals'
+import { describe, it, expect, vi } from 'vitest'
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import { Modal, ModalActions, ModalBody } from './modal'
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key })
 }))
 
@@ -42,7 +42,7 @@ describe('Modal', () => {
     })
 
     it('renders cancel icon when onCancel is provided', () => {
-      const mockOnCancel = jest.fn()
+      const mockOnCancel = vi.fn()
       const { container } = render(<Modal onCancel={mockOnCancel} />)
 
       const closeButton = container.querySelector('button')
@@ -67,7 +67,7 @@ describe('Modal', () => {
     })
 
     it('calls onCancel when cancel icon is clicked', () => {
-      const mockOnCancel = jest.fn()
+      const mockOnCancel = vi.fn()
       const { container } = render(<Modal onCancel={mockOnCancel} />)
 
       const cancelIcon = container.querySelector('button.prom-modal-close')
@@ -236,7 +236,7 @@ describe('Modal', () => {
       const MockIcon: React.FC<{ className?: string }> = ({ className }) => (
         <div data-testid="mock-icon" className={className}>Icon</div>
       )
-      const mockOnCancel = jest.fn()
+      const mockOnCancel = vi.fn()
 
       const { container } = render(
         <Modal onCancel={mockOnCancel} className="test-modal">
@@ -270,7 +270,7 @@ describe('Modal', () => {
     })
 
     it('handles click events correctly in integration', () => {
-      const mockOnCancel = jest.fn()
+      const mockOnCancel = vi.fn()
 
       const { container } = render(
         <Modal onCancel={mockOnCancel}>

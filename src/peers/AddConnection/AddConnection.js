@@ -1,6 +1,6 @@
 import React from 'react'
 import { withTranslation } from 'react-i18next'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { multiaddr } from '@multiformats/multiaddr'
 import { P2P, Circuit, WebRTC } from '@multiformats/multiaddr-matcher'
 

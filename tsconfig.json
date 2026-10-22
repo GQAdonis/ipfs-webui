@@ -21,42 +21,69 @@
     "resolveJsonModule": true,
     "preserveConstEnums": true,
     "removeComments": false,
-    "target": "ES2019",
-    "moduleResolution": "node",
+    "target": "ES2022",
+    "moduleResolution": "bundler",
     "lib": [
-      "ES2019",
-      "ES2020.Promise",
-      "ES2020.String",
-      "ES2020.BigInt",
+      "ES2022",
       "DOM",
       "DOM.Iterable"
     ],
     "noEmitOnError": false,
     "noEmit": true,
     "emitDeclarationOnly": false,
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
+    "declarationMap": false,
     "incremental": true,
-    "composite": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./@types"
-    ],
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
-    "jsx": "react",
-    "baseUrl": ".",
+    "jsx": "react-jsx",
     "module": "esnext",
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "node"
+    ],
     "paths": {
-      "*": ["*", "*.ts", "*.tsx"]
-    }
+      "@gqadonis/ipfs-mcp-ui": [
+        "../kubo/mcp/ui/dist/types/index.d.ts"
+      ],
+      "@gqadonis/ipfs-mcp-ui/host": [
+        "../kubo/mcp/ui/dist/types/host/index.d.ts"
+      ],
+      "@gqadonis/ipfs-mcp-ui/a2ui": [
+        "../kubo/mcp/ui/dist/types/a2ui/index.d.ts"
+      ],
+      "@gqadonis/ipfs-mcp-ui/styles.css": [
+        "../kubo/mcp/ui/dist/ipfs-ui.css"
+      ],
+      "@gqadonis/ipfs-agent-chat/react": [
+        "../kubo/mcp/chat/dist/types/react.d.ts"
+      ],
+      "ipld-explorer-components": [
+        "./vendor/ipld-explorer-components/src/index.ts"
+      ],
+      "ipld-explorer-components/providers": [
+        "./vendor/ipld-explorer-components/src/providers/index.ts"
+      ],
+      "ipld-explorer-components/pages": [
+        "./vendor/ipld-explorer-components/src/pages.ts"
+      ],
+      "ipld-explorer-components/pages/start-exploring": [
+        "./vendor/ipld-explorer-components/src/components/StartExploringPage.tsx"
+      ],
+      "ipld-explorer-components/forms": [
+        "./vendor/ipld-explorer-components/src/forms.ts"
+      ],
+      "istextorbinary": [
+        "./node_modules/istextorbinary/compiled-types/index.d.ts"
+      ]
+    },
+    "allowImportingTsExtensions": true
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "**/*.json",
     "@types/**/*",
-    // "src/**/*.js", // TODO: Include all js files when typecheck passes
     "src/bundles/files/**/*.js",
     "src/bundles/analytics.js",
     "src/bundles/config-save.js",
@@ -65,6 +92,8 @@
     "src/bundles/experiments.js",
     "src/bundles/ipfs-desktop.js",
     "src/bundles/ipfs-provider.js",
+    "src/agent-chat/session.js",
+    "src/agent-chat/api-address.js",
     "src/bundles/retry-init.js",
     "src/bundles/local-storage.js",
     "src/bundles/task.js",
@@ -119,5 +148,9 @@
     "src/search/settings-store.js",
     "src/webmcp/vendor/**/*.d.ts"
   ],
-  "exclude": ["src/webmcp/*.test.js", "src/settings/agent/**/*.test.js"]
+  "exclude": [
+    "src/webmcp/*.test.js",
+    "src/settings/agent/**/*.test.js",
+    "vendor/ipld-explorer-components/upstream/**"
+  ]
 }

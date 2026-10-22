@@ -1,10 +1,8 @@
 import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react'
-import ReactFauxDOM from 'react-faux-dom'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
 import * as d3 from 'd3'
-import CountryFlag from 'react-country-flag'
-import { debounce } from 'redux-bundler'
+import CountryFlag from '../../components/country-flag/CountryFlag.js'
 
 import Address from '../../components/address/Address.js'
 import Popover from '../../components/popover/Popover.js'
@@ -52,15 +50,21 @@ const WorldMap = ({ t, className, selectedPeers, doSetSelectedPeers }) => {
   const { dot } = useChartPalette()
 
   useEffect(() => {
-    const debouncedHandleResize = debounce(() => {
-      const width = calculateWidth(window.innerWidth)
-      setWidth(width)
-      setHeight(calculateHeight(width))
-    }, 100)
-
-    window.addEventListener('resize', debouncedHandleResize)
-
-    return () => window.removeEventListener('resize', debouncedHandleResize)
+    let pending
+    const onResize = () => {
+      clearTimeout(pending)
+      pending = setTimeout(() => {
+        const width = calculateWidth(window.innerWidth)
+        setWidth(width)
+        setHeight(calculateHeight(width))
+      }, 100)
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      window.removeEventListener('resize', onResize)
+      clearTimeout(pending)
+      clearTimeout(selectedTimeoutRef.current)
+    }
   }, [])
 
   const handleMapPinMouseEnter = useCallback((peerIds, element) => {
@@ -148,29 +152,19 @@ const getDotsOpacity = (numberOfDots) => {
 }
 
 // Just the dots on the map, this gets called a lot.
-const MapPins = connect('selectPeersCoordinates', ({ width, height, path, dot, peersCoordinates, handleMouseEnter, handleMouseLeave }) => {
-  const coords = peersCoordinates || []
-  const el = d3.select(ReactFauxDOM.createElement('svg'))
-    .attr('width', width)
-    .attr('height', height)
-    .attr('viewBox', `0 0 ${width} ${height}`)
+export const MapPinsView = ({ width, height, path, dot, peersCoordinates, handleMouseEnter, handleMouseLeave }) => {
+  return <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+    {(peersCoordinates || []).map(({ peerIds, coordinates }) => <path
+      key={coordinates.join(',')}
+      d={path.pointRadius(getDotsSize(peerIds.length))({ type: 'Point', coordinates })}
+      fill={dot} fillOpacity={getDotsOpacity(peerIds.length)} className='mapDot'
+      tabIndex={0} role='img' aria-label={peerIds.join(', ')}
+      onMouseEnter={event => handleMouseEnter(peerIds, event.currentTarget)} onMouseLeave={handleMouseLeave}
+      onFocus={event => handleMouseEnter(peerIds, event.currentTarget)} onBlur={handleMouseLeave} />)}
+  </svg>
+}
 
-  coords.forEach(({ peerIds, coordinates }) => {
-    el.append('path')
-      .datum({
-        type: 'Point',
-        coordinates
-      })
-      .attr('d', path.pointRadius(() => getDotsSize(peerIds.length)))
-      .attr('fill', dot)
-      .style('fill-opacity', getDotsOpacity(peerIds.length))
-      .attr('class', 'mapDot')
-      .on('mouseenter', () => handleMouseEnter(peerIds, d3.event.relatedTarget))
-      .on('mouseleave', () => handleMouseLeave())
-  })
-
-  return el.node().toReact()
-})
+const MapPins = connect('selectPeersCoordinates', MapPinsView)
 
 const MAX_PEERS = 5
 
@@ -185,7 +179,7 @@ const PeerInfo = connect('selectPeerLocationsForSwarm', ({ ids, peerLocationsFor
 
   return (
     <div className="f6 flex flex-column justify-center">
-      { peers.sort((a, b) => a.address.localeCompare(b.address)).map((peer, index) => {
+      { [...peers].sort((a, b) => a.address.localeCompare(b.address)).map((peer, index) => {
         if (index === MAX_PEERS && peers.length > MAX_PEERS) {
           return (<div className="f7 pa1 self-end" key="worldmap-more-label">{t('plusPeers', { number: peers.length - MAX_PEERS })}</div>)
         }

@@ -46,8 +46,8 @@ export const files = {
   searchClearButton: (page) => page.getByRole('button', { name: 'Clear search' }),
 
   // Dialogs
-  dialog: (page) => page.locator('div[role="dialog"]'),
-  dialogInput: (page, name) => page.locator(`div[role="dialog"] input[name="${name}"]`),
+  dialog: (page) => page.getByRole('dialog'),
+  dialogInput: (page, name) => page.getByRole('dialog').locator(`input[name="${name}"]`),
   modalInput: (page) => page.locator('input.modal-input')
 }
 
@@ -96,7 +96,7 @@ export const status = {
 // IPNS related locators
 export const ipns = {
   generateKeyButton: (page) => page.getByText('Generate key'),
-  publishModalKeys: (page) => page.locator('div[role="dialog"] .publishModalKeys'),
+  publishModalKeys: (page) => page.getByRole('dialog').locator('.publishModalKeys'),
   keyRow: (page, name) => page.getByText(name),
   keyOptionsButton: (page, name, id) => page.locator(`text=${name}${id} >> [aria-label="Show options"]`),
   removeMenuItem: (page) => page.locator('button[role="menuitem"]').filter({ hasText: 'Remove' }),

@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 import { StartExploringPage } from 'ipld-explorer-components/pages'
 import withTour from '../components/tour/withTour.js'
 import { EXPLORE_TOKEN_VARS } from '../promethity/explore-tokens.js'

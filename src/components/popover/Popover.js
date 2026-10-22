@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import './Popover.css'
 
-const Popover = ({ show, children, top, right, bottom, left, align, handleMouseEnter, handleMouseLeave }) => {
+const Popover = ({ show = false, children, top, right, bottom, left, align, handleMouseEnter, handleMouseLeave }) => {
   return (
     <div className={ classNames('popover absolute bg-near-white', align && `popover--align-${align}`) }
       aria-hidden={ show ? 'false' : 'true' } style={{
@@ -31,10 +31,6 @@ Popover.propTypes = {
   align: PropTypes.string,
   handleMouseEnter: PropTypes.func,
   handleMouseLeave: PropTypes.func
-}
-
-Popover.defaultProps = {
-  show: false
 }
 
 export default Popover

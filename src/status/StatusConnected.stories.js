@@ -4,7 +4,7 @@ import i18n from '../i18n-decorator.js'
 import { TranslatedStatusConnected as StatusConnected } from './StatusConnected.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'StatusConnected',
@@ -12,6 +12,6 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = () => <StatusConnected peersCount={1001} repoSize={123123912321312} />

@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../../lib/react-store.js'
 import { withTranslation, Trans } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 
@@ -10,29 +10,37 @@ import { Modal, ModalBody, ModalActions } from '../../modal/modal'
 import Button from '../../button/button.tsx'
 import './PinningManagerServiceModal.css'
 
-const PinningManagerServiceModal = ({ t, onLeave, onSuccess, className, service, tReady, doAddPinningService, nickname, apiEndpoint, visitServiceUrl, secretApiKey, complianceReportUrl, ...props }) => {
-  const { register, errors, clearErrors, setError, handleSubmit } = useForm({
+export const PinningManagerServiceModal = ({ t, onLeave, onSuccess, className = '', service, tReady, doAddPinningService, nickname = '', apiEndpoint = '', visitServiceUrl, secretApiKey, complianceReportUrl, ...props }) => {
+  const { register, formState: { errors, isSubmitting }, clearErrors, setError, handleSubmit } = useForm({
     defaultValues: {
       nickname,
       apiEndpoint,
-      secretApiKey: null
+      secretApiKey: ''
     }
   })
+  const pendingSubmit = useRef(false)
+  const [saving, setSaving] = useState(false)
   const inputClass = 'w-100 lh-copy f5 ph2 pv1 input-reset ba br1 focus-outline'
   const onSubmit = async data => {
+    if (pendingSubmit.current) return
+    pendingSubmit.current = true
+    setSaving(true)
     try {
       await doAddPinningService(data)
       onSuccess()
     } catch (error) {
       console.error(error)
-      setError('apiValidation', {
+      setError('root.apiValidation', {
         type: 'manual',
         message: error.message
       })
+    } finally {
+      pendingSubmit.current = false
+      setSaving(false)
     }
   }
   const cleanErrors = () => {
-    clearErrors('apiValidation')
+    clearErrors('root.apiValidation')
   }
 
   return (
@@ -60,8 +68,7 @@ const PinningManagerServiceModal = ({ t, onLeave, onSuccess, className, service,
             </label>
             <div className='relative'>
               <input id='cm-nickname'
-                name='nickname'
-                ref={ register({ required: true }) }
+                {...register('nickname', { required: true })}
                 type='text'
                 className={ classNames(inputClass, errors.nickname ? 'bg-red white' : 'charcoal') }
                 placeholder={ t('pinningServiceModal.nicknamePlaceholder') }
@@ -74,8 +81,7 @@ const PinningManagerServiceModal = ({ t, onLeave, onSuccess, className, service,
             </label>
             <div className='relative'>
               <input id='cm-apiEndpoint'
-                name='apiEndpoint'
-                ref={ register({ required: true, pattern: 'http(s){0,1}://.*' }) }
+                {...register('apiEndpoint', { required: true, pattern: /^https?:\/\/.+/i })}
                 type='url'
                 className={ classNames(inputClass, errors.apiEndpoint ? 'bg-red white' : 'charcoal') }
                 placeholder={ t('pinningServiceModal.apiEndpointPlaceholder') }
@@ -91,8 +97,7 @@ const PinningManagerServiceModal = ({ t, onLeave, onSuccess, className, service,
             </label>
             <div className='relative'>
               <input id='cm-secretApiKey'
-                ref={ register({ required: true }) }
-                name='secretApiKey'
+                {...register('secretApiKey', { required: true })}
                 type='password'
                 autoComplete='off'
                 className={ classNames(inputClass, errors.secretApiKey ? 'bg-red white' : 'charcoal') }
@@ -102,7 +107,7 @@ const PinningManagerServiceModal = ({ t, onLeave, onSuccess, className, service,
             </div>
           </div>
           <div>
-            { errors.apiValidation && <p className='red f5 ttc'>{ errors.apiValidation.message}</p> }
+            { errors.root?.apiValidation && <p role='alert' className='red f5 ttc'>{ errors.root?.apiValidation.message}</p> }
           </div>
           <p className='f6'>
             <Trans i18nKey="pinningServiceModal.description" t={t}>
@@ -114,8 +119,8 @@ const PinningManagerServiceModal = ({ t, onLeave, onSuccess, className, service,
 
         <ModalActions justify="center" className='flex flex-row-reverse'>
           {/* Button that actually submits the form needs to be first in HTML, that's why we reverse the order with css */}
-          <Button className='ma2 tc' type="submit">{t('actions.save')}</Button>
-          <Button className='ma2 tc' bg='bg-gray' onClick={onLeave}>{t('actions.cancel')}</Button>
+          <Button className='ma2 tc' buttonType="submit" disabled={saving || isSubmitting}>{t('actions.save')}</Button>
+          <Button className='ma2 tc' bg='bg-gray' buttonType='button' onClick={onLeave}>{t('actions.cancel')}</Button>
         </ModalActions>
       </form>
     </Modal>
@@ -129,12 +134,6 @@ PinningManagerServiceModal.propTypes = {
   t: PropTypes.func.isRequired,
   onLeave: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired
-}
-
-PinningManagerServiceModal.defaultProps = {
-  className: '',
-  nickname: null,
-  apiEndpoint: null
 }
 
 const ErrorMsg = ({ text }) => (<p className='red absolute f7' style={{ top: 26, left: 2 }}>{text}</p>)

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- These interfaces preserve the established IPFS diagnostic wire field names. */
 import type { HTTPRPCOptions } from 'kubo-rpc-client'
 export interface LegacyProvideStats {
   total_reprovides: number

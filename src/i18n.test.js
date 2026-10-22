@@ -41,8 +41,8 @@ describe('i18n', function () {
     expect(i18n.isInitialized).toBe(true)
   })
 
-  it('should return key for non-existent language', function () {
-    expect(i18n.t('app:actions.add', { lng: 'xx' })).toBe('actions.add')
+  it('falls back to bundled English for an unsupported language', function () {
+    expect(i18n.t('app:actions.add', { lng: 'xx' })).toBe('Add')
   })
 
   allLanguages.concat('ko').forEach((lang) => {

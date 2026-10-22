@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { useDebouncedCallback } from '../../lib/hooks/use-debounced-callback'
 import { DEFAULT_IPFS_CHECK_URL } from '../../bundles/gateway.js'
 

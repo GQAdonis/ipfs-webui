@@ -127,13 +127,13 @@ const selectors = {
 /**
  * @typedef {import('redux-bundler').Actions<typeof actions>} Actions
  * @typedef {Selectors & Actions} Ext
- * @typedef {import('redux-bundler').Context<State, Message, Ext>} Context
+ * @typedef {import('redux-bundler').Context<State, Message, Selectors>} Context
  */
 
 const actions = {
   /**
    * @param {string} key
-   * @returns {function(Context): void}
+   * @returns {(arg0: Context) => void}
    */
   doExpToggleAction: key => ({ dispatch }) => {
     if (!key) return

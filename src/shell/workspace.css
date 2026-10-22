@@ -1,0 +1,145 @@
+/* Praxis placement on the existing Promethity aliases. Font families inherit
+   from the bundled application theme; this layer defines no palette or fonts. */
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+  background-color: var(--role-canvas);
+  color: var(--role-text);
+}
+
+.workspace-navigator {
+  min-inline-size: 0;
+  background-color: var(--role-chrome);
+}
+
+.workspace-body {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.workspace-header {
+  flex: none;
+  min-inline-size: 0;
+}
+
+.workspace-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--role-chrome);
+  color: var(--role-text);
+}
+
+.workspace-control-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-inline-size: 0;
+}
+
+.workspace-control {
+  min-block-size: 44px;
+  max-inline-size: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px var(--role-text-muted);
+  background-color: var(--role-muted);
+  color: var(--role-text);
+  font: inherit;
+  text-align: start;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.workspace-control[aria-pressed='true'] {
+  background-color: var(--role-raised);
+  font-weight: 600;
+}
+
+.workspace-control:focus-visible {
+  outline: 2px solid var(--role-action);
+  outline-offset: 2px;
+}
+
+.workspace-control-hint {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--role-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+@media (hover: hover) {
+  .workspace-control:hover {
+    background-color: var(--role-hover);
+  }
+}
+
+@media (forced-colors: active) {
+  .workspace-control {
+    border: 1px solid ButtonText;
+  }
+}
+
+.workspace-stage {
+  display: grid;
+  flex: auto;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.workspace-application,
+.workspace-conversation,
+.workspace-canvas {
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.workspace-conversation {
+  padding: 1.5rem;
+  background-color: var(--role-surface);
+}
+
+.workspace-canvas {
+  padding: 1.5rem;
+  background-color: var(--role-canvas);
+}
+
+.workspace[data-workspace-mode='conversation'] .workspace-conversation {
+  background-color: var(--role-canvas);
+}
+
+/* Do not override [hidden]. Only the visible cells participate in placement;
+   the single conversation cell changes position without moving its React tree. */
+@media (min-width: 60em) {
+  .workspace {
+    grid-template-columns: 9.25rem minmax(0, 1fr);
+  }
+
+  .workspace[data-workspace-mode='application'][data-workspace-pane='docked'] .workspace-stage {
+    grid-template-columns: minmax(0, 1fr) 30rem;
+  }
+
+  .workspace[data-workspace-mode='application'][data-workspace-pane='expanded'] .workspace-stage {
+    grid-template-columns: minmax(0, 1fr) 47.5rem;
+  }
+
+  .workspace[data-workspace-mode='conversation'][data-workspace-pane='docked'] .workspace-stage {
+    grid-template-columns: 30rem minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .workspace[data-workspace-mode='conversation'][data-workspace-pane='expanded'] .workspace-stage {
+    grid-template-columns: 47.5rem minmax(0, 1fr);
+    align-items: start;
+  }
+}

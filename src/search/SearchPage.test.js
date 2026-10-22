@@ -1,24 +1,27 @@
+import { vi } from 'vitest'
 // webui-vector-search 1.2, 1.3, 1.4, 1.5, 1.6: every state of the Search page against a stub
 // fetch, the provenance labels, plain-text rendering, the error states, the status panel
 // states and the off switch.
 import React from 'react'
-import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import { render, screen, fireEvent, waitFor, cleanup, within, act } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import axe from 'axe-core'
 import { NavBar } from '../navigation/NavBar.js'
 import { SearchPage } from './SearchPage.js'
 import SearchSettingsSwitch from './SearchSettingsSwitch.js'
+import { getConnectionStore } from '../agent-chat/connection-store.js'
+import { searchHandoff } from '../shell/search-handoff.js'
 import { availabilityStore } from './availability-store.js'
 import { updateSettings as updateSearch, resetForTests as resetSearch } from './settings-store.js'
 import { updateSettings as updateChat, resetForTests as resetChat, setToken } from '../agent-chat/settings-store.js'
 import { initI18n, reply, CONFIGURED, RUN, hit, CID_A, CID_B } from './test-helpers.js'
 
-jest.mock('../components/button/button.tsx', () => ({
+vi.mock('../components/button/button.tsx', () => ({
   __esModule: true,
   default: ({ buttonType, children, minWidth, ...rest }) => <button type={buttonType} {...rest}>{children}</button>
 }))
-jest.mock('../promethity/brand-wordmark.js', () => ({ __esModule: true, default: () => null }))
-jest.mock('../promethity/brand-p-icon.js', () => ({ __esModule: true, default: () => null }))
+vi.mock('../promethity/brand-wordmark.js', () => ({ __esModule: true, default: () => null }))
+vi.mock('../promethity/brand-p-icon.js', () => ({ __esModule: true, default: () => null }))
 
 const missing = initI18n()
 const ENDPOINT = 'http://127.0.0.1:5050/agui'
@@ -35,11 +38,12 @@ beforeEach(() => {
   resetSearch()
   availabilityStore.resetForTests()
   missing.length = 0
+  searchHandoff.retire('no-pending-owner')
   routes = {
     status: async () => reply(200, CONFIGURED),
     search: async () => reply(200, { model: 'bge-m3', results: [hit()] })
   }
-  fetchMock = jest.fn(async (url) => (String(url).endsWith('/index/status') ? routes.status() : routes.search()))
+  fetchMock = vi.fn(async (url) => (String(url).endsWith('/index/status') ? routes.status() : routes.search()))
   globalThis.fetch = fetchMock
   updateChat({ enabled: true, endpoint: ENDPOINT })
   setToken('tok-1')
@@ -55,6 +59,7 @@ afterEach(() => {
 
 const ask = async (text = 'roofer invoice') => {
   fireEvent.change(await screen.findByRole('searchbox', { name: /search your files/i }), { target: { value: text } })
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Search' })).toBeEnabled())
   fireEvent.click(screen.getByRole('button', { name: 'Search' }))
 }
 
@@ -90,7 +95,7 @@ describe('provenance labels (1.2)', () => {
   })
 
   it('copies the CID', async () => {
-    const writeText = jest.fn(async () => {})
+    const writeText = vi.fn(async () => {})
     Object.defineProperty(globalThis.navigator, 'clipboard', { value: { writeText }, configurable: true })
     render(<SearchPage />)
     await ask()
@@ -384,10 +389,11 @@ describe('off switch (1.6)', () => {
     expect(indexCalls()).toHaveLength(0)
   })
 
-  it('shows the nav entry when on and configured', async () => {
+  it('keeps navigation stable when Search is enabled; Search is a composer intent', () => {
     render(<NavBar t={(key) => key} />)
-    await waitFor(() => expect(document.querySelector('a[href="#/search"]')).not.toBeNull())
-    expect(screen.getByRole('menuitem', { name: 'search:title' })).toBeInTheDocument()
+    expect(document.querySelector('a[href="#/search"]')).toBeNull()
+    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '#/')
+    expect(document.querySelector('a[href="#/pins"]')).not.toBeNull()
   })
 
   it('the switch turns it off and back on', async () => {
@@ -423,5 +429,60 @@ describe('accessibility (1.5)', () => {
     await screen.findByRole('alert')
     const result = await run(container)
     expect(result.violations.map((v) => v.id)).toEqual([])
+  })
+})
+
+describe('explicit composer query transfer', () => {
+  it('replaces an edited form only for a new explicit handoff, then retains further local editing', async () => {
+    render(<SearchPage />)
+    const previous = await screen.findByRole('searchbox')
+    fireEvent.change(previous, { target: { value: 'local unsent edit' } })
+    act(() => searchHandoff.offer('new explicit handoff', getConnectionStore().getSnapshot().generation))
+    await screen.findAllByRole('article')
+    const current = screen.getByRole('searchbox')
+    expect(current).not.toBe(previous)
+    expect(current).toHaveValue('new explicit handoff')
+    expect(searchCalls()).toHaveLength(1)
+    expect(JSON.parse(searchCalls()[0][1].body).query).toBe('new explicit handoff')
+    fireEvent.change(current, { target: { value: 'edited after handoff' } })
+    expect(screen.getByRole('searchbox')).toHaveValue('edited after handoff')
+    expect(searchCalls()).toHaveLength(1)
+  })
+  it('clears an unsent edit and its old form on an actual connection generation change', async () => {
+    render(<SearchPage />)
+    const previous = await screen.findByRole('searchbox')
+    fireEvent.change(previous, { target: { value: 'private old-generation edit' } })
+    expect(previous).toHaveValue('private old-generation edit')
+    act(() => setToken('fresh-generation-fixture-token'))
+    await waitFor(() => {
+      const current = screen.getByRole('searchbox')
+      expect(current).not.toBe(previous)
+      expect(current).toHaveValue('')
+    })
+    expect(searchCalls()).toHaveLength(0)
+    expect(screen.getByRole('button', { name: 'Search', exact: true })).toBeDisabled()
+  })
+  it('consumes a submitted query once in the current connection and shows the same text', async () => {
+    const store = getConnectionStore()
+    searchHandoff.offer('explicit submitted query', store.getSnapshot().generation)
+    const view = render(<SearchPage />)
+    await screen.findAllByRole('article')
+    expect(searchCalls()).toHaveLength(1)
+    expect(JSON.parse(searchCalls()[0][1].body).query).toBe('explicit submitted query')
+    expect(screen.getByRole('searchbox')).toHaveValue('explicit submitted query')
+    expect(searchHandoff.getSnapshot()).toBeNull()
+    view.unmount()
+    render(<SearchPage />)
+    await screen.findByRole('searchbox')
+    expect(searchCalls()).toHaveLength(1)
+  })
+  it('drops an old-owner query without running it or prepopulating a new-owner form', async () => {
+    searchHandoff.offer('old private query', getConnectionStore().getSnapshot().generation)
+    setToken('replacement-fixture-token')
+    render(<SearchPage />)
+    await screen.findByRole('searchbox')
+    expect(searchCalls()).toHaveLength(0)
+    expect(screen.getByRole('searchbox')).toHaveValue('')
+    expect(searchHandoff.getSnapshot()).toBeNull()
   })
 })

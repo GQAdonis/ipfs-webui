@@ -1,0 +1,719 @@
+--- a/package.json
++++ b/package.json
+@@ -1,287 +1,216 @@
+ {
+   "name": "ipld-explorer-components",
+-  "version": "8.1.3",
+   "description": "React components for https://explore.ipld.io",
+   "license": "Apache-2.0 OR MIT",
+-  "homepage": "https://github.com/ipfs/ipld-explorer-components#readme",
++  "author": "olizilla",
++  "version": "8.1.3-react19.1",
++  "private": true,
++  "type": "module",
+   "repository": {
+     "type": "git",
+     "url": "git+https://github.com/ipfs/ipld-explorer-components.git"
+   },
+-  "bugs": {
+-    "url": "https://github.com/ipfs/ipld-explorer-components/issues"
+-  },
+   "engines": {
+-    "node": ">=16.0.0",
+-    "npm": ">=7.0.0"
+-  },
+-  "author": "olizilla",
+-  "files": [
+-    "dist"
+-  ],
++    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
++  },
+   "exports": {
+     ".": {
+-      "import": "./dist/index.js",
+-      "types": "./dist/src/index.d.ts"
++      "types": "./src/index.ts",
++      "import": "./dist/index.js"
+     },
+     "./providers": {
+-      "import": "./dist/providers/index.js",
+-      "types": "./dist/src/providers/index.d.ts"
++      "types": "./src/providers/index.ts",
++      "import": "./dist/providers.js"
+     },
+     "./pages": {
+-      "import": "./dist/pages.js",
+-      "types": "./dist/src/pages.d.ts"
++      "types": "./src/pages.ts",
++      "import": "./dist/pages.js"
+     },
+     "./pages/start-exploring": {
+-      "import": "./dist/components/StartExploringPage.js",
+-      "types": "./dist/src/components/StartExploringPage.d.ts"
++      "types": "./src/components/StartExploringPage.tsx",
++      "import": "./dist/start-exploring.js"
+     },
+     "./forms": {
+-      "import": "./dist/forms.js",
+-      "types": "./dist/src/forms.d.ts"
+-    },
+-    "./css": {
+-      "import": "./dist/style.css"
+-    }
+-  },
+-  "type": "module",
+-  "release": {
+-    "branches": [
+-      "master"
+-    ],
+-    "plugins": [
+-      [
+-        "@semantic-release/commit-analyzer",
+-        {
+-          "preset": "conventionalcommits",
+-          "releaseRules": [
+-            {
+-              "breaking": true,
+-              "release": "major"
+-            },
+-            {
+-              "revert": true,
+-              "release": "patch"
+-            },
+-            {
+-              "type": "feat",
+-              "release": "minor"
+-            },
+-            {
+-              "type": "fix",
+-              "release": "patch"
+-            },
+-            {
+-              "type": "chore",
+-              "release": "patch"
+-            },
+-            {
+-              "type": "docs",
+-              "release": "patch"
+-            },
+-            {
+-              "type": "test",
+-              "release": "patch"
+-            },
+-            {
+-              "scope": "no-release",
+-              "release": false
+-            }
+-          ]
+-        }
+-      ],
+-      [
+-        "@semantic-release/release-notes-generator",
+-        {
+-          "preset": "conventionalcommits",
+-          "presetConfig": {
+-            "types": [
+-              {
+-                "type": "feat",
+-                "section": "Features"
+-              },
+-              {
+-                "type": "fix",
+-                "section": "Bug Fixes"
+-              },
+-              {
+-                "type": "chore",
+-                "section": "Trivial Changes"
+-              },
+-              {
+-                "type": "docs",
+-                "section": "Trivial Changes"
+-              },
+-              {
+-                "type": "test",
+-                "section": "Tests"
+-              }
+-            ]
+-          }
+-        }
+-      ],
+-      "@semantic-release/changelog",
+-      "@semantic-release/npm",
+-      "@semantic-release/github",
+-      "@semantic-release/git"
+-    ]
+-  },
+-  "eslintConfig": {
+-    "settings": {
+-      "react": {
+-        "version": "18.3"
+-      }
+-    },
+-    "extends": [
+-      "plugin:react/recommended",
+-      "plugin:jsx-a11y/recommended",
+-      "plugin:react-hooks/recommended",
+-      "ipfs"
+-    ],
+-    "plugins": [
+-      "react"
+-    ],
+-    "parserOptions": {
+-      "project": true,
+-      "sourceType": "module",
+-      "ecmaFeatures": {
+-        "jsx": true
+-      }
+-    },
+-    "rules": {
+-      "react/prop-types": "off",
+-      "no-console": [
+-        "error",
+-        {
+-          "allow": [
+-            "error",
+-            "info",
+-            "time",
+-            "timeEnd",
+-            "warn"
+-          ]
+-        }
+-      ]
+-    }
+-  },
+-  "scripts": {
+-    "build": "run-s dep-check lint build:esm-vite storybook:build",
+-    "build:esm": "aegir build",
+-    "build:esm-vite": "vite build",
+-    "release": "aegir release",
+-    "clean": "rm -rf dist",
+-    "dep-check": "aegir dep-check",
+-    "lint": "aegir lint",
+-    "lint:fix": "aegir lint -- --fix",
+-    "prepublishOnly": "npm run build",
+-    "dev": "vite",
+-    "start": "vite",
+-    "test": "run-s test:unit test:e2e test:storybook:ci test:consumer",
+-    "test:node": "run-s test:unit",
+-    "test:unit": "vitest run --environment=node",
+-    "test:unit:cov": "vitest run --environment=node --coverage",
+-    "storybook": "storybook dev",
+-    "storybook:build": "storybook build",
+-    "test:e2e": "npx playwright test -c ./test/e2e",
+-    "test:consumer": "run-s test:consumer:webui test:consumer:ipld.io",
+-    "test:consumer:webui": "aegir test-dependant https://github.com/ipfs/ipfs-webui",
+-    "test:consumer:ipld.io": "aegir test-dependant https://github.com/ipld/explore.ipld.io",
+-    "test:storybook:ci": "concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"storybook dev -p 6006\" \"wait-on 'tcp:127.0.0.1:6006' && test-storybook --coverage\""
+-  },
+-  "dependencies": {
+-    "@helia/block-brokers": "^4.0.0",
+-    "@helia/http": "^2.0.0",
+-    "@helia/interface": "^5.0.0",
+-    "@helia/routers": "^2.0.0",
+-    "@ipld/car": "^5.3.2",
+-    "@ipld/dag-cbor": "^9.2.1",
+-    "@ipld/dag-json": "^10.2.2",
+-    "@ipld/dag-pb": "^4.1.2",
+-    "@multiformats/sha3": "^3.0.2",
+-    "cytoscape": "^3.30.2",
+-    "cytoscape-dagre": "^2.5.0",
+-    "dag-jose": "^5.1.1",
+-    "filesize": "^10.1.6",
+-    "hash-wasm": "^4.11.0",
+-    "i18next-chained-backend": "^4.6.2",
+-    "i18next-localstorage-backend": "^4.2.0",
+-    "ipfs-unixfs": "^11.2.0",
+-    "multiformats": "^13.3.0",
+-    "react-helmet": "^6.1.0",
+-    "react-inspector": "^6.0.2",
+-    "react-joyride": "^2.9.2",
+-    "stream-to-it": "^1.0.1"
+-  },
+-  "devDependencies": {
+-    "@chromatic-com/storybook": "^2.0.2",
+-    "@playwright/test": "^1.49.0",
+-    "@storybook/addon-actions": "^8.3.5",
+-    "@storybook/addon-coverage": "^1.0.4",
+-    "@storybook/addon-interactions": "^8.3.5",
+-    "@storybook/addon-links": "^8.3.5",
+-    "@storybook/react": "^8.3.5",
+-    "@storybook/react-vite": "^8.3.5",
+-    "@storybook/test-runner": "^0.19.1",
+-    "@storybook/types": "^8.3.5",
+-    "@testing-library/jest-dom": "^6.6.1",
+-    "@testing-library/react": "^16.0.1",
+-    "@types/cytoscape": "^3.21.8",
+-    "@types/cytoscape-dagre": "^2.3.3",
+-    "@types/jest": "^29.5.13",
+-    "@types/loadable__component": "^5.13.9",
+-    "@types/mocha": "^10.0.9",
+-    "@types/react": "^18.3.11",
+-    "@types/react-dom": "^18.3.1",
+-    "@types/react-helmet": "^6.1.11",
+-    "@types/react-virtualized": "^9.21.30",
+-    "@vitejs/plugin-react": "^4.3.2",
+-    "@vitest/coverage-v8": "^2.1.3",
+-    "aegir": "^44.1.4",
+-    "concurrently": "^9.0.1",
+-    "eslint-config-ipfs": "^7.0.6",
+-    "eslint-plugin-jsx-a11y": "^6.10.0",
+-    "eslint-plugin-react": "^7.37.1",
+-    "eslint-plugin-react-hooks": "^5.0.0",
+-    "i18next": "^23.16.0",
+-    "i18next-browser-languagedetector": "^8.0.0",
+-    "i18next-http-backend": "^2.6.2",
+-    "i18next-icu": "^2.3.0",
+-    "ipfs-css": "^1.4.0",
+-    "ipfsd-ctl": "^15.0.2",
+-    "jsdom": "^25.0.1",
+-    "kubo": "^0.32.1",
+-    "kubo-rpc-client": "^5.0.2",
+-    "npm-run-all": "^4.1.5",
+-    "react": "^18.3.1",
+-    "react-dom": "^18.3.1",
+-    "react-i18next": "^15.0.3",
+-    "rollup-plugin-node-polyfills": "^0.2.1",
+-    "storybook": "^8.3.5",
+-    "tachyons": "^4.12.0",
+-    "tsx": "^4.19.2",
+-    "typescript": "^5.6.3",
+-    "typescript-plugin-css-modules": "^5.1.0",
+-    "vite": "^5.4.9",
+-    "vite-plugin-dts": "^4.2.4",
+-    "vite-plugin-svgr": "^4.2.0",
+-    "vitest": "^2.1.3",
+-    "wait-on": "^8.0.1"
+-  },
++      "types": "./src/forms.ts",
++      "import": "./dist/forms.js"
++    },
++    "./css": "./dist/style.css"
++  },
++  "files": [
++    "src",
++    "public",
++    "LICENSE",
++    "LICENSE-MIT",
++    "LICENSE-APACHE",
++    "FORK.md",
++    "provenance.json",
++    "upstream",
++    "patches",
++    "scripts",
++    "test",
++    "dist",
++    "package-lock.json"
++  ],
++  "sideEffects": [
++    "**/*.css"
++  ],
+   "peerDependencies": {
+     "i18next": "^23.15.2",
+     "i18next-browser-languagedetector": "^8.0.0",
+     "i18next-http-backend": "^2.6.2",
+     "i18next-icu": "^2.3.0",
+     "ipfs-css": "^1.4.0",
+-    "react": ">=16.14.0",
+-    "react-dom": ">=16.14.0",
++    "react": "19.3.1",
++    "react-dom": "19.3.1",
+     "react-i18next": "^15.0.2",
+-    "tachyons": "^4.12.0"
+-  },
+-  "browsers": [
+-    ">1%",
+-    "last 2 versions",
+-    "Firefox ESR",
+-    "not ie < 11"
+-  ]
++    "tachyons": "^4.12.0",
++    "react-joyride": "3.2.0"
++  },
++  "devDependencies": {
++    "@helia/block-brokers": "4.0.0",
++    "@helia/http": "2.0.0",
++    "@helia/interface": "5.0.0",
++    "@helia/routers": "2.0.0",
++    "@ipld/car": "5.3.2",
++    "@ipld/dag-cbor": "9.2.1",
++    "@ipld/dag-json": "10.2.2",
++    "@ipld/dag-pb": "4.1.2",
++    "@multiformats/sha3": "3.0.2",
++    "cytoscape": "3.30.2",
++    "cytoscape-dagre": "2.5.0",
++    "dag-jose": "5.1.1",
++    "filesize": "10.1.6",
++    "hash-wasm": "4.11.0",
++    "i18next-chained-backend": "4.6.2",
++    "i18next-localstorage-backend": "4.2.0",
++    "ipfs-unixfs": "11.2.0",
++    "multiformats": "13.3.0",
++    "stream-to-it": "1.0.1",
++    "react-inspector": "9.0.0"
++  },
++  "scripts": {
++    "build:artifact": "node scripts/build-artifact.mjs"
++  },
++  "overrides": {
++    "@babel/runtime": "7.25.7",
++    "@chainsafe/is-ip": "2.0.2",
++    "@chainsafe/netmask": "2.0.0",
++    "@helia/bitswap": "2.0.0",
++    "@helia/block-brokers": "4.0.0",
++    "@helia/delegated-routing-v1-http-api-client": "4.1.0",
++    "@helia/http": "2.0.0",
++    "@helia/interface": "5.0.0",
++    "@helia/routers": "2.0.0",
++    "@helia/utils": "1.0.0",
++    "@ipld/car": "5.3.2",
++    "@ipld/dag-cbor": "9.2.1",
++    "@ipld/dag-json": "10.2.2",
++    "@ipld/dag-pb": "4.1.2",
++    "@leichtgewicht/ip-codec": "2.0.5",
++    "@libp2p/crypto": "5.0.5",
++    "@libp2p/interface": "2.1.3",
++    "@libp2p/logger": "5.1.1",
++    "@libp2p/peer-collections": "6.0.8",
++    "@libp2p/peer-id": "5.0.5",
++    "@libp2p/utils": "6.1.1",
++    "@multiformats/dns": "1.0.6",
++    "@multiformats/multiaddr": "12.3.1",
++    "@multiformats/multiaddr-matcher": "1.3.0",
++    "@multiformats/multiaddr-to-uri": "10.1.0",
++    "@multiformats/sha3": "3.0.2",
++    "@multiformats/uri-to-multiaddr": "8.0.0",
++    "@noble/curves": "1.6.0",
++    "@noble/hashes": "1.5.0",
++    "@sindresorhus/fnv1a": "3.1.0",
++    "@types/dns-packet": "5.6.5",
++    "@types/murmurhash3js-revisited": "3.0.3",
++    "@types/node": "22.7.6",
++    "any-signal": "4.1.1",
++    "asn1js": "3.0.5",
++    "base64-js": "1.5.1",
++    "blockstore-core": "5.0.2",
++    "browser-readablestream-to-it": "2.0.7",
++    "buffer": "6.0.3",
++    "cborg": "4.2.4",
++    "clone-regexp": "3.0.0",
++    "convert-hrtime": "5.0.0",
++    "cytoscape": "3.30.2",
++    "cytoscape-dagre": "2.5.0",
++    "dag-jose": {
++      ".": "5.1.1",
++      "multiformats": "13.1.3"
++    },
++    "dagre": "0.8.5",
++    "datastore-core": "10.0.2",
++    "delay": "6.0.0",
++    "dns-packet": "5.6.1",
++    "eventemitter3": "5.0.1",
++    "filesize": "10.1.6",
++    "function-timeout": "0.1.1",
++    "get-iterator": "2.0.1",
++    "graphlib": "2.1.8",
++    "hash-wasm": "4.11.0",
++    "hashlru": "2.3.0",
++    "i18next-chained-backend": "4.6.2",
++    "i18next-localstorage-backend": "4.2.0",
++    "ieee754": "1.2.1",
++    "interface-blockstore": "5.3.1",
++    "interface-datastore": "8.3.1",
++    "interface-store": "6.0.2",
++    "ip-regex": "5.0.0",
++    "ipfs-unixfs": "11.2.0",
++    "ipns": "10.0.0",
++    "is-ip": "5.0.1",
++    "is-loopback-addr": "2.0.2",
++    "is-regexp": "3.1.0",
++    "it-all": "3.0.6",
++    "it-byte-stream": "1.1.0",
++    "it-drain": "3.0.7",
++    "it-filter": "3.1.1",
++    "it-first": "3.0.6",
++    "it-foreach": "2.1.1",
++    "it-length-prefixed": "9.1.0",
++    "it-length-prefixed-stream": "1.2.0",
++    "it-map": "3.1.1",
++    "it-merge": "3.0.5",
++    "it-ndjson": "1.0.7",
++    "it-peekable": "3.0.5",
++    "it-pipe": "3.0.1",
++    "it-pushable": "3.2.3",
++    "it-queueless-pushable": "1.0.0",
++    "it-reader": "6.0.4",
++    "it-sort": "3.0.6",
++    "it-stream-types": "2.0.2",
++    "it-take": "3.0.6",
++    "js-sha3": "0.9.3",
++    "lodash": "4.17.21",
++    "mortice": "3.0.4",
++    "murmurhash3js-revisited": "3.0.0",
++    "netmask": "2.0.2",
++    "observable-webworkers": "2.0.1",
++    "p-defer": "4.0.1",
++    "p-queue": "8.0.1",
++    "p-timeout": "6.1.3",
++    "progress-events": "1.0.1",
++    "protons-runtime": "5.5.0",
++    "pvtsutils": "1.3.5",
++    "pvutils": "1.1.3",
++    "race-event": "1.3.0",
++    "race-signal": "1.1.0",
++    "regenerator-runtime": "0.14.1",
++    "stream-to-it": "1.0.1",
++    "super-regex": "0.2.0",
++    "time-span": "5.1.0",
++    "timestamp-nano": "1.0.1",
++    "tslib": "2.8.0",
++    "uint8-varint": "2.0.4",
++    "uint8arraylist": "2.4.8",
++    "uint8arrays": "5.1.0",
++    "undici-types": "6.19.8",
++    "varint": "6.0.0",
++    "weald": "1.0.4",
++    "ms": "3.0.0-canary.1",
++    "supports-color": "9.4.0",
++    "multiformats": "13.3.0"
++  }
+ }
+--- /dev/null
++++ b/scripts/artifact-config.mjs
+@@ -0,0 +1,38 @@
++import { resolve } from 'node:path'
++
++export const HOST_EXTERNALS = [
++  'react', 'react-dom', 'react-i18next', 'react-joyride', 'i18next',
++  'i18next-browser-languagedetector', 'i18next-http-backend', 'i18next-icu',
++  'ipfs-css', 'tachyons'
++]
++
++export function artifactConfig (directory, react) {
++  return {
++    root: directory,
++    configFile: false,
++    publicDir: false,
++    base: './',
++    plugins: [react()],
++    build: {
++      outDir: 'dist', emptyOutDir: true, minify: false,
++      target: 'es2022', sourcemap: false, cssCodeSplit: false,
++      lib: {
++        entry: {
++          index: resolve(directory, 'src/index.ts'),
++          providers: resolve(directory, 'src/providers/index.ts'),
++          pages: resolve(directory, 'src/pages.ts'),
++          'start-exploring': resolve(directory, 'src/components/StartExploringPage.tsx'),
++          forms: resolve(directory, 'src/forms.ts')
++        },
++        formats: ['es'], fileName: (_, name) => `${name}.js`, cssFileName: 'style'
++      },
++      rolldownOptions: {
++        external: name => HOST_EXTERNALS.some(dependency => name === dependency || name.startsWith(`${dependency}/`)),
++        output: {
++          entryFileNames: '[name].js', chunkFileNames: 'chunks/[name]-[hash].js',
++          assetFileNames: asset => (asset.names?.some(name => name.endsWith('.css')) || asset.name?.endsWith('.css')) ? 'style.css' : 'assets/[name]-[hash][extname]'
++        }
++      }
++    }
++  }
++}
+--- /dev/null
++++ b/scripts/build-artifact.mjs
+@@ -0,0 +1,34 @@
++import { createRequire } from 'node:module'
++import { copyFile, readFile, writeFile } from 'node:fs/promises'
++import { dirname, resolve } from 'node:path'
++import { fileURLToPath, pathToFileURL } from 'node:url'
++import { artifactConfig } from './artifact-config.mjs'
++import { explorerSourceManifest, artifactFiles } from './freshness.mjs'
++import { copyDependencyNotices } from './licenses.mjs'
++
++const directory = resolve(dirname(fileURLToPath(import.meta.url)), '..')
++const host = resolve(directory, '../..')
++const hostRequire = createRequire(resolve(host, 'package.json'))
++const toolchain = { vite: '8.3.4', '@vitejs/plugin-react': '6.1.2' }
++for (const [name, version] of Object.entries(toolchain)) {
++  const installed = JSON.parse(await readFile(resolve(host, 'node_modules', name, 'package.json'), 'utf8'))
++  if (installed.version !== version) throw new Error(`Explorer artifact requires host ${name}@${version}`)
++}
++const { build } = await import(pathToFileURL(hostRequire.resolve('vite')).href)
++const { default: react } = await import(pathToFileURL(hostRequire.resolve('@vitejs/plugin-react')).href)
++const before = await explorerSourceManifest(directory)
++// This supplies the file dependency, not a verification build of the Web UI.
++await build(artifactConfig(directory, react))
++await copyDependencyNotices(directory)
++await copyFile(resolve(directory, 'package-lock.json'), resolve(directory, 'dist/build-inputs.lock.json'))
++const after = await explorerSourceManifest(directory)
++if (before.sha256 !== after.sha256) throw new Error('Explorer source changed while generating its dependency artifact')
++const artifacts = await artifactFiles(directory)
++await writeFile(resolve(directory, 'dist/artifact-manifest.json'), JSON.stringify({
++  schemaVersion: 1,
++  version: JSON.parse(await readFile(resolve(directory, 'package.json'), 'utf8')).version,
++  sourceSha256: after.sha256,
++  sourceFiles: after.files,
++  toolchain,
++  artifacts
++}, null, 2) + '\n')
+--- /dev/null
++++ b/scripts/check-freshness.mjs
+@@ -0,0 +1,8 @@
++import { assertExplorerFreshness } from './freshness.mjs'
++
++try {
++  console.log(JSON.stringify(await assertExplorerFreshness()))
++} catch (error) {
++  console.error(error.message)
++  process.exitCode = 1
++}
+--- /dev/null
++++ b/scripts/freshness.mjs
+@@ -0,0 +1,70 @@
++import { createHash } from 'node:crypto'
++import { lstat, readFile, readdir } from 'node:fs/promises'
++import { join, resolve } from 'node:path'
++
++const directories = ['src', 'public', 'test', 'scripts']
++const documents = ['package.json', 'package-lock.json', 'LICENSE', 'LICENSE-MIT', 'LICENSE-APACHE']
++
++export async function explorerSourceManifest (directory, { packed = false } = {}) {
++  const files = [...documents]
++  async function visit (relative) {
++    const entries = await readdir(join(directory, relative), { withFileTypes: true })
++    for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name, 'en'))) {
++      const path = `${relative}/${entry.name}`
++      if (entry.isDirectory()) await visit(path)
++      else if (entry.isFile()) files.push(path)
++      else throw new Error(`Unsupported Explorer source entry: ${path}`)
++    }
++  }
++  for (const name of directories) await visit(name)
++  const manifest = {}
++  for (const path of files.sort()) {
++    // npm omits package-lock.json from a packed dependency. The generator
++    // includes its exact bytes under dist so installed-copy checks retain it.
++    const physical = packed && path === 'package-lock.json' ? 'dist/build-inputs.lock.json' : path
++    manifest[path] = createHash('sha256').update(await readFile(join(directory, physical))).digest('hex')
++  }
++  return { files: manifest, sha256: createHash('sha256').update(JSON.stringify(manifest)).digest('hex') }
++}
++
++// F1.9 assembly consumes this precondition before building the Web UI. A local
++// file dependency is packed, so matching versions alone do not establish that
++// the installed copy contains the current source-controlled compatibility work.
++export async function artifactFiles (directory) {
++  const files = {}
++  async function visit (relative) {
++    const entries = await readdir(join(directory, relative), { withFileTypes: true })
++    for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name, 'en'))) {
++      const path = `${relative}/${entry.name}`
++      if (path === 'dist/artifact-manifest.json') continue
++      if (entry.isDirectory()) await visit(path)
++      else if (entry.isFile()) files[path] = createHash('sha256').update(await readFile(join(directory, path))).digest('hex')
++      else throw new Error(`Unsupported Explorer artifact entry: ${path}`)
++    }
++  }
++  await visit('dist')
++  return files
++}
++
++export async function assertArtifactFreshness (directory, options) {
++  const stamp = JSON.parse(await readFile(join(directory, 'dist/artifact-manifest.json'), 'utf8'))
++  const source = await explorerSourceManifest(directory, options)
++  if (source.sha256 !== stamp.sourceSha256) throw new Error('Explorer dependency artifact is stale. Install its own locked build inputs and regenerate the artifact before assembly.')
++  const actual = await artifactFiles(directory)
++  if (JSON.stringify(actual) !== JSON.stringify(stamp.artifacts)) throw new Error('Explorer dependency artifact files differ from their source/lock build manifest')
++  for (const file of ['index.js', 'providers.js', 'pages.js', 'forms.js', 'start-exploring.js', 'style.css']) {
++    if (!actual[`dist/${file}`]) throw new Error(`Explorer dependency artifact is missing ${file}`)
++  }
++  return { source, artifacts: actual }
++}
++
++export async function assertExplorerFreshness (root = process.cwd()) {
++  const source = resolve(root, 'vendor/ipld-explorer-components')
++  const installed = resolve(root, 'node_modules/ipld-explorer-components')
++  if ((await lstat(installed)).isSymbolicLink()) throw new Error('Explorer must be installed with the project install-links=true configuration')
++  const [expected, actual] = await Promise.all([assertArtifactFreshness(source), assertArtifactFreshness(installed, { packed: true })])
++  if (expected.source.sha256 !== actual.source.sha256 || JSON.stringify(expected.artifacts) !== JSON.stringify(actual.artifacts)) {
++    throw new Error('Installed Explorer source is stale. Regenerate the local dependency lock after source changes, then run npm ci with the project .npmrc before assembly.')
++  }
++  return { version: JSON.parse(await readFile(join(source, 'package.json'), 'utf8')).version, sourceSha256: expected.source.sha256, installedSha256: actual.source.sha256, artifacts: expected.artifacts }
++}
+--- /dev/null
++++ b/scripts/licenses.mjs
+@@ -0,0 +1,25 @@
++import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
++import { join } from 'node:path'
++
++// Include the complete locked build-input notice inventory. It is a superset
++// of the bundled protocol modules, so tree shaking cannot silently drop a
++// dependency's license when a later compatibility patch uses another export.
++export async function copyDependencyNotices (directory) {
++  const lock = JSON.parse(await readFile(join(directory, 'package-lock.json'), 'utf8'))
++  const notices = []
++  const output = join(directory, 'dist/licenses')
++  await mkdir(output, { recursive: true })
++  for (const [path, metadata] of Object.entries(lock.packages).sort(([a], [b]) => a.localeCompare(b, 'en'))) {
++    if (!path.includes('node_modules/')) continue
++    const name = path.split('node_modules/').at(-1)
++    const packageRoot = join(directory, path)
++    const entries = await readdir(packageRoot, { withFileTypes: true })
++    const files = entries.filter(entry => entry.isFile() && /^(licen[cs]e|notice|copying)(?:[.-]|$)/i.test(entry.name)).map(entry => entry.name).sort()
++    const destination = `${name.replaceAll('/', '__')}@${metadata.version}`
++    await mkdir(join(output, destination), { recursive: true })
++    for (const file of files) await copyFile(join(packageRoot, file), join(output, destination, file))
++    notices.push({ name, version: metadata.version, integrity: metadata.integrity, license: metadata.license, noticeFiles: files.map(file => `licenses/${destination}/${file}`) })
++  }
++  for (const file of ['LICENSE', 'LICENSE-MIT', 'LICENSE-APACHE']) await copyFile(join(directory, file), join(output, file))
++  await writeFile(join(output, 'dependencies.json'), JSON.stringify({ description: 'Complete locked build-input notice inventory, including external host adapters.', packages: notices }, null, 2) + '\n')
++}
+--- a/src/components/error/ErrorBoundary.tsx
++++ b/src/components/error/ErrorBoundary.tsx
+@@ -15,7 +15,7 @@
+     console.error(error)
+   }
+ 
+-  render (): JSX.Element {
++  render (): React.JSX.Element {
+     const { hasError } = this.state
+     const { children, fallback: Fallback } = this.props
+     return hasError ? <Fallback /> as React.ReactElement : children
+--- a/src/components/explore/IpldExploreErrorComponent.tsx
++++ b/src/components/explore/IpldExploreErrorComponent.tsx
+@@ -6,7 +6,7 @@
+   error: IpldExploreError | null
+ }
+ 
+-export function IpldExploreErrorComponent ({ error }: IpldExploreErrorComponentProps): JSX.Element | null {
++export function IpldExploreErrorComponent ({ error }: IpldExploreErrorComponentProps): React.JSX.Element | null {
+   const { t } = useTranslation('explore', { keyPrefix: 'errors' })
+   if (error == null) return null
+ 
+--- a/src/components/loader/loader.tsx
++++ b/src/components/loader/loader.tsx
+@@ -2,7 +2,7 @@
+ import styles from './loader.module.css'
+ 
+ export const Loader: React.FC<{ color?: string }> = ({ color = 'light', ...props }) => {
+-  const className = `dib ${styles.laBallTrianglePath} ${color === 'dark' ? styles.laDark : ''} la-sm`
++  const className = `dib ${styles['la-ball-triangle-path']} ${color === 'dark' ? styles['la-dark'] : ''} ${styles['la-sm']}`
+   return (
+     <div {...props}>
+       <div
+--- a/src/i18n-decorator.tsx
++++ b/src/i18n-decorator.tsx
+@@ -2,7 +2,7 @@
+ import { I18nextProvider } from 'react-i18next'
+ import i18n from './i18n'
+ 
+-export default function i18nDecorator (fn: () => ReactNode): JSX.Element {
++export default function i18nDecorator (fn: () => ReactNode): React.JSX.Element {
+   return (
+     <I18nextProvider i18n={i18n}>
+       {fn()}
+--- /dev/null
++++ b/src/style.css
+@@ -0,0 +1,3 @@
++/* Upstream component styles; font faces remain supplied by the Web UI host. */
++@import './components/loader/loader.module.css';
++@import './components/object-info/links-table.module.css';

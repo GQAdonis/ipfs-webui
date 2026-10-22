@@ -1,8 +1,8 @@
 import React from 'react'
 import { withTranslation } from 'react-i18next'
 import { Title } from './Commons.js'
-import { Pie } from 'react-chartjs-2'
-import { connect } from 'redux-bundler-react'
+import { Pie } from '../lib/charts.js'
+import { connect } from '../lib/react-store.js'
 import { useChartPalette } from '../promethity/tokens.js'
 
 const CountryChart = ({ t, peerLocations, className }) => {
@@ -47,23 +47,17 @@ const CountryChart = ({ t, peerLocations, className }) => {
 
   const options = {
     responsive: true,
-    legend: {
-      display: true,
-      position: 'bottom',
-      labels: {
-        fontColor: palette.text,
-        fontFamily: palette.fontBody
-      }
-    },
-    tooltips: {
-      displayColors: false,
-      callbacks: {
-        title: (tooltipItem, data) => data.labels[tooltipItem[0].index],
-        label: (tooltipItem, data) => {
-          const percent = data.datasets[0].data[tooltipItem.index]
-          const count = Math.round((percent * totalCountries) / 100)
-
-          return t('pieChartLabel', { percent, count })
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { color: palette.text, font: { family: palette.fontBody } } },
+      tooltip: {
+        displayColors: false,
+        callbacks: {
+          title: items => items[0]?.label || '',
+          label: context => {
+            const percent = context.parsed
+            const count = Math.round((percent * totalCountries) / 100)
+            return t('pieChartLabel', { percent, count })
+          }
         }
       }
     }

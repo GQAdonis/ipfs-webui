@@ -1,6 +1,6 @@
 import React from 'react'
 import PeerBandwidthTableComponent from './PeerBandwidthTable.js'
-import { Provider } from 'redux-bundler-react'
+import { Provider } from '../lib/react-store.js'
 import { composeBundlesRaw } from 'redux-bundler'
 
 const defaultState = {
@@ -45,7 +45,7 @@ const getStore = composeBundlesRaw({
 const store = getStore({ peerBandwidth: defaultState })
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Status/PeerBandwidthTable',
@@ -60,7 +60,7 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const PeerBandwidthTable = {
   args: {

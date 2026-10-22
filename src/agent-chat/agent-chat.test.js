@@ -1,10 +1,12 @@
+import { vi } from 'vitest'
 import React from 'react'
 import { render, screen, fireEvent, act, waitFor, cleanup } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import { initReactI18next } from 'react-i18next'
 import i18n from 'i18next'
 import agentChatEn from '../../public/locales/en/agentChat.json'
 import { AgentChatLauncher } from './index.js'
+import { getOriginPolicy } from './origin-policy.js'
 import { validateEndpoint } from './endpoint.js'
 import { setTheme } from '../promethity/theme.js'
 import { STORAGE_KEY, TOKEN_STORAGE_KEY, getSettings, getToken, resetForTests, setToken, updateSettings } from './settings-store.js'
@@ -53,9 +55,9 @@ beforeEach(() => {
   StubChat.instances = []
   StubChat.tokens = []
   StubChat.providers = []
-  fetchSpy = jest.fn(() => Promise.reject(new Error('no network expected')))
+  fetchSpy = vi.fn(() => Promise.reject(new Error('no network expected')))
   globalThis.fetch = fetchSpy
-  loader = jest.fn(async () => { defineStub() })
+  loader = vi.fn(async () => { defineStub() })
 })
 
 afterEach(() => {
@@ -221,7 +223,7 @@ describe('agent chat token storage', () => {
   })
 
   it('stays in memory for the page when storage is blocked', () => {
-    const spy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
     try {
       setToken('page-only')
       expect(getToken()).toBe('page-only')
@@ -229,7 +231,7 @@ describe('agent chat token storage', () => {
   })
 
   it('does not throw when reading storage is blocked', () => {
-    const spy = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked') })
+    const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked') })
     try {
       expect(() => resetForTests()).not.toThrow()
       expect(getToken()).toBeUndefined()
@@ -241,7 +243,7 @@ describe('agent chat under the IPFS Desktop bridge', () => {
   const BRIDGE_ENDPOINT = 'http://127.0.0.1:50999/agui'
   let bridge
   beforeEach(() => {
-    bridge = Object.freeze({ getEndpoint: jest.fn(async () => BRIDGE_ENDPOINT), getToken: jest.fn(async () => 'desktop-token') })
+    bridge = Object.freeze({ getEndpoint: vi.fn(async () => BRIDGE_ENDPOINT), getToken: vi.fn(async () => 'desktop-token') })
     globalThis.ipfsDesktop = Object.freeze({ agentChat: bridge })
   })
   afterEach(() => { delete globalThis.ipfsDesktop })
@@ -261,13 +263,15 @@ describe('agent chat under the IPFS Desktop bridge', () => {
     expect(chatElements()[0].getAttribute('endpoint')).toBe(BRIDGE_ENDPOINT)
   })
 
-  it('sets tokenProvider to the bridge getToken and never sets token', async () => {
+  it('sets an origin-fenced bridge tokenProvider and never sets token', async () => {
     setToken('typed-token')
     render(<AgentChatLauncher loadIsland={loader} />)
     fireEvent.click(await screen.findByRole('button', { name: 'Agent chat' }))
     await waitFor(() => expect(chatElements()).toHaveLength(1))
     expect(StubChat.providers.length).toBeGreaterThan(0)
-    expect(StubChat.providers.every((p) => p === bridge.getToken)).toBe(true)
+    expect(bridge.getToken).not.toHaveBeenCalled()
+    expect(await StubChat.providers.at(-1)()).toBe('desktop-token')
+    expect(bridge.getToken).toHaveBeenCalledTimes(1)
     expect(StubChat.tokens).toEqual([])
     const el = chatElements()[0]
     expect(el.hasAttribute('token')).toBe(false)
@@ -364,4 +368,52 @@ describe('launcher clearance for sticky action areas (round 5 correction H2)', (
     render(<AgentChatLauncher loadIsland={loader} />)
     expect(read()).toBe('')
   })
+})
+
+describe('legacy launcher respects the host origin boundary', () => {
+  let previous
+  beforeEach(() => { previous = location.href })
+  afterEach(() => { cleanup(); history.replaceState(null, '', previous); getOriginPolicy().refresh() })
+  it('loads no island on a shared path despite stored endpoint and token', () => {
+    history.replaceState(null, '', '/ipfs/bafyfixture/'); getOriginPolicy().refresh()
+    updateSettings({ enabled: true, endpoint: ENDPOINT }); setToken('fixture-token')
+    render(<AgentChatLauncher loadIsland={loader} />)
+    expect(screen.queryByRole('button', { name: 'Agent chat' })).toBeNull()
+    expect(loader).not.toHaveBeenCalled(); expect(chatElements()).toHaveLength(0)
+  })
+  it('does not mount after a delayed island load when the current path became shared', async () => {
+    let resolve
+    const held = new Promise(_resolve => { resolve = _resolve })
+    const delayed = vi.fn(() => held)
+    updateSettings({ enabled: true, endpoint: ENDPOINT }); setToken('fixture-token')
+    render(<AgentChatLauncher loadIsland={delayed} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Agent chat' }))
+    history.replaceState(null, '', '/ipns/shared/')
+    await act(async () => { defineStub(); resolve(); await held })
+    expect(chatElements()).toHaveLength(0)
+  })
+  it('removes a live element synchronously before replacement origin notification completes', async () => {
+    updateSettings({ enabled: true, endpoint: ENDPOINT }); setToken('fixture-token')
+    render(<AgentChatLauncher loadIsland={loader} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Agent chat' }))
+    await waitFor(() => expect(chatElements()).toHaveLength(1))
+    history.replaceState(null, '', '/proxy/ipfs/bafyfixture/')
+    act(() => { getOriginPolicy().refresh(); expect(chatElements()).toHaveLength(0) })
+    expect(screen.queryByRole('button', { name: 'Agent chat' })).toBeNull()
+  })
+})
+
+it('does not revive a retired legacy island load just because the page returned to a permitted route', async () => {
+  const previous = location.href
+  let resolve
+  const held = new Promise(_resolve => { resolve = _resolve })
+  try {
+    updateSettings({ enabled: true, endpoint: ENDPOINT }); setToken('fixture-token')
+    render(<AgentChatLauncher loadIsland={() => held} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Agent chat' }))
+    act(() => { history.replaceState(null, '', '/ipfs/bafyfixture/'); getOriginPolicy().refresh() })
+    act(() => { history.replaceState(null, '', previous); getOriginPolicy().refresh() })
+    await act(async () => { defineStub(); resolve(); await held })
+    expect(chatElements()).toHaveLength(0)
+  } finally { cleanup(); history.replaceState(null, '', previous); getOriginPolicy().refresh() }
 })

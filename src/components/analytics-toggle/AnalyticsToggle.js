@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Trans } from 'react-i18next'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import Checkbox from '../checkbox/Checkbox.js'
 import Details from '../details/Details.js'
 
@@ -94,11 +94,11 @@ const AnalyticsToggle = ({ analyticsActionsToRecord, analyticsConsent, doToggleC
                 <li>A random, generated device ID</li>
                 <li>Timestamp when the session starts</li>
                 <li>Periodic timestamps to track duration</li>
-                <li>App version e.g. "2.4.4"</li>
-                <li>Locale e.g. "en-GB"</li>
-                <li>User Agent e.g. "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) ..."</li>
-                <li>Screen resolution e.g. "800x600"</li>
-                <li>Screen pixel density e.g. "1"</li>
+                <li>App version e.g. &quot;2.4.4&quot;</li>
+                <li>Locale e.g. &quot;en-GB&quot;</li>
+                <li>User Agent e.g. &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) ...&quot;</li>
+                <li>Screen resolution e.g. &quot;800x600&quot;</li>
+                <li>Screen pixel density e.g. &quot;1&quot;</li>
               </ul>
             </Trans>
           </AnalyticType>

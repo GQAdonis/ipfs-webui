@@ -1,43 +1,54 @@
 import { getFilesFromDataTransferItems } from 'datatransfer-files-promise'
-import { HTML5Backend } from 'react-dnd-html5-backend'
+import { HTML5Backend, NativeTypes } from 'react-dnd-html5-backend'
 
-// If you drop a dir "foo" which contains "cat.jpg" & "dog.png" we receive a
-// single item in the `event.dataTransfer.items` for the directory.
-//
-// We use 'datatransfer-files-promise' to map the dir tree to a flat list of
-// FileSystemEntry objects, each with a filepath propety, that captures the
-// files relative path within the dir that was dropped.
-//
-// so the "foo" becomes:
-// [
-//  { filepath: 'foo/cat.jpg' name: 'cat.jpg', size: Number },
-//  { filepath: 'foo/dog.png' name: 'dog.png', size: Number }
-// ]
-//
-// Which is a useful shape for passing to ipfs.add, with the caveat that each
-// FileSystemEntry object must be passed to pull-file-reader or similar to
-// convert to a stream style that ipfs.add accepts.
-//
-// ReactDnD doesn't give the calling code access to the `event.dataTransfer.items`
-// so we have to work around it here by plugin a custom drop handler that does
-// the work to map from a dir entry to a flat list of files and then stash it on
-//  a custom `filesPromise` prop on the return object, which we check for in our
-//  dropTarget drop handler functions.
-//
-// See: https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
-// See: https://github.com/grabantot/datatransfer-files-promise/blob/72b6cc763f9b400c59197bcc787268965310c260/index.js
-const createBackend = (manager) => {
-  const backend = HTML5Backend(manager)
-  const handler = backend.handleTopDropCapture
-  backend.handleTopDropCapture = (event) => {
-    handler.call(backend, event)
-    if (backend.currentNativeSource && event.dataTransfer.items) {
-      // Prevent handling drag & drop of text inside webui
-      if ([...event.dataTransfer.items].every(({ kind }) => kind === 'string')) return
+// Capture entries during the drop event. Directory traversal preserves filepath.
+export function captureDataTransferFiles (transfer) {
+  const items = Array.from(transfer?.items || []).filter(item => item.kind === 'file')
+  if (!items.length) {
+    const files = Array.from(transfer?.files || [])
+    return () => Promise.resolve(files)
+  }
+  try {
+    const captured = items.map(item => {
+      const entry = item.webkitGetAsEntry?.()
+      if (entry) return { webkitGetAsEntry: () => entry }
+      const file = item.getAsFile?.()
+      if (!file) throw new Error('FILE_DROP_UNREADABLE')
+      return { webkitGetAsEntry: () => ({ isFile: true, file: resolve => resolve(file) }) }
+    })
+    return () => getFilesFromDataTransferItems(captured)
+  } catch (error) {
+    return () => Promise.reject(error)
+  }
+}
 
-      const filesPromise = getFilesFromDataTransferItems(event.dataTransfer.items)
-      backend.currentNativeSource.item.filesPromise = filesPromise
+export const filesFromDataTransfer = transfer => captureDataTransferFiles(transfer)()
+
+const createBackend = (manager, context, options) => {
+  const backend = HTML5Backend(manager, context, options)
+  const root = options?.rootElement || context || globalThis.window
+  const monitor = manager.getMonitor()
+  const capture = event => {
+    if (monitor.getItemType() !== NativeTypes.FILE) return
+    const item = monitor.getItem()
+    if (item) {
+      const read = captureDataTransferFiles(event.dataTransfer)
+      let promise
+      // Traversal starts only when an enabled target actually handles the drop.
+      Object.defineProperty(item, 'filesPromise', { configurable: true, get: () => { return promise || (promise = read()) } })
     }
+  }
+  const setup = backend.setup.bind(backend)
+  const teardown = backend.teardown.bind(backend)
+  backend.setup = () => {
+    setup()
+    // Backend capture populates the public item first; this adds hierarchy
+    // before any target handles the bubble-phase drop. No private fields.
+    root?.addEventListener('drop', capture, true)
+  }
+  backend.teardown = () => {
+    root?.removeEventListener('drop', capture, true)
+    teardown()
   }
   return backend
 }

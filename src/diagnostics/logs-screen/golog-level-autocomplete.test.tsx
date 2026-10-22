@@ -1,12 +1,12 @@
 import React from 'react'
 import { render, screen, waitFor, cleanup, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals'
-import '@testing-library/jest-dom'
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
+import '@testing-library/jest-dom/vitest'
 import { GologLevelAutocomplete } from './golog-level-autocomplete'
 
 // Mock react-i18next
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
@@ -34,7 +34,7 @@ const mockSubsystems: LogSubsystem[] = [
 
 const defaultProps = {
   value: '',
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   subsystems: mockSubsystems,
   disabled: false,
   placeholder: 'Enter log levels...',
@@ -43,7 +43,7 @@ const defaultProps = {
 
 describe('GologLevelAutocomplete', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
@@ -553,9 +553,9 @@ describe('GologLevelAutocomplete', () => {
     })
 
     it('should handle async form submission with error', async () => {
-      const mockOnSubmit = jest.fn<(event?: React.FormEvent) => Promise<void>>().mockImplementation(() => Promise.reject(new Error('Submission failed')))
-      const mockOnValidityChange = jest.fn()
-      const mockOnErrorChange = jest.fn()
+      const mockOnSubmit = vi.fn<(event?: React.FormEvent) => Promise<void>>().mockImplementation(() => Promise.reject(new Error('Submission failed')))
+      const mockOnValidityChange = vi.fn()
+      const mockOnErrorChange = vi.fn()
 
       const { unmount } = render(
         <GologLevelAutocomplete
@@ -593,8 +593,8 @@ describe('GologLevelAutocomplete', () => {
     })
 
     it('should handle async form submission with unknown error', async () => {
-      const mockOnSubmit = jest.fn<(event?: React.FormEvent) => Promise<void>>().mockImplementation(() => Promise.reject(new Error('Unknown error')))
-      const mockOnErrorChange = jest.fn()
+      const mockOnSubmit = vi.fn<(event?: React.FormEvent) => Promise<void>>().mockImplementation(() => Promise.reject(new Error('Unknown error')))
+      const mockOnErrorChange = vi.fn()
 
       const { unmount } = render(
         <GologLevelAutocomplete
@@ -673,7 +673,7 @@ describe('GologLevelAutocomplete', () => {
     })
 
     it('should call onErrorChange when error prop changes', () => {
-      const mockOnErrorChange = jest.fn()
+      const mockOnErrorChange = vi.fn()
       const { rerender } = render(
         <GologLevelAutocomplete
           {...defaultProps}
@@ -746,7 +746,7 @@ describe('GologLevelAutocomplete', () => {
     })
 
     it('should integrate with validation logic', async () => {
-      const mockOnValidityChange = jest.fn()
+      const mockOnValidityChange = vi.fn()
       render(
         <GologLevelAutocomplete
           {...defaultProps}

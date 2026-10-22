@@ -7,7 +7,7 @@ import PinningServicesMock from './fixtures/pinningServices.js'
 const t = i18n.getFixedT('en', 'settings')
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Pinning Manager',
@@ -24,6 +24,6 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = {}

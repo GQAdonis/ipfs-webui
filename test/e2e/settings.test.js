@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { test, expect } from './setup/coverage.js'
 import { settings } from './setup/locators.js'
+import { observeThemeSwitchContrast } from './setup/theme-contrast.js'
 import { DEFAULT_PATH_GATEWAY, DEFAULT_SUBDOMAIN_GATEWAY, TEST_PATH_GATEWAY, TEST_SUBDOMAIN_GATEWAY } from '../../src/bundles/gateway.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -19,6 +20,35 @@ const getLanguages = async () => {
 test.describe('Settings screen', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/#/settings')
+  })
+
+  test('names the page and global path control and preserves valid accessible Settings tables', async ({ page }) => {
+    await expect(page.getByRole('heading', { level: 1, name: 'Settings', exact: true })).toHaveCount(1)
+    await expect(page.getByRole('banner').getByRole('textbox', { name: 'Paste in a CID or IPFS path', exact: true })).toBeVisible()
+    const rail = page.getByRole('navigation', { name: 'Primary', exact: true })
+    if (await rail.isVisible()) await expect(rail.getByRole('link', { name: 'See the code', exact: true })).toBeVisible()
+    const keys = page.getByRole('grid', { name: 'IPNS publishing keys', exact: true })
+    await expect(keys.getByRole('columnheader', { name: 'Show options', exact: true })).toHaveText('Show options')
+    for (const grid of [keys, page.getByRole('grid', { name: 'Pinning services', exact: true })]) {
+      await expect(grid).toBeVisible()
+      const invalid = await grid.locator('.ReactVirtualized__Table__row').evaluateAll(rows => rows.filter(row =>
+        row.parentElement.getAttribute('role') !== 'presentation' || row.parentElement.parentElement.getAttribute('role') !== 'rowgroup' ||
+        row.querySelectorAll('[role=gridcell]').length !== 3 || row.querySelector('[role=row]')
+      ).length)
+      expect(invalid).toBe(0)
+    }
+  })
+
+  test('keeps real Settings text readable throughout an immediate theme switch', async ({ page }) => {
+    await page.getByRole('radio', { name: 'Light', exact: true }).check()
+    for (const theme of ['Dark', 'Light']) {
+      const frames = await observeThemeSwitchContrast(page, () => page.getByRole('radio', { name: theme, exact: true }).check())
+      expect(frames.length).toBeGreaterThan(1)
+      for (const frame of frames) {
+        expect(frame.nodes.length).toBeGreaterThan(3)
+        for (const node of frame.nodes) expect(node.contrast, `${theme}: ${node.text} ${node.foreground} on ${node.background}`).toBeGreaterThanOrEqual(4.5)
+      }
+    }
   })
 
   test('should show config of IPFS node', async ({ page }) => {

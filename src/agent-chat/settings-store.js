@@ -9,6 +9,11 @@
 // `enabled: false` is the person's choice and always wins: only an absent key takes the
 // default (see boot.js, decision D18).
 
+// In session mode (console-session-auth, see session.js) the page holds no credential: no token is
+// read from or written to storage, setToken is a no-op, and the endpoint is the page's own /agui.
+
+import { getSessionEndpoint, isSessionMode } from './session.js'
+
 export const STORAGE_KEY = 'ipfs-webui:agent-chat'
 export const TOKEN_STORAGE_KEY = 'ipfs-webui:agent-chat:token'
 
@@ -23,6 +28,7 @@ const listeners = new Set()
 let token
 
 function readToken () {
+  if (isSessionMode()) return undefined
   try {
     const raw = globalThis.localStorage?.getItem(TOKEN_STORAGE_KEY)
     return typeof raw === 'string' && raw !== '' ? raw : undefined
@@ -32,6 +38,7 @@ function readToken () {
 }
 
 function writeToken (value) {
+  if (isSessionMode()) return
   try {
     if (value === undefined) globalThis.localStorage?.removeItem(TOKEN_STORAGE_KEY)
     else globalThis.localStorage?.setItem(TOKEN_STORAGE_KEY, value)
@@ -40,17 +47,26 @@ function writeToken (value) {
   }
 }
 
+/**
+ * In session mode the endpoint is the page's own origin, whatever was saved.
+ *
+ * @param {AgentChatSettings} settings
+ */
+function withSessionEndpoint (settings) {
+  return isSessionMode() ? Object.freeze({ ...settings, endpoint: getSessionEndpoint() }) : settings
+}
+
 function read () {
   try {
     const raw = globalThis.localStorage?.getItem(STORAGE_KEY)
-    if (!raw) return DEFAULTS
+    if (!raw) return withSessionEndpoint(DEFAULTS)
     const parsed = JSON.parse(raw)
-    return Object.freeze({
+    return withSessionEndpoint(Object.freeze({
       enabled: typeof parsed?.enabled === 'boolean' ? parsed.enabled : DEFAULTS.enabled,
       endpoint: typeof parsed?.endpoint === 'string' ? parsed.endpoint : ''
-    })
+    }))
   } catch (_) {
-    return DEFAULTS
+    return withSessionEndpoint(DEFAULTS)
   }
 }
 
@@ -67,7 +83,7 @@ export function getSettings () {
 
 /** @param {Partial<AgentChatSettings>} patch */
 export function updateSettings (patch) {
-  const next = Object.freeze({ ...snapshot, ...patch })
+  const next = withSessionEndpoint(Object.freeze({ ...snapshot, ...patch }))
   snapshot = next
   try {
     globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(next))
@@ -84,6 +100,7 @@ export function getToken () {
 
 /** @param {string | undefined} value */
 export function setToken (value) {
+  if (isSessionMode()) value = undefined
   token = typeof value === 'string' && value !== '' ? value : undefined
   writeToken(token)
   emit()

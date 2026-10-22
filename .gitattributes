@@ -3,3 +3,5 @@ test/e2e/fixtures/explore/blocks/README.md text
 test/e2e/fixtures/**/Qm* binary linguist-generated
 test/e2e/fixtures/**/*.raw binary linguist-generated
 test/e2e/fixtures/**/*.car binary linguist-generated
+vendor/ipld-explorer-components/dist/licenses/filesize@10.1.6/LICENSE -text
+vendor/ipld-explorer-components/dist/licenses/tslib@2.8.0/LICENSE.txt -text

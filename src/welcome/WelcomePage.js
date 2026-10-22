@@ -1,8 +1,7 @@
 import React from 'react'
-import { Helmet } from 'react-helmet'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 import { withTranslation, Trans } from 'react-i18next'
-import ReactJoyride from 'react-joyride'
+import ReactJoyride from '../components/tour/Tour.js'
 import withTour from '../components/tour/withTour.js'
 import { welcomeTour } from '../lib/tours.js'
 import { getJoyrideLocales } from '../helpers/i8n.js'
@@ -34,9 +33,9 @@ const WelcomePage = ({ t, ipfsInitFailed, ipfsConnected, ipfsReady, toursEnabled
 
   return (
     <div>
-      <Helmet>
+      <>
         <title>{titleWithBrand(t('title'))}</title>
-      </Helmet>
+      </>
       <div className='lh-copy charcoal'>
         <ConnectionStatus connected={ipfsConnected} sameOrigin={isSameOrigin} t={t} />
       </div>
@@ -57,7 +56,7 @@ const WelcomePage = ({ t, ipfsInitFailed, ipfsConnected, ipfsReady, toursEnabled
  * @param {boolean} props.connected
  * @param {boolean} props.sameOrigin
  *
- * @returns {JSX.Element}
+ * @returns {import('react').ReactElement}
  */
 const ConnectionStatus = ({ t: _t, connected }) => {
   if (connected) {

@@ -3,7 +3,8 @@ import PropTypes from 'prop-types'
 import { join, basename } from 'path'
 import { withTranslation } from 'react-i18next'
 import classnames from 'classnames'
-import { normalizeFiles, humanSize } from '../../lib/files.js'
+import { humanSize } from '../../lib/files.js'
+import { addNativeFiles, reportDropError } from '../native-drop.js'
 // React DnD
 import { useDrag, useDrop } from 'react-dnd'
 // Components
@@ -15,11 +16,11 @@ import { CID } from 'multiformats/cid'
 import { NativeTypes } from 'react-dnd-html5-backend'
 import PinIcon from '../pin-icon/PinIcon.js'
 
-const File = ({
-  name, type, size, cid, path, pinned, t, selected, focused, translucent, coloured, cantSelect, cantDrag, isMfs, isRemotePin, isPendingPin, isFailedPin,
+export const File = ({
+  name, type, size, cid, path, pinned, t, selected, focused, translucent = false, coloured = false, cantSelect, cantDrag, isMfs, isRemotePin, isPendingPin, isFailedPin,
   onAddFiles, onMove, onSelect, onNavigate, onSetPinning, onDismissFailedPin, handleContextMenuClick
 }) => {
-  const dotsWrapper = useRef()
+  const dotsWrapper = useRef(null)
 
   const handleCtxLeftClick = (ev) => {
     const pos = dotsWrapper.current.getBoundingClientRect()
@@ -31,6 +32,7 @@ const File = ({
   }
 
   const [, drag, preview] = useDrag({
+    type: 'FILE',
     item: { name, size, cid, path, pinned, type: 'FILE' },
     canDrag: !cantDrag && isMfs
   })
@@ -52,23 +54,21 @@ const File = ({
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: [NativeTypes.FILE, 'FILE'],
     drop: (_, monitor) => {
+      if (monitor.didDrop()) return
       const item = monitor.getItem()
 
-      if (item.files) {
-        (async () => {
-          const files = await item.filesPromise
-          onAddFiles(normalizeFiles(files), path)
-        })()
+      if (monitor.getItemType() === NativeTypes.FILE) {
+        void addNativeFiles(item, files => onAddFiles(files, path)).catch(reportDropError)
       } else {
         const src = item.path
         const dst = join(path, basename(item.path))
 
-        onMove(src, dst)
+        Promise.resolve(onMove(src, dst)).catch(reportDropError)
       }
     },
     canDrop: (_, monitor) => checkIfDir(monitor),
     collect: (monitor) => ({
-      canDrop: checkIfDir(monitor),
+      canDrop: monitor.canDrop(),
       isOver: monitor.isOver()
     })
   })
@@ -104,13 +104,13 @@ const File = ({
   }, ['pl2 w2'])
 
   return (
-    <div ref={drop}>
-      <div className={className} style={styles} onContextMenu={handleCtxRightClick} ref={drag} data-testid="file-row" data-type={type}>
+    <div ref={node => { drop(node) }}>
+      <div className={className} style={styles} onContextMenu={handleCtxRightClick} ref={node => { drag(node) }} data-testid="file-row" data-type={type}>
         <div className={checkBoxCls}>
           <Checkbox disabled={cantSelect} checked={selected} onChange={select} aria-label={ t('selectLabel', { name })} />
         </div>
 
-        <button ref={preview} onClick={onNavigate} className='relative pointer flex items-center flex-grow-1 ph2 pv1 w-40' aria-label={ name === '..' ? t('previousFolder') : t('fileLabel', { name, type, size }) }>
+        <button ref={node => { preview(node) }} onClick={onNavigate} className='relative pointer flex items-center flex-grow-1 ph2 pv1 w-40' aria-label={ name === '..' ? t('previousFolder') : t('fileLabel', { name, type, size }) }>
           <div className='dib flex-shrink-0 mr2'>
             <FileIcon name={name} type={type} />
           </div>
@@ -158,11 +158,6 @@ File.propTypes = {
   handleContextMenuClick: PropTypes.func,
   pinned: PropTypes.bool,
   isMfs: PropTypes.bool
-}
-
-File.defaultProps = {
-  coloured: false,
-  translucent: false
 }
 
 export default withTranslation('files')(File)

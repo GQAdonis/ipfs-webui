@@ -38,7 +38,8 @@
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-sm);
   color: var(--text-muted);
-  transition: color var(--motion-duration) var(--motion-ease), background-color var(--motion-duration) var(--motion-ease);
+  /* Theme tokens switch together. Tweening this foreground against the already
+     switched control fill passes through unreadable intermediate pairs. */
   pointer-events: none;
 }
 

@@ -8,7 +8,21 @@ Source: `assessment-ui.md` section 5.8 (phase `agent-backend-settings`), which f
 - The brand name lives in one constant (`src/promethity/brand.js`) and one Helmet helper, so titles compose as `${t('title')} | ${brand.name}` instead of editing the Transifex-managed locale files.
 - Only the files below are structurally edited. Everything else is upstream code under an override layer.
 
-Non-goals (recorded so a merger does not "fix" them): no React 19 / Vite / Tailwind migration of this shell, no rewrite of Tachyons markup across the 163 files, and no edits inside `ipld-explorer-components` (the `/explore` route is themed at the wrapper level only; its internal markup stays upstream and is a known visual seam).
+Migration amendment (2026-10-20, operator UI-14/UI-15/UI-16): React 19 throughout, Vite/Vitest and a maintained Explorer compatibility fork supersede the earlier no-migration/no-fork constraints. The authority is [Kubo ADR-0014](../../kubo/docs/mcp/0014-react19-migration.md). Preserve existing operations, routing, localization and Promethity identity. Tachyons remains; no general markup rewrite or new visual direction is authorized.
+
+## React 19 foundation toolchain
+
+`npm start` uses Vite on loopback port 3000 (`PORT` remains configurable); `npm run build` produces the same `build/` static artifact. The Vite base is `./`, HTML public assets use relative paths, locale requests remain relative, and navigation remains hash-based. No new proxy or service endpoint is configured. Session requests continue to use the page's own origin. `scripts/generate-locales.js` retains the `lol public/locales` generation before start/build, including on Windows.
+
+`index.html` replaces CRA's `public/index.html`. `vite.config.js` and the source-controlled adapters under `scripts/` replace `config-overrides.js`, CRA Babel configuration and its font loader. Legacy `.js` JSX is transformed before import analysis; relative `.js` imports retain their `.ts`/`.tsx` fallback. Only explicit public build metadata (`REACT_APP_ENV`, version, Git revision, `NODE_ENV`, relative `PUBLIC_URL` and boolean `DEBUG`) is defined. Other environment values are never serialized into client code. The PostCSS font-strip pass removes only faces originating in `ipfs-css/ipfs.css`; local Promethity woff2 faces and font licenses remain bundled.
+
+`npm run test:unit` and its watch/coverage variants now use Vitest and React Testing Library with jsdom, fake IndexedDB, encoding globals and explicit cleanup in `test/setup.js`. Jest/Enzyme configurations and the React 16 adapter are removed. Unit V8 reports go to `.nyc_output/unit/`; `REACT_APP_ENV=test npm run build` retains browser Istanbul instrumentation for the existing Playwright collection. E2E and component-test entry points remain separate. Existing test bodies are retained for their assigned ESM/mock/async migration; no compatibility shim translates Jest mocks or silently skips their behavior.
+
+ESLint retains Standard, React and JSX accessibility rules using Babel's syntax parser plus the real TypeScript typecheck. The selected TypeScript 7 release exceeds `@typescript-eslint/parser` 8's peer range; no incompatible parser override is used. The dependency-check command uses `depcheck` directly because Aegir 42's `tsquery`/TypeScript peer chain is incompatible. Its old E2E `aegir/get-port` import is explicitly pending the fixture migration. Storybook packages move to the maintained Vite family; source configuration and stories migrate in foundation task 1.6.
+
+The dependency graph is staged before consumer source edits: legacy dropdown, clipboard, country-flag, faux-DOM, metadata, identicon, overlay and Redux React wrappers are removed from the manifest; their owned replacements and imports follow in tasks 1.3–1.6. Explore's upstream dependency is removed pending the actual licensed source import in task 1.5; only then add `file:vendor/ipld-explorer-components`. The old production imports intentionally remain visible as unfinished migration work. Do not treat this intermediate foundation task as a runnable or accepted application, delete operations to make it compile, or reinstall incompatible wrappers.
+
+The exact runtime/tool pins and foundation-task dependency-resolution snapshot live in `scripts/react19-toolchain.json`. Node 26.5.0 is the available supported build runtime; `.tool-versions` and `engines` agree. `npm ci` consumes the checked lock; no force or ignored-peer installation is part of the migration. `npm run analyze` retains an opt-in local bundle-size visualization through `rollup-plugin-visualizer`, without automatically opening a browser. All production tasks and fixtures precede the final QA boundary. Tests authored in `scripts/toolchain.test.js` cover env exclusion, local-font preservation, JSX pretransform and extension fallback; authoring them is not acceptance evidence.
 
 ## Structural files
 
@@ -47,13 +61,13 @@ Non-goals (recorded so a merger does not "fix" them): no React 19 / Vite / Tailw
 | `src/components/about-webui/AboutWebUI.js` | D8: the source-code and bug links point at `BRAND.forkRepo`, and two lines under the list say the app is built on the IPFS Web UI (MIT license, Protocol Labs) and is an independent fork not affiliated with Protocol Labs. | Reapply the attribution lines after the list; take upstream list changes. |
 | `src/files/info-boxes/add-files-info/AddFilesInfo.js` | The default text inside `<Trans>` drops its exclamation mark to match the `en` locale. | Copy only. |
 | `tsconfig.json` | The typecheck `include` list adds `src/promethity/brand.js`, `icons.js` and `page-title.js`, which included files import (composite projects must list every file they import), plus `src/settings/agent/core/*.js` (the transport-free settings client and form logic) and `src/agent-chat/endpoint.js`; `exclude` adds `src/settings/agent/**/*.test.js`. | Keep the three lines; take upstream's other include changes. |
-| `package.json`, `package-lock.json` | Adds `lucide-react` (the icon module's only dependency). | Keep the dependency; take upstream's other dependency changes and regenerate the lockfile. |
+| `package.json`, `package-lock.json` | Exact React 19, Vite/Vitest and compatible tool/consumer pins; preserves unrelated direct dependency resolutions. Lucide remains the icon module's only dependency. | Preserve the migration contract and review peer/protocol changes before regenerating the lockfile. |
 | `test/e2e/navigation.test.js` | The title assertions are built from `BRAND.name` instead of a literal `IPFS`. The Explore title (`Explore \| IPLD`) is set by `ipld-explorer-components` and is left as upstream. | Reapply the `BRAND` import and template strings. |
-| `public/index.html` | Two `theme-color` metas, title, description and generator for Promethity; font preloads for the bundled woff2 set. | Reapply meta/title changes onto upstream's HTML shell changes. |
+| `index.html` (moved from `public/index.html`) | Vite module entry with relative public assets; preserves the two theme-color metas, Promethity title/description/generator and Git revision. | Retain the root Vite entry and relative paths; reapply upstream metadata changes here. |
 | `public/manifest.json` | Promethity name, icon set (192, 512, maskable) and theme colours. | Fork-owned; prefer the fork side unless upstream adds required manifest keys. |
 | `public/favicon.ico`, `public/favicon.svg`, `public/apple-touch-icon.png`, `public/icon-192.png`, `public/icon-512.png`, `public/maskable-512.png` | Promethity p-icon set copied from the brand (`branding/logo/p-icon` web and pwa exports), replacing the IPFS favicon; `public/ipfs-logo-512-ice.png` is removed with it. | Fork-owned; prefer the fork side.
 | `src/index.js` | Imports the Promethity override layer (`src/promethity/fonts.css`, `tokens.css`, then `theme-overrides.css` last) after the upstream CSS imports so the cascade order holds, and bootstraps the D16 theme store (`initTheme()` from `src/promethity/theme.js`) and the agent default-on migration (`migrateAgentDefaults()` from `src/agent-chat/boot.js`) before first render. | One-line import additions and the bootstrap call; keep them after upstream's imports when merging. |
-| `config-overrides.js` (+ `strip-ipfs-css-fonts-loader.cjs`) | Build-time removal of the ipfs-css Inter/Montserrat `@font-face` blocks so the ~100 unused font files never enter the bundle; the fork's faces come from `src/promethity/fonts.css`. | Upstream rarely touches the webpack override; keep the rule, take upstream's other changes. |
+| `vite.config.js`, `vitest.config.js`, `postcss.config.js`, `scripts/**`, `test/setup.js` | Replace CRA/Jest/Enzyme configuration; preserve build metadata, locale generation, legacy JSX/extensions, browser shims, coverage and font stripping. | Port upstream tooling changes into Vite/Vitest; do not restore CRA or the old font loader. |
 | `src/index.css` | The React Joyride tooltip override moved off `font-family: 'Montserrat'` (dropped with ipfs-css's fonts) onto the `--font-body` token stack, with accent focus rings on the tooltip buttons. | One-section change; prefer the fork side. |
 
 ## Agent features: defaults and off switches
@@ -62,7 +76,7 @@ The fork's agent features ship enabled (kubo `AGENTS.md`, User Agency; change `a
 
 | Feature | Default | Off switch | Disabled-state test |
 |---|---|---|---|
-| Agent chat launcher | On, but it renders nothing until a valid `/agui` endpoint is set (or IPFS Desktop's bridge supplies one) | Settings, Agent, "Enable agent chat" (stored `ipfs-webui:agent-chat` `enabled: false`) | `src/agent-chat/agent-chat.test.js` (`switched off`, `default on`) |
+| Agent conversation | On, but Ask sends nothing until a valid authenticated `/agui` connection is available (or IPFS Desktop manages one). The composed Home can still offer ordinary Go/Search paths. | Settings, Agent, "Enable agent chat" (stored `ipfs-webui:agent-chat` `enabled: false`) | `src/agent-chat/agent-chat.test.js` (`switched off`, `default on`) |
 | Search page | On, but the Search entry shows only when the node's `ipfs mcp` reports a configured index (`GET /index/status`); while off, no entry, `#/search` redirects and no request goes to `/index/*` | Settings, Agent, "Search your files" (stored `ipfs-webui:search` `enabled: false`; `src/search/SearchSettingsSwitch.js` mounted in `src/settings/agent/FeaturesSection.js`). IPFS Desktop's own `search.enabled` (default off) is a separate setting for its local index | `src/settings/agent/SearchSwitch.test.js`, `src/search/SearchPage.test.js` (`off switch`), `test/e2e/search.test.js` (`disabled state`, driven through the switch) |
 | WebMCP read tools | On; registers only in a browser that has WebMCP | Settings, Agent, "Offer read tools to agents" (stored `ipfs-webui:webmcp` `enabled: false`), or serve `Permissions-Policy: tools=()` | `src/webmcp/webmcp.test.js` (`disabled state`, `registration`) |
 | WebMCP DNSLink resolution | Off | Settings, Agent | `src/webmcp/webmcp.test.js` |
@@ -73,6 +87,28 @@ Launcher clearance (review M1): the fixed chat launcher publishes its height as 
 Migration (decision D18): `migrateAgentDefaults()` runs once at boot. It writes `enabled: true` only into a stored settings object that has no `enabled` key, never touches a stored boolean, and the stores fall back to the default for an absent key. A stored `enabled: false` survives. `src/agent-chat/boot.test.js` loads `src/index.js` with its collaborators stubbed to prove it through the real startup path. Unreadable storage cannot encode a choice, so the default applies.
 
 ## Everything else
+
+Existing Files uploads expose a named Cancel action for each active WRITE job,
+including the copy stage after byte progress reaches 100 percent. The Files
+bundle owns each request's AbortController privately; Redux carries only an
+opaque upload token. Cancellation aborts add/copy requests, prevents queued
+copies and late progress, and reports Cancelled separately from Imported or
+Failed. It does not undo imported blocks or copies already completed. The Files
+listing is refreshed after success, cancellation or failure. A refresh failure
+does not replace an earlier upload/copy error; if only refresh fails, that failure
+is reported without promising that completed copies were undone. Closing the
+status dropdown dismisses settled rows and collapses live progress while keeping
+its bookkeeping. Once all copies finish, Cancel is disabled during final refresh.
+
+This bounded divergence lives in the Files bundle's actions, reducer, selectors,
+protocol and constants, `src/files/file-import-status/**` and English Files copy.
+Generic task execution, FilesPage, dependencies, CAR and ADD_BY_PATH behavior
+remain upstream. Regressions use the actual Files bundle and connected status
+component with explicitly deferred client transport; they do not establish live
+RPC effects. The UI-114 registration preserves chooser cancellation and requires
+a genuinely pending, throughput-limited request to the isolated make-built node,
+actual Cancel termination and MFS checks. An unavailable node leaves that live
+check BLOCKED. No response mock or blockstore rollback is accepted as evidence.
 
 - `src/promethity/**`, `public/fonts/**`, the agent-chat island assets under `public/agent-chat/**`, `src/agent-chat/**` and `src/settings/agent/**` (the Agent settings page, its `SettingsClient` implementations and tests) are fork-only files; upstream never touches them. `public/locales/en/agentSettings.json` is a new `en`-only namespace.
 - `public/locales/en/**` carries `en`-only copy edits (`app`, `explore`, `files`, `notify`, `peers`, `settings`, `welcome`: banned words and exclamation marks removed, the product-name uses reworded, the D8 attribution keys added); other locales are Transifex-managed and stay upstream. A translated title that still ends in `| IPFS` is cleaned by `titleWithBrand`.
@@ -93,3 +129,33 @@ The Desktop fork (`tribe-health/ipfs-desktop`) has no delta file of its own, so 
 | `assets/build/gen_icons.sh` (new) | Regenerates all of the above from the brand repo's p-icon masters. | Fork-only. |
 
 Not changed here, because they sit outside the display-branding task's ownership: the splash screen (`src/splash`, `assets/pages/splash.html`), the Desktop locale strings that say "IPFS Desktop" (`assets/locales/en.json`), the Linux autostart entry name (`src/auto-launch.js`) and the macOS menu-bar app name, which Electron takes from `productName`.
+
+### React19 consumer compatibility (foundation 1.6)
+
+The remaining consumers use native React19 title/meta hoisting, Chart.js4 registration/options and external tooltips, React Hook Form7 field registration/root errors, Joyride3 events/options, and Ace15 with a local `ace-builds` JSON worker. The bandwidth chart keeps numeric millisecond points on a linear elapsed-time axis; local `Intl` labels avoid adding a date runtime. Chart fills, gauge gap, palette and tooltip portal are retained. Lazy routes retain `@loadable/component@5.16.7`, whose published peer range explicitly includes React19; the DHT diagnostics tab now uses ESM `lazy`/`Suspense` instead of browser `require`.
+
+Owned controls replace legacy wrappers: clipboard writes report success only after completion and expose a translated failure; SVG identicons retain the upstream MD5 geometry/palette (see their ISC provenance); map paths render directly through React with pointer/focus targets; dropdowns use explicit DOM refs and dispose positioning listeners; tables measure their available width with a disposed ResizeObserver. Function defaults are parameter defaults, while supported class defaults remain. Portal children mount after attachment so their focus effects act on connected DOM. Existing protocol actions and hash routes stay in place.
+
+`blueimp-md5@2.19.0` supplies decorative identicon hashing. `flag-icon-css@3.3.0` bundles the exact artwork previously fetched from the default country-flag CDN; the old platform-dependent emoji/SVG choice remains. Its deprecation notice records the upstream rename, not a compatibility problem. Preserve its MIT artwork license and the identicon ISC notice in final artifact attribution alongside Explorer's generated dependency notices.
+
+Storybook10 uses the React/Vite framework, core actions/controls and args instead of knobs, plus the existing accessibility/links addons. Its test build uses the same Istanbul source instrumentation as the browser fixtures. Store/provider decorators own their cleanup. Jest APIs are converted to native Vitest ESM mocks, including partial imports, hoisted spies, async module reloads, jsdom URL reconfiguration, and source fixture directory resolution. Existing assertions remain; the old skipped App/Enzyme placeholder is replaced by route/startup/disconnected RTL coverage. New clipboard, observer, tour, identicon, map, editor, form and chart fixtures are authored but not executed during production authoring.
+
+Foundation1.9 still assembles shared host artifacts and the Explorer package deterministically, reinstalls changed packed copies, checks source/lock/config/dist/installed-copy freshness, and carries bundled license notices into the exported artifact. Foundation1.10 wires operation/browser runners and coverage collection. All test/build/runtime acceptance remains at the single final phase boundary; dependency resolution and source authoring are not acceptance evidence.
+
+UI-112 accessibility registration verifies the complete current export, then attempts decisions, shell, a2ui, inbox and context independently in each of the four existing slots. Per-family outcomes preserve `FAIL > BLOCKED > NOT_EXERCISED > PASS`; unsuccessful callbacks still receive source hash checks and never receive a successful evidence binding. The common pinned fixture-browser prerequisite no longer imports the daemon before independent fixtures run. Decisions and the actual shared-path shell retain their node requirements, while A2UI/context/inbox presentation fixtures retain their limited authority. Shell authoring includes 320/375/539/540/768/1024/1440/1920 in both themes. Orchestration unit fixtures and authored widths do not establish actual browser or whole UI-112 acceptance; all five families, all four slots and independent Desktop evidence remain required.
+
+The MD5 type companion is pinned at `@types/blueimp-md5@2.18.2`. Obsolete local Helmet, Redux wrapper and Joyride augmentation declarations are removed; Joyride now uses its published 3.2 types. The service form also guards its in-flight action independently of asynchronous field validation so repeated submit events cannot issue a second add-service action.
+
+Control dependency notices are copied verbatim from the installed flag/MD5 packages (plus the documented ISC identicon notice) into `public/licenses/`, which Vite includes automatically. Explorer and shared host artifact licensing still require their foundation1.9 assembly step.
+
+### Deterministic local artifact export (foundation1.9)
+
+The Desktop handoff is `COREPACK_ENABLE_AUTO_PIN=0 npm run export:local -- --kubo ../kubo`, after `npm run prepare:explorer-artifact` refreshes any changed maintained fork input. The exporter uses existing local shared contract/catalog/tool producers and dependency builds, then existing chat/WebMCP vendor generators and locale generation. It does not fetch a released WebUI or change a shipped CID. `build/WEBUI_ARTIFACT.json` records source/lock/config/catalog/contract, dependency artifact, installed Explorer, compiler/runtime and output hashes. See `scripts/LOCAL-ARTIFACT.md` for the exact schema, source-aware and artifact-only check interfaces, license/provenance paths and Desktop copy requirements. Source changes after assembly require regeneration; generation is not QA acceptance.
+
+## Frontend feature control update
+
+The composed Home/conversation/Activity shell retains one in-memory conversation and existing IPFS destinations. Settings → Agent now includes explicitly browser-local display preferences for decision observations and generated UI, plus the stable local reference/fact policy used by supported host views. Turning a local display off retires its owned frontend state and actions; it does not disable a server or native confirmation feature. Existing chat, Search, WebMCP and Desktop-managed controls remain separate. See [Agent feature controls](AGENT-FEATURE-CONTROLS.md) for exact teardown, storage and authority limits.
+
+This source update is not acceptance evidence. All authored frontend scenarios, shared producer assembly, browser/native behavior and separately delivered server/host disabled-state evidence remain subject to the completed-production verification packet.
+
+Agent-positive hosting now requires an actual isolated/dedicated origin. Shared content paths, including local path-gateway exports, preserve ordinary read navigation but cannot host chat/settings/approval writes. A valid per-content CID/PeerID subdomain permits only an authentication attempt; saved gateway/API strings do not attest a page, and no alternate working localhost destination is assumed. See the origin restrictions in [Agent feature controls](AGENT-FEATURE-CONTROLS.md). Production-path fixtures must retain shared-path negative cases and use actual supported isolated/dedicated hosting for positive agent evidence.

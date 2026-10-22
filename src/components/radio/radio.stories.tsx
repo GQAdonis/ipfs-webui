@@ -1,5 +1,5 @@
 import * as React from 'react'
-import type { Meta, Story } from '@storybook/react'
+import type { Meta, StoryFn } from '@storybook/react-vite'
 import Radio, { type RadioProps } from './radio'
 
 const meta: Meta<RadioProps> = {
@@ -50,16 +50,16 @@ const RadioTemplate = (args: RadioProps) => {
   )
 }
 
-export const Default: Story<RadioProps> = RadioTemplate.bind({})
+export const Default: StoryFn<RadioProps> = RadioTemplate.bind({})
 Default.args = { label: 'Click me!', disabled: false, checked: false }
 
-export const Disabled: Story<RadioProps> = RadioTemplate.bind({})
+export const Disabled: StoryFn<RadioProps> = RadioTemplate.bind({})
 Disabled.args = { label: 'Click me!', disabled: true, checked: false }
 
-export const DisabledChecked: Story<RadioProps> = RadioTemplate.bind({})
+export const DisabledChecked: StoryFn<RadioProps> = RadioTemplate.bind({})
 DisabledChecked.args = { label: 'Click me!', disabled: true, checked: true }
 
-export const Big: Story<RadioProps> = RadioTemplate.bind({})
+export const Big: StoryFn<RadioProps> = RadioTemplate.bind({})
 Big.args = {
   label: 'Click me!',
   disabled: false,
@@ -70,5 +70,5 @@ Big.args = {
   }
 }
 
-export const Checked: Story<RadioProps> = RadioTemplate.bind({})
+export const Checked: StoryFn<RadioProps> = RadioTemplate.bind({})
 Checked.args = { label: 'Click me!', checked: true, disabled: false }

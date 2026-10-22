@@ -1,13 +1,15 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import path, { dirname as testDirname } from 'node:path'
 // webui-dataviz-reskin 1.1 / 1.2: the chart palette resolves from the live CSS
 // tokens (and follows a theme switch), and the data-viz files carry no colour
 // literals, gradients or shadows.
 
 import fs from 'node:fs'
-import path from 'node:path'
 import React from 'react'
 import { render, act } from '@testing-library/react'
 import { chartPalette, readToken, useChartPalette } from './tokens.js'
 import { setTheme } from './theme.js'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 const setTokens = (values) => {
   for (const [name, value] of Object.entries(values)) {

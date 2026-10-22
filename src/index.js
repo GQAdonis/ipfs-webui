@@ -1,10 +1,11 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-import { Provider } from 'redux-bundler-react'
+import { Provider } from './lib/react-store.js'
+import { startStoreRoot } from './lib/react-store-root.js'
 import './index.css'
 import 'react-virtualized/styles.css'
 import './promethity/fonts.css'
 import './promethity/tokens.css'
+import './promethity/roles.css'
 import './promethity/theme-overrides.css'
 import './promethity/components.css'
 import App from './App.js'
@@ -15,9 +16,10 @@ import i18n from './i18n.js'
 import { DndProvider } from 'react-dnd'
 import DndBackend from './lib/dnd-backend.js'
 import { HeliaProvider, ExploreProvider } from 'ipld-explorer-components/providers'
-import { ContextBridgeProvider } from './helpers/context-bridge.jsx'
+import { ContextBridgeProvider, contextBridge } from './helpers/context-bridge.js'
 import { initTheme } from './promethity/theme.js'
 import { migrateAgentDefaults } from './agent-chat/boot.js'
+import { bootSession } from './agent-chat/session-boot.js'
 
 // Apply the persisted Promethity theme (D16) before first render.
 initTheme()
@@ -30,7 +32,7 @@ const gitRevision = process.env.REACT_APP_GIT_REV
 
 console.log(`IPFS Web UI - v${appVersion} - https://github.com/ipfs-shipyard/ipfs-webui/commit/${gitRevision}`)
 
-async function render () {
+async function loadInitialData () {
   const initialData = await bundleCache.getAll()
   if (initialData && process.env.NODE_ENV !== 'production') {
     console.log('intialising store with data from cache', initialData)
@@ -43,8 +45,20 @@ async function render () {
     '%cThis is a browser feature intended for developers. If someone told you to paste something here, they might be trying to steal your data!',
     'color: black; font-size: 16px; font-weight: bold; background: yellow; padding: 4px; border-radius: 4px;'
   )
-  const store = getStore(initialData)
-  ReactDOM.render(
+  return initialData
+}
+
+const container = document.getElementById('root')
+if (!container) throw new Error('The Web UI root container is missing')
+
+const application = startStoreRoot({
+  container,
+  // Console session discovery still precedes the cache and any store initializer
+  // that reads a saved API address (ADR-0013).
+  beforeStore: bootSession,
+  loadData: loadInitialData,
+  createStore: getStore,
+  renderStore: store => (
     <Provider store={store}>
       <ContextBridgeProvider>
         <I18nextProvider i18n={i18n} >
@@ -57,9 +71,29 @@ async function render () {
           </DndProvider>
         </I18nextProvider>
       </ContextBridgeProvider>
-    </Provider>,
-    document.getElementById('root')
+    </Provider>
   )
+})
+
+export const startup = application.ready.catch(error => {
+  unmount()
+  throw error
+})
+
+export function unmount () {
+  window.removeEventListener('pagehide', onPageHide)
+  try {
+    application.unmount()
+  } finally {
+    contextBridge.clear()
+  }
 }
 
-render()
+function onPageHide (event) {
+  // A bfcache entry resumes the same live document; retain its store/root.
+  if (!event.persisted) unmount()
+}
+
+window.addEventListener('pagehide', onPageHide)
+
+if (import.meta.hot) import.meta.hot.dispose(unmount)

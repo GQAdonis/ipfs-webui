@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { multiaddr } from '@multiformats/multiaddr'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
 import { useIdentity } from '../contexts/identity-context.jsx'
 import Address from '../components/address/Address.js'

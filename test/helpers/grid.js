@@ -1,5 +1,3 @@
-const webuiPort = 3001
-const webuiUrl = `http://127.0.0.1:${webuiPort}`
 const waitForIpfsStats = globalThis.waitForIpfsStats || (async () => {
   await new Promise(resolve => setTimeout(resolve, 1000))
 })
@@ -37,7 +35,7 @@ const selectViewMode = async (page, mode) => {
  * @param {import('@playwright/test').Page} page - The Playwright page object
  */
 const navigateToFilesPage = async (page) => {
-  await page.goto(webuiUrl + '#/files')
+  await page.goto('/#/files')
 
   // Clear localStorage after page has loaded to ensure consistent test state
   await page.evaluate(() => {

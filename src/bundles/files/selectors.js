@@ -63,7 +63,7 @@ const selectors = () => ({
 
   /**
    * @param {Model} state
-   * @returns {PendingJob<void, {progress: number, entries: {size:number, path: string}[]}>[]}
+   * @returns {PendingJob<{progress: number, entries: {size:number, path: string}[], cancellable?: boolean}, {uploadToken?: symbol}>[]}
    */
   selectFilesPending: (state) =>
     state.files.pending.filter(s => (s.type === ACTIONS.WRITE || s.type === ACTIONS.ADD_BY_PATH) && s.message != null),
@@ -73,6 +73,9 @@ const selectors = () => ({
    */
   selectFilesFinished: (state) =>
     state.files.finished.filter(s => s.type === ACTIONS.WRITE || s.type === ACTIONS.ADD_BY_PATH),
+
+  /** @param {Model} state */
+  selectFilesCancelled: (state) => state.files.cancelled,
 
   /**
    * @param {Model} state

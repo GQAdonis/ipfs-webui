@@ -5,7 +5,7 @@ import Button from '../../button/button.tsx'
 import { Modal, ModalActions, ModalBody } from '../../modal/modal'
 import { Trans } from 'react-i18next'
 
-const RemoveKeyModal = ({ t, tReady, name, onCancel, onRemove, className, ...props }) => {
+const RemoveKeyModal = ({ t, tReady, name, onCancel, onRemove, className = '', ...props }) => {
   return (
     <Modal {...props} className={className} onCancel={onCancel} >
       <ModalBody title={t('removeKeyModal.title')} Icon={TrashIcon}>
@@ -29,10 +29,6 @@ RemoveKeyModal.propTypes = {
   onRemove: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   t: PropTypes.func.isRequired
-}
-
-RemoveKeyModal.defaultProps = {
-  className: ''
 }
 
 export default RemoveKeyModal

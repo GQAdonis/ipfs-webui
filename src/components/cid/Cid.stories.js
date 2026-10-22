@@ -1,7 +1,7 @@
 import Cid from './Cid.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 const CidStory = {
   title: 'CID',
@@ -18,7 +18,7 @@ const CidStory = {
 export default CidStory
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const CidV0 = {
   args: {
@@ -29,7 +29,7 @@ export const CidV0 = {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const CidV0Identicon = {
   args: {
@@ -40,7 +40,7 @@ export const CidV0Identicon = {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const CidV1 = {
   args: {
@@ -51,7 +51,7 @@ export const CidV1 = {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const CidV1Sha3 = {
   args: {

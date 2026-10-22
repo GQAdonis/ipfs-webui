@@ -1,7 +1,10 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import { dirname as testDirname } from 'node:path'
 // webui-vector-search 1.5: no hard-coded colours outside the token layer. Every colour in
 // src/search is a var() of src/promethity/tokens.css.
 import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 const FILES = readdirSync(__dirname).filter((f) => /\.(css|js)$/.test(f) && !/\.test\.js$/.test(f) && f !== 'test-helpers.js')
 const LITERAL = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(|\boklch\(|\bcolor\(|\b(white|black|red|green|blue|gray|grey)\b\s*[;}]/

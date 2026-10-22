@@ -8,6 +8,7 @@
 // bury the person in prompts. A request from a host that gave no AbortSignal (Kimi) expires
 // sooner, because the host cannot cancel it.
 
+import { getOriginPolicy } from '../agent-chat/origin-policy.js'
 import { getSettings } from './settings-store.js'
 
 export const MAX_PENDING = 3
@@ -56,7 +57,7 @@ export function requestConfirmation (request, context = {}) {
   const { signal } = context
   if (signal?.aborted) return Promise.resolve(false)
   // Writes switched off: nothing may ask, whatever the host still believes is registered.
-  if (!getSettings().writes) return Promise.resolve('writes_off')
+  if (!getSettings().writes || !getOriginPolicy().allowsAgent()) return Promise.resolve('writes_off')
   if (queue.length >= MAX_PENDING) return Promise.resolve('queue_full')
   return new Promise((resolve) => {
     const id = nextId++
@@ -75,6 +76,7 @@ export function requestConfirmation (request, context = {}) {
 
 /** @param {number} id @param {boolean} approved */
 export function decide (id, approved) {
+  if (approved && !getOriginPolicy().allowsAgent()) { denyAll(); return }
   settle(id, approved ? 'approved' : 'denied')
 }
 

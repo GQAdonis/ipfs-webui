@@ -1,10 +1,12 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import path, { dirname as testDirname } from 'node:path'
 // webui-titles-and-copy 1.1: document titles compose from brand.js, and no
 // page hard-codes a product suffix.
 
 import fs from 'node:fs'
-import path from 'node:path'
 import { titleWithBrand } from './page-title.js'
 import { BRAND } from './brand.js'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 it('appends the brand name as the product suffix', () => {
   expect(titleWithBrand('Status')).toBe(`Status | ${BRAND.name}`)

@@ -1,5 +1,4 @@
 import React from 'react'
-import { Helmet } from 'react-helmet'
 import { withTranslation } from 'react-i18next'
 import Title from './Title.js'
 import Box from '../components/box/Box.js'
@@ -8,9 +7,9 @@ import { titleWithBrand } from '../promethity/page-title.js'
 
 export const AnalyticsPage = ({ t }) => (
   <div data-id='AnalyticsPage' className='mw9 center'>
-    <Helmet>
+    <>
       <title>{titleWithBrand(t('title'))}</title>
-    </Helmet>
+    </>
 
     <Box>
       <Title>{t('analytics')}</Title>
