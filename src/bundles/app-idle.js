@@ -19,6 +19,7 @@ const createAppIdle = spec => ({
   name: 'appIdle',
 
   init: store => {
+    let destroyed = false
     const opts = Object.assign({}, defaults, spec)
     const { idleAction, idleTimeout } = opts
     let idleDispatcher
@@ -26,7 +27,7 @@ const createAppIdle = spec => ({
       idleDispatcher = getIdleDispatcher(
         opts.stopWhenTabInactive,
         idleTimeout,
-        () => store.dispatch({ type: idleAction })
+        () => { if (!destroyed) store.dispatch({ type: idleAction }) }
       )
     }
 
@@ -36,8 +37,13 @@ const createAppIdle = spec => ({
       }
     }
 
-    store.subscribe(callback)
+    const unsubscribe = store.subscribe(callback)
     callback()
+    return () => {
+      destroyed = true
+      unsubscribe()
+      idleDispatcher?.cancel()
+    }
   }
 })
 export default createAppIdle

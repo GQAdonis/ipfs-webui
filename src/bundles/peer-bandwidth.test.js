@@ -1,5 +1,6 @@
 /* global it, expect */
 import { composeBundlesRaw, createReactorBundle } from 'redux-bundler'
+import { vi } from 'vitest'
 import createPeerBandwidthBundle from './peer-bandwidth.js'
 import { fakeCid } from '../../test/helpers/cid.js'
 import { randomInt } from '../../test/helpers/random.js'
@@ -160,7 +161,7 @@ it('should sync added and removed peers', async () => {
 
   // Add and remove the peers
   store.doUpdateMockPeers(nextPeers)
-  await sleep()
+  await vi.waitFor(() => expect(store.selectPeerBandwidthPeers().length).toBe(nextPeers.length))
   bwPeers = store.selectPeerBandwidthPeers()
 
   expect(bwPeers.length).toBe(nextPeers.length)

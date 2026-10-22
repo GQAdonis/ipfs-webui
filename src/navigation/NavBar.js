@@ -1,11 +1,10 @@
 import React from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import BrandWordmark from '../promethity/brand-wordmark.js'
 import BrandPIcon from '../promethity/brand-p-icon.js'
 import { BRAND } from '../promethity/brand.js'
-import { useSearchAvailability } from '../search/use-availability.js'
 // Nav icons come from the fork's single icon module only
 // (src/promethity/icons.js; webui-shell-redesign 1.3).
 import {
@@ -15,7 +14,7 @@ import {
   PeersIcon,
   SettingsIcon,
   DiagnosticsIcon,
-  SearchIcon
+  PinnedIcon
 } from '../promethity/icons.js'
 
 // Styles
@@ -41,7 +40,7 @@ const NavLink = ({
   const href = `#${to}`
   const active = alternative
     ? hash === href || hash.startsWith(`${href}${alternative}`)
-    : hash === href || hash.startsWith(`${href}/`)
+    : hash === href || (to !== '/' && hash.startsWith(`${href}/`)) || (to === '/' && (hash === '' || hash === '#'))
   const anchorClass = classnames({
     'navbar-item-active': active,
     'o-50 no-pointer-events': disabled
@@ -49,7 +48,7 @@ const NavLink = ({
 
   return (
     // eslint-disable-next-line jsx-a11y/anchor-is-valid
-    <a href={disabled ? undefined : href} onClick={(e) => e.currentTarget.blur()} className={anchorClass} role='menuitem' title={children}>
+    <a href={disabled ? undefined : href} className={anchorClass} aria-current={active ? 'page' : undefined} title={children}>
       <div className='db ph2 pv1'>
         <div className='db'>
           <Icon />
@@ -72,12 +71,11 @@ export const NavBar = ({ t }) => {
   const gitRevision = process.env.REACT_APP_GIT_REV
   // Shown only when the node answers GET /index/status with a configured index and the
   // Web UI setting search.enabled is on; while off or unconnected, nothing is requested.
-  const { visible: showSearch } = useSearchAvailability()
   const revisionUrl = `${codeUrl}/commit/${gitRevision}`
   return (
-    <div className='h-100 fixed-l flex flex-column justify-between' style={{ overflowY: 'auto', width: 'inherit' }}>
+    <nav aria-label='Primary' className='praxis-wide-navigation h-100 fixed-l flex flex-column justify-between' style={{ overflowY: 'auto', width: 'inherit' }}>
       <div className='flex flex-column'>
-        <a href="#/welcome" role='menuitem' title={t('welcome:description')} className='navbar-brand'>
+        <a href="#/welcome" title={t('welcome:description')} className='navbar-brand'>
           <div className='pt3 pb1 pb2-l'>
             {/* One mark per surface: the wordmark on the expanded rail, the
                 p-icon on the collapsed bar — never side by side. */}
@@ -85,12 +83,14 @@ export const NavBar = ({ t }) => {
             <BrandPIcon className='navbar-logo-horiz center db dn-l' style={{ height: 56 }} />
           </div>
         </a>
-        <div className='db overflow-x-scroll overflow-x-hidden-l nowrap tc' role='menubar'>
-          <NavLink to='/' alternative="status" icon={StatusIcon}>{t('status:title')}</NavLink>
+        <div className='db overflow-x-scroll overflow-x-hidden-l nowrap tc'>
+          <NavLink to='/' icon={StatusIcon}>Home</NavLink>
           <NavLink to='/files' icon={FilesIcon}>{t('files:title')}</NavLink>
+          <NavLink to='/pins' icon={PinnedIcon}>{t('pins:title', { defaultValue: 'Pins' })}</NavLink>
           <NavLink to='/explore' icon={ExploreIcon}>{t('explore:tabName')}</NavLink>
-          {showSearch && <NavLink to='/search' icon={SearchIcon}>{t('search:title')}</NavLink>}
           <NavLink to='/peers' icon={PeersIcon}>{t('peers:title')}</NavLink>
+          <NavLink to='/activity' icon={DiagnosticsIcon}>Activity</NavLink>
+          <NavLink to='/status' icon={StatusIcon}>{t('status:title')}</NavLink>
           <NavLink to='/settings' icon={SettingsIcon}>{t('settings:title')}</NavLink>
           <NavLink to='/diagnostics' icon={DiagnosticsIcon}>{t('diagnostics:title')}</NavLink>
         </div>
@@ -109,7 +109,7 @@ export const NavBar = ({ t }) => {
           <a className='navbar-footer-link navbar-footer-attribution' href={BRAND.upstreamRepo} target='_blank' rel='noopener noreferrer'>{t('app:nav.attribution')}</a>
         </div>
       </div>
-    </div>
+    </nav>
   )
 }
 

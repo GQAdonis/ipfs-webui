@@ -1,24 +1,19 @@
 import React from 'react'
-import { Doughnut } from 'react-chartjs-2'
+import { Doughnut } from '../lib/charts.js'
 import filesize from 'filesize'
 import { useChartPalette } from '../promethity/tokens.js'
 
-const rotation = (n) => (0.5 + (1 - n)) * Math.PI
-const circumference = (n) => n * 2 * Math.PI
+const rotation = (n) => (0.5 + (1 - n)) * 180 + 90
+const circumference = (n) => n * 360
 
 function Speedometer ({ total = 100, title, filled = 0, noSpeed = false, color }) {
   const palette = useChartPalette()
   const fill = color || palette.down
   const doughnut = {
     options: {
-      legend: {
-        display: false
-      },
-      tooltips: {
-        enabled: false
-      },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
       maintainAspectRatio: false,
-      cutoutPercentage: 80,
+      cutout: '80%',
       rotation: rotation(0.7),
       circumference: circumference(0.7)
     },

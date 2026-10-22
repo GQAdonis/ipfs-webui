@@ -4,7 +4,7 @@ import { PencilIcon as Icon } from '../../../promethity/icons.js'
 import TextInputModal from '../../text-input-modal/TextInputModal.js'
 import { Trans } from 'react-i18next'
 
-const RenameKeyModal = ({ t, tReady, name, onCancel, onSubmit, className, ...props }) => {
+const RenameKeyModal = ({ t, tReady, name, onCancel, onSubmit, className = '', ...props }) => {
   return (
     <TextInputModal
       onSubmit={(p) => onSubmit(p.trim())}
@@ -34,10 +34,6 @@ RenameKeyModal.propTypes = {
   onCancel: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   className: PropTypes.string
-}
-
-RenameKeyModal.defaultProps = {
-  className: ''
 }
 
 export default RenameKeyModal

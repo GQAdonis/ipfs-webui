@@ -1,10 +1,10 @@
 import React from 'react'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 import i18nDecorator from '../i18n-decorator.js'
 import PinsStatusesComponent from './PinsStatuses.js'
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const PinStatusesStory = {
   render: () => (
@@ -34,7 +34,7 @@ export const PinStatusesStory = {
 }
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Pins/PinsStatuses',

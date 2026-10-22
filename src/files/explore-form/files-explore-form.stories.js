@@ -2,7 +2,7 @@
 import FilesExploreForm from './files-explore-form'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Files/Explore Form',
@@ -14,6 +14,6 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = {}

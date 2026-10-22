@@ -45,6 +45,8 @@ const phaseFor = (kind) => {
   switch (kind) {
     case 'not_configured': return 'needs-connection'
     case 'unauthorized': return 'unauthorized'
+    case 'step_up_required': return 'step-up'
+    case 'forbidden': return 'not-eligible'
     case 'route_absent': return 'unavailable'
     default: return 'error'
   }
@@ -110,7 +112,7 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
         dispatch({ type: 'test-finished', url, result })
       } catch (e) {
         const failure = failureOf(e)
-        if (failure.kind === 'unauthorized') dispatch({ type: 'phase', phase: 'unauthorized', failure })
+        if (failure.kind === 'unauthorized' || failure.kind === 'step_up_required' || failure.kind === 'forbidden') dispatch({ type: 'phase', phase: phaseFor(failure.kind), failure })
         dispatch({ type: 'test-failed', url, failure })
       }
     },
@@ -128,7 +130,7 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
         void refreshStatus()
       } catch (e) {
         const failure = failureOf(e)
-        if (failure.kind === 'unauthorized') dispatch({ type: 'phase', phase: 'unauthorized', failure })
+        if (failure.kind === 'unauthorized' || failure.kind === 'step_up_required' || failure.kind === 'forbidden') dispatch({ type: 'phase', phase: phaseFor(failure.kind), failure })
         dispatch({ type: 'key-failed', failure })
         if (failure.kind === 'revision_conflict') void load({ keepEdits: true })
       }
@@ -146,7 +148,7 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
         void refreshStatus()
       } catch (e) {
         const failure = failureOf(e)
-        if (failure.kind === 'unauthorized') dispatch({ type: 'phase', phase: 'unauthorized', failure })
+        if (failure.kind === 'unauthorized' || failure.kind === 'step_up_required' || failure.kind === 'forbidden') dispatch({ type: 'phase', phase: phaseFor(failure.kind), failure })
         dispatch({ type: 'key-failed', failure })
         if (failure.kind === 'revision_conflict') void load({ keepEdits: true })
       }
@@ -165,7 +167,7 @@ function createActions (dispatch, stateRef, clientRef, nowRef, setStatus) {
         void refreshStatus()
       } catch (e) {
         const failure = failureOf(e)
-        if (failure.kind === 'unauthorized') dispatch({ type: 'phase', phase: 'unauthorized', failure })
+        if (failure.kind === 'unauthorized' || failure.kind === 'step_up_required' || failure.kind === 'forbidden') dispatch({ type: 'phase', phase: phaseFor(failure.kind), failure })
         dispatch({ type: 'apply-failed', failure, at: new Date(nowRef.current()).toISOString() })
         void refreshStatus()
         // A stale revision: take the node's current revision (and state) and keep the edits, so

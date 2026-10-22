@@ -6,6 +6,7 @@
 // passed on. Hit text stays a plain string for the page to render as text.
 
 import { SearchError } from './errors.js'
+import { markSessionExpired } from '../agent-chat/session.js'
 import { isKind, isSource } from './content-kinds.js'
 import { plainText } from './plain-text.js'
 
@@ -188,10 +189,11 @@ async function errorFromResponse (res) {
 /**
  * @param {Object} options
  * @param {string} options.root the listener origin plus any path prefix (the chat endpoint without /agui)
- * @param {() => string | undefined | Promise<string | undefined>} options.getToken called per request
+ * @param {() => string | undefined | Promise<string | undefined>} [options.getToken] called per request; unused in session mode
+ * @param {boolean} [options.session] session mode (console-session-auth): same-origin cookie, no Authorization header
  * @param {typeof fetch} [options.fetch] test seam
  */
-export function createSearchClient ({ root, getToken, fetch: fetchImpl }) {
+export function createSearchClient ({ root, getToken = () => undefined, session = false, fetch: fetchImpl }) {
   const doFetch = fetchImpl ?? ((/** @type {any[]} */ ...a) => /** @type {any} */ (globalThis.fetch)(...a))
 
   /**
@@ -201,10 +203,14 @@ export function createSearchClient ({ root, getToken, fetch: fetchImpl }) {
    */
   async function request (method, path, opts = {}) {
     const { body, signal } = opts
-    const token = await getToken()
-    if (!token) throw new SearchError('unauthenticated', 'No access token is set.')
+    signal?.throwIfAborted()
+    const token = session ? undefined : await getToken()
+    // Credential providers can retire their capture while awaited (for example Desktop rotation).
+    // A stale request must not reach fetch, including fetch implementations that ignore abort.
+    signal?.throwIfAborted()
+    if (!session && !token) throw new SearchError('unauthenticated', 'No access token is set.')
     /** @type {Record<string, string>} */
-    const headers = { authorization: `Bearer ${token}`, accept: 'application/json' }
+    const headers = { accept: 'application/json', ...(!session && { authorization: `Bearer ${token}` }) }
     if (body !== undefined) headers['content-type'] = 'application/json'
     let res
     try {
@@ -212,7 +218,7 @@ export function createSearchClient ({ root, getToken, fetch: fetchImpl }) {
         method,
         headers,
         body: body === undefined ? undefined : JSON.stringify(body),
-        credentials: 'omit',
+        credentials: session ? 'same-origin' : 'omit',
         redirect: 'error',
         referrerPolicy: 'no-referrer',
         cache: 'no-store',
@@ -220,13 +226,23 @@ export function createSearchClient ({ root, getToken, fetch: fetchImpl }) {
         signal
       })
     } catch (e) {
+      signal?.throwIfAborted()
       if (/** @type {any} */ (e)?.name === 'AbortError') throw e
       throw new SearchError('network', 'Cannot reach the node.')
     }
-    if (!res.ok) throw await errorFromResponse(res)
+    signal?.throwIfAborted()
+    if (!res.ok) {
+      if (session && res.status === 401) markSessionExpired()
+      const error = await errorFromResponse(res)
+      signal?.throwIfAborted()
+      throw error
+    }
     try {
-      return await res.json()
+      const value = await res.json()
+      signal?.throwIfAborted()
+      return value
     } catch (_) {
+      signal?.throwIfAborted()
       throw new SearchError('protocol', 'The node answered with something that is not JSON.')
     }
   }

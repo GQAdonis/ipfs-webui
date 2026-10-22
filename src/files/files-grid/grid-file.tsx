@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect, type FC } from 'react'
 import { withTranslation } from 'react-i18next'
 import { useDrag, useDrop, type DropTargetMonitor } from 'react-dnd'
-import { humanSize, normalizeFiles } from '../../lib/files.js'
+import { humanSize } from '../../lib/files.js'
+import { addNativeFiles, reportDropError, type NativeFileItem } from '../native-drop.js'
 import { CID } from 'multiformats/cid'
 import { isBinary } from 'istextorbinary'
 import FileIcon from '../file-icon/FileIcon.js'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import FileThumbnail from '../file-preview/file-thumbnail.js'
 import PinIcon from '../pin-icon/PinIcon.js'
 import { DotsIcon as GlyphDots } from '../../promethity/icons.js'
@@ -56,6 +57,7 @@ const GridFile: FC<GridFilePropsConnected> = ({
   const fileRef = useRef<HTMLDivElement | null>(null)
 
   const [, drag, preview] = useDrag({
+    type: 'FILE',
     item: { name, size, cid, path, pinned, type: 'FILE' },
     canDrag: isMfs,
     collect: (monitor) => ({
@@ -67,7 +69,7 @@ const GridFile: FC<GridFilePropsConnected> = ({
     if (!isMfs) return false
     if (type !== 'directory') return false
 
-    const item = monitor.getItem()
+    const item = monitor.getItem<{ name?: string }>()
     if (!item) return false
 
     if (item.name) {
@@ -80,23 +82,21 @@ const GridFile: FC<GridFilePropsConnected> = ({
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: [NativeTypes.FILE, 'FILE'],
     drop: (_, monitor) => {
-      const item = monitor.getItem()
+      if (monitor.didDrop()) return
+      const item = monitor.getItem<NativeFileItem & { path: string }>()
 
-      if (item.files) {
-        (async () => {
-          const files = await item.filesPromise
-          onAddFiles(normalizeFiles(files), path)
-        })()
+      if (monitor.getItemType() === NativeTypes.FILE) {
+        void addNativeFiles(item, files => onAddFiles(files, path)).catch(reportDropError)
       } else {
         const src = item.path
         const dst = join(path, basename(item.path))
 
-        onMove(src, dst)
+        Promise.resolve(onMove(src, dst)).catch(reportDropError)
       }
     },
     canDrop: (_, monitor) => checkIfDir(monitor),
     collect: (monitor) => ({
-      canDrop: checkIfDir(monitor),
+      canDrop: monitor.canDrop(),
       isOver: monitor.isOver()
     })
   })
@@ -162,7 +162,7 @@ const GridFile: FC<GridFilePropsConnected> = ({
   const formattedSize = humanSize(size, { round: 0 })
   const hash = cid.toString() || t('hashUnavailable')
 
-  const setRefs = (el: HTMLDivElement) => {
+  const setRefs = (el: HTMLDivElement | null) => {
     fileRef.current = el
 
     drag(el)
@@ -203,6 +203,7 @@ const GridFile: FC<GridFilePropsConnected> = ({
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             e.preventDefault()
+            e.stopPropagation()
             onNavigate({ path, cid })
           }
         }}

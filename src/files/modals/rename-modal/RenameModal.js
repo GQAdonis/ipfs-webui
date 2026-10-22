@@ -4,7 +4,7 @@ import { PencilIcon } from '../../../promethity/icons.js'
 import TextInputModal from '../../../components/text-input-modal/TextInputModal.js'
 import { withTranslation } from 'react-i18next'
 
-function RenameModal ({ t, tReady, onCancel, onSubmit, filename, folder, className, ...props }) {
+function RenameModal ({ t, tReady, onCancel, onSubmit, filename, folder = false, className = '', ...props }) {
   const context = folder ? 'Folder' : 'File'
 
   return (
@@ -29,11 +29,6 @@ RenameModal.propTypes = {
   folder: PropTypes.bool,
   t: PropTypes.func.isRequired,
   tReady: PropTypes.bool.isRequired
-}
-
-RenameModal.defaultProps = {
-  className: '',
-  folder: false
 }
 
 export default withTranslation('files')(RenameModal)

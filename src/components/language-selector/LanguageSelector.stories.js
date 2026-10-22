@@ -7,7 +7,7 @@ import LanguageSelectorEl from './LanguageSelector.js'
 const t = i18n.getFixedT('en', 'settings')
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'LanguageSelector',
@@ -24,7 +24,7 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = {
   name: 'LanguageSelector',

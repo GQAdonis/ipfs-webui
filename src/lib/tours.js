@@ -1,4 +1,5 @@
 import React from 'react'
+import AppHintTooltip from '../components/tour/AppHintTooltip.jsx'
 
 /* Promethity tour skin (webui-shell-redesign 1.2). Tooltips are flat panels on
    the tokens: `raised` fill, `text` copy, the accent reserved for the Next
@@ -37,7 +38,7 @@ const tourPanelStyles = {
 }
 
 /**
- * @type {import('react-joyride').CustomTour}
+ * @type {{ getSteps: (props: any) => any[], styles: object }}
  */
 export const appTour = {
   getSteps: ({ t }) => [{
@@ -46,6 +47,8 @@ export const appTour = {
     </div>,
     placement: 'left',
     target: '.joyride-app-tour',
+    tooltipComponent: AppHintTooltip,
+    disableFocusTrap: true,
     disableBeacon: true
   }],
   styles: {
@@ -63,7 +66,7 @@ export const appTour = {
 }
 
 /**
- * @type {import('react-joyride').CustomTour}
+ * @type {{ getSteps: (props: any) => any[], styles: object }}
  */
 export const welcomeTour = {
   getSteps: ({ t }) => [
@@ -82,7 +85,7 @@ export const welcomeTour = {
 }
 
 /**
- * @type {import('react-joyride').CustomTour}
+ * @type {{ getSteps: (props: any) => any[], styles: object }}
  */
 export const statusTour = {
   getSteps: ({ t, Trans }) => [
@@ -139,7 +142,7 @@ export const statusTour = {
 }
 
 /**
- * @type {import('react-joyride').CustomTour}
+ * @type {{ getSteps: (props: any) => any[], styles: object }}
  */
 export const filesTour = {
   getSteps: ({ t, Trans }) => [
@@ -210,7 +213,7 @@ export const filesTour = {
 }
 
 /**
- * @type {import('react-joyride').CustomTour}
+ * @type {{ getSteps: (props: any) => any[], styles: object }}
  */
 export const peersTour = {
   getSteps: ({ t }) => [
@@ -247,7 +250,7 @@ export const peersTour = {
 }
 
 /**
- * @type {import('react-joyride').CustomTour}
+ * @type {{ getSteps: (props: any) => any[], styles: object }}
  */
 export const settingsTour = {
   getSteps: ({ t, Trans }) => [
@@ -264,7 +267,6 @@ export const settingsTour = {
       content: <div>
         <h2 className='prom-tour-title'>{t('tour.step2.title')}</h2>
         <p className='tl f6'>{t('tour.step2.paragraph1')}</p>
-        <p className='tl f6'>{t('tour.step2.paragraph2')}</p>
       </div>,
       placement: 'auto',
       target: '.joyride-settings-customapi'
@@ -285,7 +287,7 @@ export const settingsTour = {
         <h2 className='prom-tour-title'>{t('tour.step4.title')}</h2>
         <Trans i18nKey='tour.step4.paragraph1' t={t}>
           <p className='tl f6'>You can change the language of the Web UI.
-          If your preferred language isn't available, head over our project page in <a className='teal link' href='https://www.transifex.com/ipfs/ipfs-webui/translate/' rel='noopener noreferrer' target='_blank'>Transifex</a> to help us translate!
+          If your preferred language isn&apos;t available, head over our project page in <a className='teal link' href='https://www.transifex.com/ipfs/ipfs-webui/translate/' rel='noopener noreferrer' target='_blank'>Transifex</a> to help us translate!
           </p>
         </Trans>
       </div>,

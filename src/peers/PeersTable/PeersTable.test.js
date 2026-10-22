@@ -1,14 +1,15 @@
+import { vi } from 'vitest'
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import { initReactI18next, withTranslation } from 'react-i18next'
 import i18n from 'i18next'
 import ICU from 'i18next-icu'
 import peersEn from '../../../public/locales/en/peers.json'
 import { FilterInput } from './PeersTable.js'
 
-// Cid.js imports error-boundary.jsx, which Jest cannot resolve (the file is .tsx); the row cell it renders is not under test.
-jest.mock('../../components/cid/Cid.js', () => () => null)
+// The filter fixture does not render peer row cells.
+vi.mock('../../components/cid/Cid.js', () => ({ default: () => null }))
 
 i18n.use(ICU).use(initReactI18next).init({
   lng: 'en',
@@ -45,7 +46,7 @@ describe('Peers filter row (N3)', () => {
   })
 
   it('clears the filter on Escape', () => {
-    const setFilter = jest.fn()
+    const setFilter = vi.fn()
     render(<Filter filter='abc' setFilter={setFilter} filteredCount={0} />)
     fireEvent.keyDown(screen.getByLabelText('Filter peers'), { key: 'Escape' })
     expect(setFilter).toHaveBeenCalledWith('')

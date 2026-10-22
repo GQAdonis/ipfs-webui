@@ -1,5 +1,5 @@
 /* global describe, it, expect, beforeEach, afterEach */
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { composeBundles } from 'redux-bundler'
 import configBundle from './config.js'
 import gatewayBundle from './gateway.js'
@@ -21,11 +21,11 @@ const createStore = (config) => composeBundles(
 
 describe('gateway selection with a Local Gateway URL override', () => {
   // getURLFromAddress logs when @multiformats/multiaddr-to-uri cannot resolve a
-  // multiaddr, which it cannot under jest; the override path does not need it.
+  // multiaddr, which it cannot under vi; the override path does not need it.
   let logSpy
   beforeEach(() => {
     window.localStorage.clear()
-    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+    logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
   })
   afterEach(() => logSpy.mockRestore())
 
@@ -47,7 +47,7 @@ describe('gateway selection with a Local Gateway URL override', () => {
 
     // clearing the override removes it from gateway selection (the multiaddr
     // ->URI fallback to the Kubo config gateway is covered by e2e, since
-    // @multiformats/multiaddr-to-uri does not load under jest)
+    // @multiformats/multiaddr-to-uri does not load under vi)
     await store.doUpdateLocalGateway('')
     expect(store.selectLocalGateway()).toBe('')
   })

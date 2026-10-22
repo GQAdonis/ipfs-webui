@@ -11,6 +11,8 @@ import { useAgentChatSettings } from '../../agent-chat/use-agent-chat-settings.j
 import { forgetAdminToken, forgetAdminTokenUnless, setAdminToken, setAdminTokenRemembered } from './core/admin-token.js'
 import { useAdminTokenState } from './use-admin-token.js'
 import { useAgentSettings } from './AgentSettings.js'
+import SessionPanel from '../../agent-chat/SessionPanel.js'
+import { useSession } from '../../agent-chat/use-session.js'
 
 /** Under Desktop the main process owns the connection; the manual fields are not rendered at all. */
 const ManagedConnection = () => {
@@ -151,20 +153,23 @@ const AdminAccess = () => {
  */
 export const ConnectionSection = () => {
   const { t } = useTranslation('agentSettings')
-  const { meta } = useAgentSettings()
+  const { meta, state } = useAgentSettings()
+  const session = useSession()
   return (
     <Box className='mb3 pa4-l pa3'>
       <section aria-labelledby='as-connection-title' data-id='AgentSettingsConnection'>
         <Title props={{ id: 'as-connection-title' }}>{t('connection.title')}</Title>
         {meta.managedByDesktop
           ? <ManagedConnection />
-          : (
+          : session
+            ? <SessionPanel phase={state.phase} />
+            : (
             <>
               <p className='pm-help as-lede'>{t('connection.lede')}</p>
               <ChatConnection />
               <AdminAccess />
             </>
-            )}
+              )}
       </section>
     </Box>
   )

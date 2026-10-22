@@ -20,9 +20,11 @@ const toggled = (list, value) => (list.includes(value) ? list.filter((v) => v !=
  * @param {boolean} props.busy
  * @param {(req: { query: string, kinds: string[], sources: string[] }) => void} props.onSearch
  */
-const SearchForm = ({ busy, onSearch }) => {
+const SearchForm = ({ busy, onSearch, submittedQuery = '' }) => {
   const { t } = useTranslation('search')
-  const [query, setQuery] = useState('')
+  // SearchPage keys the form by connection generation and submitted handoff.
+  // Seed that lifetime once; a passive reset could overwrite an immediate edit.
+  const [query, setQuery] = useState(submittedQuery)
   const [kinds, setKinds] = useState(/** @type {string[]} */ ([]))
   const [sources, setSources] = useState(/** @type {string[]} */ ([]))
   const filtered = kinds.length > 0 || sources.length > 0
@@ -75,6 +77,7 @@ const SearchForm = ({ busy, onSearch }) => {
 
 SearchForm.propTypes = {
   busy: PropTypes.bool.isRequired,
+  submittedQuery: PropTypes.string,
   onSearch: PropTypes.func.isRequired
 }
 

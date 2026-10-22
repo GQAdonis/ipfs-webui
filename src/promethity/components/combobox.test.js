@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 // webui-settings-primitives 1.2: keyboard behaviour of the APG editable
 // combobox with list autocomplete.
 
@@ -125,7 +126,7 @@ it('says so when typing matches nothing, and leaves the list closed', () => {
 })
 
 it('does not submit an enclosing form on Enter', () => {
-  const onSubmit = jest.fn((e) => e.preventDefault())
+  const onSubmit = vi.fn((e) => e.preventDefault())
   const { getByRole } = render(
     <form onSubmit={onSubmit}>
       <Combobox aria-label='Model' options={OPTIONS} value='' onChange={() => {}} />

@@ -3,7 +3,7 @@ import i18nDecorator from '../../../i18n-decorator.js'
 import AddFilesInfo from './AddFilesInfo.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Files/Info Boxes/AddFilesInfo',
@@ -14,7 +14,7 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = {
   name: 'AddFilesInfo'

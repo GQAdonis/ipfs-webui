@@ -1,6 +1,8 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import path, { dirname as testDirname } from 'node:path'
 import fs from 'node:fs'
-import path from 'node:path'
 import { EXPLORE_TOKEN_VARS } from './explore-tokens.js'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 const root = path.resolve(__dirname, '..', '..')
 const overrides = fs.readFileSync(path.join(root, 'src/promethity/theme-overrides.css'), 'utf8')

@@ -20,6 +20,7 @@ export const after = (fn, times) => {
     if (counter >= times) {
       return fn(...args)
     }
+    return undefined
   }
 }
 

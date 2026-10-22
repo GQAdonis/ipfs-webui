@@ -1,27 +1,22 @@
 import React from 'react'
 
-import { action } from '@storybook/addon-actions'
-import {
-  withKnobs
-  // , boolean
-} from '@storybook/addon-knobs'
+import { action } from 'storybook/actions'
 import i18nDecorator from '../../i18n-decorator.js'
 import { FileImportStatus } from './FileImportStatus.js'
 import i18n from '../../i18n.js'
-import { Array } from 'window-or-global'
 
 const containerStyle = { width: 156 }
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Files/FileImportStatus',
-  decorators: [i18nDecorator, withKnobs]
+  decorators: [i18nDecorator]
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ImportASingleFileExpandedInProgress = () => (
   <div className="sans-serif vh-80 bg-navy" style={containerStyle}>
@@ -42,12 +37,10 @@ export const ImportASingleFileExpandedInProgress = () => (
   </div>
 )
 
-ImportASingleFileExpandedInProgress.story = {
-  name: 'Import a single file (expanded, in progress)'
-}
+ImportASingleFileExpandedInProgress.storyName = 'Import a single file (expanded, in progress)'
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ImportASingleFileCollapsedInProgress = () => (
   <div className="sans-serif vh-80 bg-navy" style={containerStyle}>
@@ -69,12 +62,10 @@ export const ImportASingleFileCollapsedInProgress = () => (
   </div>
 )
 
-ImportASingleFileCollapsedInProgress.story = {
-  name: 'Import a single file (collapsed, in progress)'
-}
+ImportASingleFileCollapsedInProgress.storyName = 'Import a single file (collapsed, in progress)'
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ImportASingleFileExpandedComplete = () => (
   <div className="sans-serif vh-80 bg-navy" style={containerStyle}>
@@ -96,12 +87,10 @@ export const ImportASingleFileExpandedComplete = () => (
   </div>
 )
 
-ImportASingleFileExpandedComplete.story = {
-  name: 'Import a single file (expanded, complete)'
-}
+ImportASingleFileExpandedComplete.storyName = 'Import a single file (expanded, complete)'
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ImportMultipleFilesExpandedInProgress = () => (
   <div className="sans-serif vh-80 bg-navy" style={containerStyle}>
@@ -142,12 +131,10 @@ export const ImportMultipleFilesExpandedInProgress = () => (
   </div>
 )
 
-ImportMultipleFilesExpandedInProgress.story = {
-  name: 'Import multiple files (expanded, in progress)'
-}
+ImportMultipleFilesExpandedInProgress.storyName = 'Import multiple files (expanded, in progress)'
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ImportMultipleFilesCollapsedInProgress = () => (
   <div className="sans-serif vh-80 bg-navy" style={containerStyle}>
@@ -192,12 +179,10 @@ export const ImportMultipleFilesCollapsedInProgress = () => (
   </div>
 )
 
-ImportMultipleFilesCollapsedInProgress.story = {
-  name: 'Import multiple files (collapsed, in progress)'
-}
+ImportMultipleFilesCollapsedInProgress.storyName = 'Import multiple files (collapsed, in progress)'
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const ImportMultipleFilesExpandedComplete = () => (
   <div className="sans-serif vh-80 bg-navy" style={containerStyle}>
@@ -221,9 +206,7 @@ export const ImportMultipleFilesExpandedComplete = () => (
   </div>
 )
 
-ImportMultipleFilesExpandedComplete.story = {
-  name: 'Import multiple files (expanded, complete)'
-}
+ImportMultipleFilesExpandedComplete.storyName = 'Import multiple files (expanded, complete)'
 
 const catFile = {
   path: 'awesome-cat-image-that-is-extermely-awesome.gif',
@@ -251,7 +234,7 @@ const dirOfFiles = [
 ]
 
 // /**
-//  * @type {import('@storybook/react').Meta}
+//  * @type {import('@storybook/react-vite').Meta}
 //  */
 // const FileImportStatusStory = {
 //   title: 'Files/FileImportStatus',
@@ -261,6 +244,6 @@ const dirOfFiles = [
 // export default FileImportStatusStory
 
 // /**
-//  * @type {import('@storybook/react').StoryObj}
+//  * @type {import('@storybook/react-vite').StoryObj}
 //  */
 // export const Default = {}

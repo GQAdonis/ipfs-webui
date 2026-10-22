@@ -5,7 +5,7 @@
 //   waiting      switched on and available, waiting for the node connection
 //   registered   tools are registered (some may have failed: see `failed`)
 
-/** @typedef {{ state: 'off' | 'unavailable' | 'waiting' | 'registered', registered: number, failed: number, writes: number }} RegistrationStatus */
+/** @typedef {{ state: 'off' | 'unavailable' | 'waiting' | 'registered' | 'origin-restricted', registered: number, failed: number, writes: number }} RegistrationStatus */
 
 /** @type {RegistrationStatus} */
 const OFF = Object.freeze({ state: 'off', registered: 0, failed: 0, writes: 0 })

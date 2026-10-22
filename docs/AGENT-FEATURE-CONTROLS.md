@@ -1,0 +1,42 @@
+# Agent feature controls in this Web UI
+
+Open **Settings → Agent**. Browser feature and display choices apply immediately and are separate from the backend form's Apply action. The fork uses bundled fonts and does not select a cloud service on your behalf. Ordinary Files, Pins, Explore and navigation keep their existing routes.
+
+| Control | What off does here | What it does not establish |
+| --- | --- | --- |
+| Enable agent chat | Retires the current chat connection, clears its conversation/draft and forgets a browser bearer token. Under Desktop, use its managed agent control instead. | It does not disable indexed Search, browser tools or the node's agent service. Features sharing the forgotten bearer may need a new credential. |
+| Search your files | Cancels local Search requests and clears their results/capability state; hides the navigation entry and redirects the disabled page. | It does not disable Desktop's index or change server index configuration. |
+| Offer read tools to agents | Removes this page's registered WebMCP tools and clears its dependent DNSLink/write choices. Write offering is page-only and never restored from storage. | It does not change server tools or approval policy. Serving `Permissions-Policy: tools=()` also disables browser registration. |
+| Show Home decisions and Activity | Stops the protected decision stream/snapshot/detail reads, clears local observations and closes the current review. | It does not resolve, cancel or replay server decisions, disable native prompts or prove the server's decisions feature is off. |
+| Show agent-generated UI | Retires current generated surfaces/actions and stops their local rendering. Plain chat and reported tool results remain. | It grants no tool/approval authority and does not change the server's A2UI setting. |
+| Show context references | Clears/gates selected references through the current controller. Re-enabling does not restore a removed or sent same-page reference. | It does not fetch or upload content, enable tools or prove server support is disabled. Go and Search continue to use text only. |
+| Show run facts when available | Clears/retires the current run inspector. Plain chat and generated UI continue; re-enabling admits a future accepted run, without reviving old tails. | It does not stop the run, alter reported tool outcomes or change the server’s fact support. Facts still require actual supported fields. |
+| Desktop confirmation window | Uses only the existing Desktop get/set control, when exposed; otherwise the page directs you to the tray setting. | Browser display preferences cannot stand in for required native presence or change main-process authorization. |
+
+The four display preferences are stored under `ipfs-webui:agent-presentation:v1` for this origin/browser profile. They contain booleans only, no credentials, observations or chat history. Explicit false choices survive a new page. If storage is blocked they last for the page. An already-open tab has its own current preference snapshot; reload it to pick up changes made by another page. Display preferences never enter the server settings Apply payload.
+
+The retained settings API does not expose the canonical server switches for decisions, A2UI, context references or run facts. This Web UI does not add admin discovery or invent settings fields to infer them. Use the node operator's actual supported configuration controls and documentation; frontend hiding is not server disabled-state evidence. A decision route's 401 can mean a missing route grant, and does not alone prove console sign-in expired. The existing shared host connection remains the lifetime authority.
+
+Decision history is bounded: the server reports at most 200 resolved records globally for seven days and resets history on restart. Local display is further bounded. A partial loaded count is not a full current-identity count. A missing decision or receipt is unavailable history, not proof of failure. Approval does not prove execution success; unknown outcomes never trigger a write retry automatically. An Inbox answer uses the existing owned-chat continuation, rechecked against current protected detail and by the server; no display switch grants approval.
+
+## Sharing and retention
+
+The share dialog explains the address before you copy it. An IPFS CID identifies content-addressed bytes; an IPNS name can point to changing content. A link does not keep data online or guarantee retrieval, and a local gateway link works only where that gateway is reachable. A CID is not access control. Sharing does not encrypt or decrypt content: a CID for previously encrypted bytes does not include the key or make the plaintext readable. Existing public, local, subdomain and native addresses retain their existing construction.
+
+The Files removal dialog removes selected MFS path names on this node. Its separate choices request local pin removal and unpinning at the listed configured remote services only after MFS removal succeeds. The pin-location dialog changes selected local/named-service pin retention without removing MFS paths. It lists a local change separately from remote removals; a remote-only removal does not claim to change local pin protection. These are request scopes, not success receipts.
+
+Unpinning removes pin protection. It does not by itself delete blocks immediately or delete copies throughout IPFS. Other MFS references, pins, nodes or services may retain content; unreferenced, unpinned local blocks may later be reclaimed by garbage collection. A remote service may have its own retention policy. Confirm the actual reported operation outcome. These frontend explanations do not replace the authoritative backend tool summary/documentation still tracked under BE-05.
+
+Changed removal descriptions and checkbox labels use new source keys, so older translations cannot keep the superseded deletion promise or ambiguous service scope. They fall back to English until translated through the existing localization process.
+
+These notes describe frontend behavior. Live server/host disabled-state and authorization guarantees require their own delivered configuration, contract and test evidence. In particular the current Desktop bridge has no idle credential-change subscription; known browser transitions retire immediately, while an unreported host rotation cannot be inferred from an email, display name or endpoint.
+
+## Origin restrictions
+
+Agent actions require an isolated or dedicated page origin in addition to the existing authentication, capability, endpoint-origin and native confirmation checks. A structurally valid CID/IPNS PeerID subdomain separates content origins; it does not prove that content is trustworthy or grant a write. Dedicated loopback pages and the existing trusted Desktop file host are supported. A dedicated remote HTTPS console requires the existing validated same-origin console report; a saved endpoint or gateway URL does not establish deployment trust.
+
+A shared `/ipfs/…` or `/ipns/…` content path is blocked for chat, indexed Search/decision access, agent settings and approvals, including on loopback and through a gateway prefix/encoded path. Ordinary IPFS navigation remains available. Enabled WebMCP read tools can still be registered; write tools are omitted and retained write callbacks/pending confirmations are refused on a current unsafe origin. This does not alter generated tools or the node's RPC API.
+
+Opening a different hash route does not change the page's transport origin or turn a shared path into an isolated host. Use the actual isolated or dedicated Web UI address configured by the operator or Desktop. The current frontend has no trusted alternate Web UI URL to offer from a blocked page, so it shows an explanation rather than converting a saved API/gateway address or manufacturing a localhost link. Legacy local path-gateway hosting needs a supported isolated/dedicated host for agent-positive use. No hostname popularity list, query parameter, stored origin or page trust flag bypasses these restrictions.
+
+The frontend checks origin again at credential completion and privileged call/confirmation boundaries and retires pending local work on known transitions. It cannot undo an operation already accepted by the server/host; check its reported outcome before retrying. Server/host isolation and configured deployment provenance remain separately verifiable requirements.

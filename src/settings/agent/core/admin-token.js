@@ -8,6 +8,8 @@
 // localStorage, a URL, a cookie, an attribute or a log line, and nothing outside
 // this module reads the storage key.
 
+import { isSessionMode } from '../../../agent-chat/session.js'
+
 export const ADMIN_TOKEN_SESSION_KEY = 'ipfs-webui:agent-settings:admin-token:v2'
 // The first version stored the bare token with no root. It is removed, never read.
 const LEGACY_SESSION_KEY = 'ipfs-webui:agent-settings:admin-token:v1'
@@ -59,6 +61,8 @@ export const getAdminTokenVersion = () => version
  * @param {{ remember?: boolean, root?: string }} options root is required to hold a token; remember keeps it for this tab (sessionStorage)
  */
 export function setAdminToken (value, { remember = false, root } = {}) {
+  // In session mode the cookie session is the credential: no admin token is held or kept.
+  if (isSessionMode()) value = undefined
   held = typeof value === 'string' && value !== '' && typeof root === 'string' && root !== '' ? { token: value, root } : undefined
   remembered = held !== undefined && remember
   version += 1
@@ -71,7 +75,7 @@ export function setAdminToken (value, { remember = false, root } = {}) {
  * @param {boolean} remember
  */
 export function setAdminTokenRemembered (remember) {
-  if (held === undefined) return
+  if (held === undefined || isSessionMode()) return
   remembered = remember
   version += 1
   writeSession(remember ? held : undefined)

@@ -1,5 +1,3 @@
-import React from 'react'
-
 export const ViewList = ({ width = 24, height = 24, className = '' }) => (
   <svg width={width} height={height} viewBox="0 0 24 24" className={className}>
     <path

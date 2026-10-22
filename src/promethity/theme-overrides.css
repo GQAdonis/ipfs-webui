@@ -50,6 +50,11 @@
    classes that follow (.red, .charcoal, .gray) win over it at equal specificity. */
 .link { color: var(--text); }
 
+/* Tachyons gives these Settings links only a color tween. Their token-backed
+   ancestor fill changes immediately on a theme switch, so update text with it.
+   Other controls' transform/opacity/size motion is unchanged. */
+[data-id='SettingsPage'] a.link { transition: none; }
+
 .navy, .charcoal, .snow, .washed-blue,
 .aqua, .aqua-muted, .teal, .teal-muted { color: var(--text); }
 
@@ -410,4 +415,38 @@ input:disabled, textarea:disabled, select:disabled { opacity: 0.45; }
   background-color: var(--control);
   color: var(--text);
   border-radius: var(--radius-pill);
+}
+
+/* Legacy IPFS/Tachyons utilities carry fixed transition durations and can load
+   after component skins. Honor the preference throughout the owned application
+   and body-portalled native WebUI dialogs and guided tours, including their
+   pseudo-elements. The Joyride portal is outside #root. */
+@media (prefers-reduced-motion: reduce) {
+  #root,
+  #root *,
+  #react-joyride-portal,
+  #react-joyride-portal *,
+  dialog.webui-overlay,
+  dialog.webui-overlay * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  #root::before,
+  #root::after,
+  #root *::before,
+  #root *::after,
+  #react-joyride-portal::before,
+  #react-joyride-portal::after,
+  #react-joyride-portal *::before,
+  #react-joyride-portal *::after,
+  dialog.webui-overlay::before,
+  dialog.webui-overlay::after,
+  dialog.webui-overlay *::before,
+  dialog.webui-overlay *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,0 +1,29 @@
+--- a/src/providers/explore.tsx
++++ b/src/providers/explore.tsx
+@@ -113,6 +113,10 @@
+       setExploreState((exploreState) => ({
+         ...exploreState,
+         targetNode: null,
++        canonicalPath: '',
++        localPath: '',
++        nodes: [],
++        pathBoundaries: [],
+         error: null
+       }))
+       const pathParts = parseIpldPath(path)
+@@ -154,13 +158,14 @@
+     }
+     const newPath = processPath(path, explorePathPrefix)
+     setExploreState((exploreState) => exploreState.path === newPath ? exploreState : ({
+-      ...exploreState,
++      ...defaultState,
+       path: newPath
+     }))
+   }, [explorePathPrefix])
+ 
+   const doExploreLink = useCallback((link: LinkObject): void => {
+     const { nodes, pathBoundaries } = exploreState
++    if (!nodes[0]) return
+     const cid = nodes[0].cid
+     const pathParts = pathBoundaries.map((p) => p.path)
+ 

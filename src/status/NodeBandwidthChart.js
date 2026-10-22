@@ -1,8 +1,8 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import { Line } from 'react-chartjs-2'
+import React, { useLayoutEffect, useState, useSyncExternalStore } from 'react'
+import { createPortal } from 'react-dom'
+import { Line } from '../lib/charts.js'
 import { withTranslation } from 'react-i18next'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 import PropTypes from 'prop-types'
 import filesize from 'filesize'
 import { Title } from './Commons.js'
@@ -18,47 +18,38 @@ const bwUnits = {
 const chartsize = filesize.partial({ round: 1, exponent: 2, ...bwUnits })
 const tootltipSize = filesize.partial({ round: 0, output: 'array', ...bwUnits })
 
-// Chart.js 2 reads canvas colours, not CSS, so axis, grid and legend colours
-// come from the token palette (src/promethity/tokens.js). Grid lines are a
-// `raised` fill step on the panel, not a drawn rule.
-const defaultSettings = (palette) => ({
-  defaultFontFamily: palette.fontBody,
-  defaultFontColor: palette.textMuted,
+// Numeric millisecond timestamps retain real elapsed spacing and the existing
+// rolling window. Intl formats labels locally without a bundled date runtime.
+export const defaultSettings = (palette) => ({
   responsive: true,
-  tooltips: {
-    mode: 'x',
-    position: 'nearest',
-    enabled: false
-  },
-  hover: { mode: 'index' },
+  interaction: { mode: 'index', intersect: false },
   scales: {
-    xAxes: [{
-      type: 'time',
-      time: {
-        minUnit: 'second'
-      },
-      gridLines: { color: palette.grid, zeroLineColor: palette.grid },
-      ticks: { fontColor: palette.textMuted, fontFamily: palette.fontBody }
-    }],
-    yAxes: [{
+    x: {
+      type: 'linear',
+      grid: { color: palette.grid },
+      border: { color: palette.grid },
+      ticks: { callback: value => new Date(value).toLocaleTimeString(), color: palette.textMuted, font: { family: palette.fontBody } }
+    },
+    y: {
       stacked: true,
-      gridLines: { color: palette.grid, zeroLineColor: palette.grid },
-      ticks: {
-        callback: v => chartsize(v) + '/s',
-        suggestedMax: 200000,
-        maxTicksLimit: 5,
-        fontColor: palette.textMuted,
-        fontFamily: palette.fontBody
-      }
-    }]
+      suggestedMax: 200000,
+      grid: { color: palette.grid },
+      border: { color: palette.grid },
+      ticks: { callback: value => chartsize(value) + '/s', maxTicksLimit: 5, color: palette.textMuted, font: { family: palette.fontBody } }
+    }
   },
-  legend: {
-    reverse: true,
-    display: true,
-    position: 'bottom',
-    labels: { fontColor: palette.text, fontFamily: palette.fontBody }
+  plugins: {
+    tooltip: { enabled: false, position: 'nearest' },
+    legend: { reverse: true, display: true, position: 'bottom', labels: { color: palette.text, font: { family: palette.fontBody } } }
   }
 })
+
+export function bandwidthTooltip ({ chart, tooltip }, t) {
+  if (!tooltip.opacity || !tooltip.dataPoints?.length) return { show: false }
+  const value = index => Math.abs(tooltip.dataPoints.find(point => point.datasetIndex === index)?.parsed?.y || 0)
+  const rect = chart.canvas.getBoundingClientRect()
+  return { t, show: true, bw: { out: tootltipSize(value(0)), in: tootltipSize(value(1)) }, pos: { left: rect.left + tooltip.caretX, top: rect.top + tooltip.caretY } }
+}
 
 const Tooltip = ({ t, bw, show, pos }) => {
   if (!show) {
@@ -70,7 +61,7 @@ const Tooltip = ({ t, bw, show, pos }) => {
   return (
     <div className='sans-serif absolute pa2 prom-chart-tooltip' style={{
       top: `${pos.top + window.scrollY}px`,
-      left: `${pos.left}px`,
+      left: `${pos.left + window.scrollX}px`,
       transform: 'translateY(calc(-100% - 20px))'
     }}>
       <div className='prom-chart-tooltip-caret' />
@@ -90,7 +81,40 @@ const Tooltip = ({ t, bw, show, pos }) => {
   )
 }
 
-class NodeBandwidthChart extends React.Component {
+// An independent subscribed child updates the tooltip without re-rendering the
+// canvas or resetting its hover state. The portal shares the application's root
+// and is removed with the chart, rather than leaving a separate React root alive.
+export function createTooltipController () {
+  let snapshot = { show: false }
+  const listeners = new Set()
+  return {
+    getSnapshot: () => snapshot,
+    subscribe: listener => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+    set: value => {
+      snapshot = value
+      listeners.forEach(listener => listener())
+    }
+  }
+}
+
+export function TooltipLayer ({ controller }) {
+  const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot)
+  const [container] = useState(() => {
+    const element = document.createElement('div')
+    element.id = 'node_bw_chart'
+    return element
+  })
+  useLayoutEffect(() => {
+    document.body.appendChild(container)
+    return () => container.remove()
+  }, [container])
+  return createPortal(<Tooltip {...snapshot} />, container)
+}
+
+export class NodeBandwidthChart extends React.Component {
   static propTypes = {
     nodeBandwidthChartData: PropTypes.object.isRequired,
     palette: PropTypes.object.isRequired,
@@ -101,20 +125,7 @@ class NodeBandwidthChart extends React.Component {
     animatedPoints: 500 // Only animate for the first 500 points
   }
 
-  // getTooltip adds the tooltip element to the DOM if it doesn't
-  // exist yet and returns the element.
-  getTooltip = (t) => {
-    let tooltip = document.getElementById('node_bw_chart')
-
-    if (!tooltip) {
-      tooltip = document.createElement('div')
-      tooltip.id = 'node_bw_chart'
-      document.body.appendChild(tooltip)
-    }
-
-    ReactDOM.render(<Tooltip t={t} show={false} />, tooltip)
-    return tooltip
-  }
+  tooltipController = createTooltipController()
 
   // Flat series fills from the token palette (webui-dataviz-reskin 1.1), one
   // fill per series. Both series are named in the legend.
@@ -129,6 +140,7 @@ class NodeBandwidthChart extends React.Component {
           borderColor: palette.up,
           backgroundColor: palette.up,
           pointRadius: 2,
+          fill: 'origin',
           cubicInterpolationMode: 'monotone'
         },
         {
@@ -137,21 +149,15 @@ class NodeBandwidthChart extends React.Component {
           borderColor: palette.down,
           backgroundColor: palette.down,
           pointRadius: 2,
+          fill: 'origin',
           cubicInterpolationMode: 'monotone'
         }
       ]
     }
   }
 
-  componentDidMount () {
-    // Setup tooltip
-    this.tooltip = document.createElement('div')
-    this.tooltip.id = 'node_bw_chart'
-    document.body.appendChild(this.tooltip)
-  }
-
   componentDidUpdate () {
-    ReactDOM.render(<Tooltip show={false} />, this.tooltip)
+    this.tooltipController.set({ show: false })
   }
 
   render () {
@@ -161,35 +167,16 @@ class NodeBandwidthChart extends React.Component {
       return null
     }
 
-    const tooltip = this.tooltip
+    const tooltipController = this.tooltipController
     const settings = defaultSettings(palette)
 
     const options = {
       ...settings,
-      tooltips: {
-        ...settings.tooltips,
-        custom: function (model) {
-          const data = { show: true }
-
-          if (model.opacity === 0) {
-            data.show = false
-          } else {
-            data.bw = {
-              out: tootltipSize(Math.abs(model.dataPoints[0].yLabel)),
-              in: tootltipSize(Math.abs(model.dataPoints[1].yLabel))
-            }
-
-            const rect = this._chart.canvas.getBoundingClientRect()
-            data.pos = {
-              left: rect.left + model.caretX,
-              top: rect.top + model.caretY
-            }
-          }
-
-          // I know this isn't a very React-y way of doing this, but there was a simple issue:
-          // re-rendering the tooltip was also re-rendering the chart which then lost its focus
-          // state causing the Tooltip to stick and not disappear.
-          ReactDOM.render(<Tooltip t={t} {...data} />, tooltip)
+      plugins: {
+        ...settings.plugins,
+        tooltip: {
+          ...settings.plugins.tooltip,
+          external: context => tooltipController.set(bandwidthTooltip(context, t))
         }
       },
       animation: {
@@ -202,6 +189,7 @@ class NodeBandwidthChart extends React.Component {
       <div>
         <Title>{t('bandwidthOverTime')}</Title>
         <Line data={this.data()} options={options} />
+        <TooltipLayer controller={this.tooltipController} />
       </div>
     )
   }

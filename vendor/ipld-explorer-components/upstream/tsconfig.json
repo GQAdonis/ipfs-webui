@@ -1,0 +1,59 @@
+{
+  // "extends": "aegir/src/config/tsconfig.aegir.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2021",
+      "esnext"
+    ],
+    "types": [
+      "vite/client",
+      "vite-plugin-svgr/client",
+      "mocha",
+      "jest",
+      "@storybook/types",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "outDir": "dist",
+    "declarationDir": "dist",
+    "jsx": "react-jsx",
+    "rootDir": "."
+  },
+  "include": [
+    "src/**/*",
+    "dev/**/*",
+    "test/**/*"
+  ],
+  "exclude": [
+    "src/**/*.stories.*",
+    "node_modules",
+    "storybook-static",
+    "build",
+    "dist",
+    "vite.config.ts",
+    "package.json"
+  ],
+  "plugins": [
+    {
+      "name": "typescript-plugin-css-modules",
+      "options": {
+        "classnameTransform": "camelCaseOnly"
+      }
+    }
+  ]
+}

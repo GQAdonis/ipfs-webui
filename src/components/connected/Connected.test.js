@@ -3,7 +3,7 @@
 
 import React from 'react'
 import { render, screen, cleanup } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import { initReactI18next } from 'react-i18next'
 import i18n from 'i18next'
 import appEn from '../../../public/locales/en/app.json'

@@ -1,8 +1,8 @@
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 import RemoveModal from './RemoveModal.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Files/Modals',
@@ -34,6 +34,6 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Remove = {}

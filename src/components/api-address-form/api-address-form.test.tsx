@@ -1,27 +1,28 @@
-import React from 'react'
+import { vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
 import i18n from 'i18next'
 
 import ApiAddressForm from './api-address-form'
-import { ContextBridgeProvider } from '../../helpers/context-bridge'
+import { ContextBridgeProvider, contextBridge } from '../../helpers/context-bridge'
 
-jest.mock('../../helpers/context-bridge', () => {
-  const originalModule = jest.requireActual('../../helpers/context-bridge')
+vi.mock('../../helpers/context-bridge', async () => {
+  const originalModule = await vi.importActual<typeof import('../../helpers/context-bridge')>('../../helpers/context-bridge')
   const realContextBridge = originalModule.contextBridge
   const mockContextBridge = {
     ...realContextBridge,
-    setContext: jest.fn((name, value) => {
+    clear: vi.fn(() => realContextBridge.clear()),
+    setContext: vi.fn((name, value) => {
       realContextBridge.setContext(name, value)
     }),
-    getContext: jest.fn((name) => {
+    getContext: vi.fn((name) => {
       return realContextBridge.getContext(name)
     }),
-    subscribe: jest.fn((name, callback) => {
+    subscribe: vi.fn((name, callback) => {
       return realContextBridge.subscribe(name, callback)
     }),
-    hasContext: jest.fn((name) => {
+    hasContext: vi.fn((name) => {
       return realContextBridge.hasContext(name)
     })
   }
@@ -29,7 +30,7 @@ jest.mock('../../helpers/context-bridge', () => {
   return {
     ...originalModule,
     contextBridge: mockContextBridge,
-    useBridgeSelector: jest.fn((contextName) => {
+    useBridgeSelector: vi.fn((contextName) => {
       return realContextBridge.getContext(contextName)
     })
   }
@@ -62,8 +63,8 @@ i18n
 
 // Test utilities
 const renderApiAddressForm = (contextProps: any = {}, validationProps: any = {}) => {
-  const mockDoUpdateIpfsApiAddress = jest.fn()
-  const defaultMockCheckValidAPIAddress = jest.fn().mockReturnValue(true)
+  const mockDoUpdateIpfsApiAddress = vi.fn()
+  const defaultMockCheckValidAPIAddress = vi.fn().mockReturnValue(true)
 
   const finalContextProps = {
     ipfsApiAddress: 'http://127.0.0.1:5001',
@@ -71,9 +72,7 @@ const renderApiAddressForm = (contextProps: any = {}, validationProps: any = {})
     doUpdateIpfsApiAddress: mockDoUpdateIpfsApiAddress,
     ...contextProps
   }
-
-  const { contextBridge } = require('../../helpers/context-bridge')
-  contextBridge.contexts.clear()
+  contextBridge.clear()
   contextBridge.setContext('selectIpfsApiAddress', finalContextProps.ipfsApiAddress)
   contextBridge.setContext('selectIpfsInitFailed', finalContextProps.ipfsInitFailed)
 
@@ -104,7 +103,7 @@ const renderApiAddressForm = (contextProps: any = {}, validationProps: any = {})
 
 describe('ApiAddressForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('initial render', () => {
@@ -128,7 +127,7 @@ describe('ApiAddressForm', () => {
 
     it('disables submit and shows error styling when initial address is invalid', () => {
       const testAddress = 'invalid-address'
-      const mockCheckValidAPIAddress = jest.fn().mockReturnValue(false)
+      const mockCheckValidAPIAddress = vi.fn().mockReturnValue(false)
 
       const { mockCheckValidAPIAddress: mockValidation } = renderApiAddressForm(
         { ipfsApiAddress: testAddress },
@@ -167,6 +166,22 @@ describe('ApiAddressForm', () => {
   })
 
   describe('input validation', () => {
+    it('keeps invalid and unchanged values disabled through both Enter and native submit', () => {
+      const { container, mockDoUpdateIpfsApiAddress } = renderApiAddressForm({}, {
+        checkValidAPIAddress: (address: string) => address.startsWith('http://')
+      })
+      const input = screen.getByLabelText('Kubo RPC API address')
+      fireEvent.keyDown(input, { key: 'Enter' })
+      fireEvent.submit(container.querySelector('form')!)
+      expect(mockDoUpdateIpfsApiAddress).not.toHaveBeenCalled()
+      fireEvent.change(input, { target: { value: 'invalid-address' } })
+      expect(input).toHaveAttribute('aria-invalid', 'true')
+      expect(screen.getByRole('button', { name: /submit/i })).toBeDisabled()
+      fireEvent.keyDown(input, { key: 'Enter' })
+      fireEvent.submit(container.querySelector('form')!)
+      expect(mockDoUpdateIpfsApiAddress).not.toHaveBeenCalled()
+    })
+
     it('shows green border for valid addresses', () => {
       renderApiAddressForm()
 
@@ -184,7 +199,7 @@ describe('ApiAddressForm', () => {
     })
 
     it('toggles red/green styles and disabled state as validation flips', () => {
-      const mockCheckValidAPIAddress = jest.fn()
+      const mockCheckValidAPIAddress = vi.fn()
         .mockReturnValueOnce(true) // Initial valid
         .mockReturnValueOnce(false) // After change to invalid
         .mockReturnValueOnce(true) // After change back to valid
@@ -210,7 +225,7 @@ describe('ApiAddressForm', () => {
 
   describe('submit button state', () => {
     it('disables button for invalid addresses', () => {
-      const mockCheckValidAPIAddress = jest.fn().mockReturnValue(false)
+      const mockCheckValidAPIAddress = vi.fn().mockReturnValue(false)
 
       const { mockCheckValidAPIAddress: mockValidation } = renderApiAddressForm(
         { ipfsApiAddress: 'invalid-address' },
@@ -222,7 +237,7 @@ describe('ApiAddressForm', () => {
     })
 
     it('enables button for valid addresses that differ from current', () => {
-      const mockCheckValidAPIAddress = jest.fn().mockReturnValue(true)
+      const mockCheckValidAPIAddress = vi.fn().mockReturnValue(true)
 
       const { mockCheckValidAPIAddress: mockValidation } = renderApiAddressForm(
         { ipfsApiAddress: 'http://current:5001' },
@@ -285,7 +300,7 @@ describe('ApiAddressForm', () => {
     it('while submitting, additional Enter presses are ignored', async () => {
       let deferredResolve!: () => void
       const pending = new Promise<void>(resolve => { deferredResolve = resolve })
-      const doUpdate = jest.fn().mockImplementation(() => pending)
+      const doUpdate = vi.fn().mockImplementation(() => pending)
 
       renderApiAddressForm({
         doUpdateIpfsApiAddress: doUpdate,
@@ -308,8 +323,7 @@ describe('ApiAddressForm', () => {
     })
 
     it('handles submission when doUpdateIpfsApiAddress is not provided without throwing errors', async () => {
-      const { contextBridge } = require('../../helpers/context-bridge')
-      contextBridge.contexts.clear()
+      contextBridge.clear()
       contextBridge.setContext('selectIpfsApiAddress', 'http://127.0.0.1:5001')
       contextBridge.setContext('selectIpfsInitFailed', false)
       contextBridge.setContext('doUpdateIpfsApiAddress', null)
@@ -339,7 +353,7 @@ describe('ApiAddressForm', () => {
 
   describe('user interactions', () => {
     it('updates input value and validation state on user typing', () => {
-      const mockCheckValidAPIAddress = jest.fn()
+      const mockCheckValidAPIAddress = vi.fn()
         .mockReturnValueOnce(true) // Initial
         .mockReturnValueOnce(false) // After first change
         .mockReturnValueOnce(true) // After second change
@@ -363,7 +377,7 @@ describe('ApiAddressForm', () => {
 
   describe('edge cases', () => {
     it('handles empty string input', () => {
-      const mockCheckValidAPIAddress = jest.fn().mockReturnValue(false)
+      const mockCheckValidAPIAddress = vi.fn().mockReturnValue(false)
 
       const { mockCheckValidAPIAddress: mockValidation } = renderApiAddressForm(
         {},
@@ -378,7 +392,7 @@ describe('ApiAddressForm', () => {
     })
 
     it('handles special characters in URL and validates correctly', () => {
-      const mockCheckValidAPIAddress = jest.fn().mockReturnValue(true)
+      const mockCheckValidAPIAddress = vi.fn().mockReturnValue(true)
 
       const { mockCheckValidAPIAddress: mockValidation } = renderApiAddressForm(
         {},

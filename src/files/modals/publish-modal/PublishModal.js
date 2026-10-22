@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { withTranslation } from 'react-i18next'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { CopyToClipboard } from '../../../components/copy-to-clipboard/CopyToClipboard.js'
 import Button from '../../../components/button/button.tsx'
 import { Modal, ModalActions, ModalBody } from '../../../components/modal/modal'
 import { PublishIcon as Icon, CopyIcon as GlyphCopy, CheckIcon as GlyphTick } from '../../../promethity/icons.js'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../../lib/react-store.js'
 import Radio from '../../../components/radio/radio.js'
 import { buildShareLink, toIpnsBase36 } from '../../../lib/share-link.js'
 import ProgressBar from '../../../components/progress-bar/ProgressBar.js'
 import './PublishModal.css'
 
-export const PublishModal = ({ t, tReady, onLeave, onSubmit, file, ipnsKeys, effectiveShareLinkType, localGatewayUrl, publicGateway, publicSubdomainGateway, className, doFetchIpnsKeys, doUpdateExpectedPublishTime, expectedPublishTime, ...props }) => {
+export const PublishModal = ({ t, tReady, onLeave, onSubmit, file, ipnsKeys, effectiveShareLinkType, localGatewayUrl, publicGateway, publicSubdomainGateway, className = '', doFetchIpnsKeys, doUpdateExpectedPublishTime, expectedPublishTime, ...props }) => {
   const [disabled, setDisabled] = useState(true)
   const [error, setError] = useState(null)
   const [selectedKey, setSelectedKey] = useState({ name: '', id: '' })
@@ -164,10 +164,6 @@ PublishModal.propTypes = {
   t: PropTypes.func.isRequired,
   file: PropTypes.object,
   tReady: PropTypes.bool
-}
-
-PublishModal.defaultProps = {
-  className: ''
 }
 
 export default connect(

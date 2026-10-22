@@ -9,11 +9,13 @@ import { readSetting, writeSetting } from './local-storage.js'
 import { localGatewayToKuboGateway, DEFAULT_KUBO_GATEWAY } from './gateway.js'
 import { contextBridge } from '../helpers/context-bridge'
 import { createSelector } from 'redux-bundler'
+import { isSessionMode, reportUnauthorized } from '../agent-chat/session.js'
+import { apiAddressHasCredential } from '../agent-chat/api-address.js'
 
 /**
  * @typedef {import('kubo-rpc-client').KuboRPCClient} IPFSService
  * @typedef {import('multiformats/cid').CID} CID
- * @typedef {import('kubo-rpc-client/dist/src/files').FilesStatResult} FileStat
+ * @typedef {Awaited<ReturnType<IPFSService['files']['stat']>>} FileStat
  * @typedef {'httpClient'|'jsIpfs'|'windowIpfs'|'webExt'} ProviderName
  * @typedef {Object} Model
  * @property {null|string|HTTPClientOptions} apiAddress
@@ -319,7 +321,7 @@ const selectors = {
 /**
  * @typedef {import('redux-bundler').Actions<typeof actions>} Actions
  * @typedef {Selectors & Actions} Ext
- * @typedef {import('redux-bundler').Context<State, Message, Ext, Extra>} Context
+ * @typedef {import('redux-bundler').Context<State, Message, Selectors & {doInitIpfs: () => Promise<InitResult>, doTryInitIpfs: () => Promise<boolean>}, Extra>} Context
  */
 
 const actions = {
@@ -352,7 +354,7 @@ const actions = {
   },
 
   /**
-   * @returns {function(Context):Promise<boolean>}
+   * @returns {(arg0: Context) => Promise<boolean>}
    */
   doTryInitIpfs: () => async ({ store }) => {
     // There is a code in `bundles/retry-init.js` that reacts to `IPFS_INIT`
@@ -366,7 +368,7 @@ const actions = {
     }
   },
   /**
-   * @returns {function(Context):Promise<InitResult>}
+   * @returns {(arg0: Context) => Promise<InitResult>}
    */
   doInitIpfs: () => perform('IPFS_INIT',
     /**
@@ -413,6 +415,7 @@ const actions = {
           try {
             await last(ipfs.stats.bw())
           } catch (err) {
+            reportUnauthorized(err)
             const error = /** @type {Error} */(err)
             const errorString = error.toString() || error.message || /** @type {string} */(/** @type {unknown} */(error))
             if (!/bandwidth reporter disabled in config/.test(errorString)) {
@@ -435,7 +438,7 @@ const actions = {
       }
     }),
   /**
-   * @returns {function(Context):Promise<void>}
+   * @returns {(arg0: Context) => Promise<void>}
    */
   doStopIpfs: () => async (context) => {
     if (ipfs) {
@@ -446,11 +449,12 @@ const actions = {
 
   /**
    * @param {string} address
-   * @returns {function(Context):Promise<boolean>}
+   * @returns {(arg0: Context) => Promise<boolean>}
    */
   doUpdateIpfsApiAddress: (address) => async (context) => {
     const apiAddress = asAPIOptions(address)
-    if (apiAddress == null) {
+    // Console session mode holds no credential: an address that carries one is refused, not saved.
+    if (apiAddress == null || (isSessionMode() && apiAddressHasCredential(JSON.stringify(apiAddress)))) {
       context.dispatch({ type: ACTIONS.IPFS_API_ADDRESS_INVALID })
       return false
     } else {
@@ -490,7 +494,7 @@ const actions = {
   },
 
   /**
-   * @returns {function(Context):void}
+   * @returns {(arg0: Context) => void}
    */
   doDismissIpfsInvalidAddress: () => (context) => {
     context.dispatch({ type: 'IPFS_API_ADDRESS_INVALID_DISMISS' })
@@ -498,7 +502,7 @@ const actions = {
 
   /**
    * @param {string} path
-   * @returns {function(Context):Promise<FileStat>}
+   * @returns {(arg0: Context) => Promise<FileStat>}
    */
   doGetPathInfo: (path) => async () => {
     if (ipfs) {
@@ -510,7 +514,7 @@ const actions = {
 
   /**
    * @param {CID} cid
-   * @returns {function(Context):Promise<boolean>}
+   * @returns {(arg0: Context) => Promise<boolean>}
    */
   doCheckIfPinned: (cid) => async () => {
     if (ipfs == null) {

@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 // webui-settings-primitives 1.1: Field, Switch and SegmentedControl each wire
 // label, help and error through aria-describedby.
 
@@ -66,7 +67,7 @@ describe('Switch', () => {
   })
 
   it('does not toggle while disabled', () => {
-    const onChange = jest.fn()
+    const onChange = vi.fn()
     const { getByRole } = render(<Switch label='X' checked={false} onChange={onChange} disabled />)
     fireEvent.click(getByRole('switch'))
     expect(onChange).not.toHaveBeenCalled()

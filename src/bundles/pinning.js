@@ -109,7 +109,7 @@ const resumePendingPins = (store) => {
   const interval = setInterval(() => {
     const isReady = store.selectIpfsReady()
     if (isReady) {
-      clearTimeout(interval)
+      clearInterval(interval)
       const pendingPins = store.selectPendingPins()
 
       pendingPins.forEach(pin => {
@@ -118,24 +118,30 @@ const resumePendingPins = (store) => {
       })
     }
   }, 1000)
+  return () => clearInterval(interval)
 }
 
 const intervalFetchPins = (store) => {
-  setInterval(() => {
+  const interval = setInterval(() => {
     const pins = [
       ...store.selectPendingPins(),
       ...store.selectFailedPins()
     ].map(serviceCid => ({ cid: serviceCid.split(':')[1] }))
     store.doFetchRemotePins(pins, true)
   }, PIN_CHECK_INTERVAL)
+  return () => clearInterval(interval)
 }
 
 const pinningBundle = {
   name: 'pinning',
   persistActions: ['UPDATE_REMOTE_PINS', 'DISMISS_REMOTE_PINS', 'CANCEL_PENDING_PINS'],
   init: store => {
-    resumePendingPins(store)
-    intervalFetchPins(store)
+    const stopResume = resumePendingPins(store)
+    const stopFetch = intervalFetchPins(store)
+    return () => {
+      stopResume()
+      stopFetch()
+    }
   },
   reducer: (state, action) => {
     if (action.type === 'UPDATE_REMOTE_PINS') {

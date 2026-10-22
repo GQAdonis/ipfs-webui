@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { connect } from 'redux-bundler-react'
+import { useEffect } from 'react'
+import { connect } from '../lib/react-store.js'
 import LoadableExplorePage from './LoadableExplorePage'
 import LoadableStartExploringPage from './LoadableStartExploringPage'
 import { useExplore, useHelia } from 'ipld-explorer-components/providers'
@@ -14,13 +14,11 @@ const ExplorePageRenderer = ({ routeInfo }) => {
     if (helia == null) {
       doInitHelia()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [helia])
+  }, [helia, doInitHelia])
 
   useEffect(() => {
     setExplorePath(window.location.hash)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url])
+  }, [url, setExplorePath])
 
   if (pattern === '/explore') {
     return <LoadableStartExploringPage />

@@ -1,19 +1,18 @@
 import React from 'react'
 
-import { withKnobs } from '@storybook/addon-knobs'
 import i18n from '../i18n.js'
 import { NavBar } from './NavBar.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'NavBar',
-  decorators: [withKnobs]
+  decorators: []
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = {
   render: () => (

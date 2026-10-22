@@ -22,7 +22,8 @@
     "registered": "{count, plural, one {Registered # tool.} other {Registered # tools.}}",
     "writesCount": "{count, plural, one {# changes your node.} other {# change your node.}}",
     "readOnly": "None of them change your node.",
-    "failed": "{count, plural, one {# could not be registered.} other {# could not be registered.}}"
+    "failed": "{count, plural, one {# could not be registered.} other {# could not be registered.}}",
+    "originRestricted": "Agent writes are unavailable on this page origin. Read-only tools can still be offered when enabled and supported."
   },
   "operator": "To turn WebMCP off for everyone who opens this Web UI, serve it with the response header",
   "dialog": {

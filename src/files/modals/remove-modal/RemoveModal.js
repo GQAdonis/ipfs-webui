@@ -5,9 +5,9 @@ import { TrashIcon } from '../../../promethity/icons.js'
 import Button from '../../../components/button/button.tsx'
 import Checkbox from '../../../components/checkbox/Checkbox.js'
 import { Modal, ModalActions, ModalBody } from '../../../components/modal/modal'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../../lib/react-store.js'
 
-const RemoveModal = ({ t, tReady, onCancel, onRemove, files, foldersCount, filesCount, remotePins, pinningServices, className, ...props }) => {
+export const RemoveModal = ({ t, tReady, onCancel, onRemove, files, foldersCount = 0, filesCount = 0, remotePins, pinningServices, className = '', ...props }) => {
   let context = 'File'
   const count = filesCount + foldersCount
 
@@ -32,9 +32,10 @@ const RemoveModal = ({ t, tReady, onCancel, onRemove, files, foldersCount, files
     })()
   })
 
+  const remoteServiceNames = pinningServices.map(service => service.name)
   const modalData = { count, name: files[0].name }
   const modalTitle = t(`removeModal.title${context}`, modalData)
-  const modalDescription = t(`removeModal.description${context}`, modalData)
+  const modalDescription = t(`removeModal.scopeDescription${context}`, modalData)
 
   const handleLocalPinRemoval = () => setShouldRemoveLocalPin(!shouldRemoveLocalPin)
   const handleRemotePinRemoval = () => setShouldRemoveRemotePin(!shouldRemoveRemotePin)
@@ -46,14 +47,24 @@ const RemoveModal = ({ t, tReady, onCancel, onRemove, files, foldersCount, files
       <ModalBody title={modalTitle} Icon={TrashIcon}>
         <div className='charcoal w-100 center tl'>
           <p>{modalDescription}</p>
+          <p className='f6'>{t('removeModal.mfsRetention')}</p>
           { isLocallyPinned && (<div>
-            <Checkbox className="mr1" checked={shouldRemoveLocalPin} onChange={handleLocalPinRemoval} label={t('removeModal.checkboxRemoveLocalPin')}/>
+            <Checkbox className="mr1" checked={shouldRemoveLocalPin} onChange={handleLocalPinRemoval} label={t('removeModal.checkboxRemoveLocalPinScope')}/>
+            <p className='f6'>{t('removeModal.localPinHelp')}</p>
           </div>
           )}
           { isRemotelyPinned && (<div className='mt1'>
-            <Checkbox className="mr1" checked={shouldRemoveRemotePin} onChange={handleRemotePinRemoval} label={t('removeModal.checkboxUnpinFromServices')}/>
+            <Checkbox className="mr1" checked={shouldRemoveRemotePin} onChange={handleRemotePinRemoval} label={t('removeModal.checkboxUnpinFromServicesScope')}/>
+            <p className='f6'>{t('removeModal.remotePinHelp')}</p>
           </div>
           )}
+          <div className='f6' aria-live='polite'>
+            <p>{t(shouldRemoveLocalPin ? 'removeModal.localPinRequested' : 'removeModal.localPinUnchanged')}</p>
+            {shouldRemoveRemotePin
+              ? <><p>{t(remoteServiceNames.length ? 'removeModal.remoteServicesRequested' : 'removeModal.noRemoteTargets')}</p>
+              {remoteServiceNames.length > 0 ? <ul>{remoteServiceNames.map(name => <li key={name}><code>{name}</code></li>)}</ul> : null}</>
+              : <p>{t('removeModal.remotePinsUnchanged')}</p>}
+          </div>
         </div>
       </ModalBody>
 
@@ -72,12 +83,6 @@ RemoveModal.propTypes = {
   foldersCount: PropTypes.number,
   t: PropTypes.func.isRequired,
   tReady: PropTypes.bool.isRequired
-}
-
-RemoveModal.defaultProps = {
-  className: '',
-  filesCount: 0,
-  foldersCount: 0
 }
 
 export default connect(

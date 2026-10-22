@@ -67,8 +67,8 @@ export type Sorting = {
 }
 
 export type MakeDir = Perform<'FILES_MAKEDIR', Error, void, void>
-export type WriteProgress = { paths: string[], progress: number }
-export type Write = Spawn<'FILES_WRITE', WriteProgress, Error, void, void>
+export type WriteProgress = { entries: {path: string, size: number}[], progress: number, cancellable?: boolean }
+export type Write = Spawn<'FILES_WRITE', WriteProgress, Error, void, { uploadToken: symbol }>
 export type AddByPath = Perform<'FILES_ADDBYPATH', Error, void, void>
 export type BulkCidImport = Perform<'FILES_BULK_CID_IMPORT', Error, void, void>
 export type Move = Perform<'FILES_MOVE', Error, void, void>
@@ -88,6 +88,7 @@ export type ShareLink = Perform<'FILES_SHARE_LINK', Error, ShareLinks, void>
 
 export type Message =
   | { type: 'FILES_CLEAR_ALL' }
+  | { type: 'FILES_CANCEL_UPLOAD', token: symbol }
   | { type: 'FILES_DISMISS_ERRORS' }
   | { type: 'FILES_UPDATE_SORT', payload: Sorting }
   | Perform<'FILES_FETCH', Error, PageContent, void>
@@ -116,6 +117,7 @@ export interface PendingJob<M, I> extends JobInfo {
   status: 'Pending'
   init: I
   message?: M
+  cancelRequested?: boolean
 }
 
 export interface FailedJob extends JobInfo {
@@ -129,6 +131,11 @@ export interface FinishedJob<T> extends JobInfo {
   value: T
   end: number
 }
+
+export interface CancelledJob extends JobInfo {
+  status: 'Cancelled'
+  end: number
+}
 export type Model = {
   pageContent: null | PageContent
   pins: string[]
@@ -137,6 +144,7 @@ export type Model = {
 
   pending: PendingJob<any, any>[]
   finished: FinishedJob<any>[]
+  cancelled: CancelledJob[]
   failed: FailedJob[]
 }
 

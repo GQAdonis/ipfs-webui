@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 /**
@@ -11,11 +11,14 @@ const Portal = ({ id, children, zIndex }) => {
   const el = useRef(document.getElementById(id) || document.createElement('div'))
   const [dynamic] = useState(!el.current.parentElement)
 
-  useEffect(() => {
+  const [ready, setReady] = useState(!dynamic)
+
+  useLayoutEffect(() => {
     if (dynamic) {
       el.current.id = id
       zIndex && (el.current.style.zIndex = String(zIndex))
       document.body.appendChild(el.current)
+      setReady(true)
     }
     return () => {
       if (dynamic && el.current.parentElement) {
@@ -24,6 +27,6 @@ const Portal = ({ id, children, zIndex }) => {
       }
     }
   }, [dynamic, id, zIndex])
-  return createPortal(children, el.current)
+  return ready ? createPortal(children, el.current) : null
 }
 export default memo(Portal)

@@ -1,6 +1,6 @@
 import React from 'react'
 import NetworkTrafficComponent from './NetworkTraffic.js'
-import { Provider } from 'redux-bundler-react'
+import { Provider } from '../lib/react-store.js'
 import { composeBundlesRaw } from 'redux-bundler'
 
 const getStore = composeBundlesRaw({
@@ -33,7 +33,7 @@ const setRandomUpdateInterval = (intervalSections = 1000) => {
 }
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Status/NetworkTraffic',
@@ -80,7 +80,7 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const NetworkTraffic = {
   args: {

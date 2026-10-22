@@ -6,7 +6,7 @@
  * 2. enabling transport via ipfs config Swarm.Transports.Network.WebTransport --json true
  *
  * Run the tests with
- *    KUBO_PORT_2033_TEST=5001 npm run test:unit -- --runTestsByPath "test/kubo-webtransport.test.js" --env=./custom-jest-env.js
+ *    KUBO_PORT_2033_TEST=5001 npm run test:unit -- --runTestsByPath "test/kubo-webtransport.test.js" --env=./custom-vi-env.js
  */
 describe.skip('identity.js', function () {
   /**
@@ -22,7 +22,7 @@ describe.skip('identity.js', function () {
       21 |       console.log('ipfsBin: ', ipfsBin)
       22 |       /**
 
-      at Runtime.linkAndEvaluateModule (node_modules/jest-cli/node_modules/jest-runtime/build/index.js:779:5)
+      at Runtime.linkAndEvaluateModule (node_modules/vi-cli/node_modules/vi-runtime/build/index.js:779:5)
       at src/bundles/identity.test.js:19:36
    */
   describe('Kubo webtransport fix test', function () {

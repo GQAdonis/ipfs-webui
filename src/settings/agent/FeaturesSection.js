@@ -13,6 +13,7 @@ import { getStatus as getWebMcpStatus, subscribe as subscribeWebMcpStatus } from
 import { useStore } from '../../webmcp/use-store.js'
 import { getDesktopConfirmSwitch } from './core/desktop-client.js'
 import { useAgentSettings } from './AgentSettings.js'
+import { PresentationPreferences } from './PresentationPreferences.js'
 
 /**
  * What WebMCP really did, in the words of the webmcp namespace. Never claims
@@ -24,6 +25,7 @@ import { useAgentSettings } from './AgentSettings.js'
 function webMcpStatusText (tw, status) {
   switch (status.state) {
     case 'unavailable': return tw('status.unavailable')
+    case 'origin-restricted': return tw('status.originRestricted')
     case 'waiting': return tw('status.waiting')
     case 'registered': {
       const parts = [
@@ -198,6 +200,7 @@ export const FeaturesSection = () => {
         <p className='pm-help as-lede'>{t('features.lede')}</p>
         <ChatFeature />
         <SearchFeature />
+        <PresentationPreferences />
         <WebMcpFeature />
         <DesktopConfirmFeature />
         <PolicyDecision subject={t('policy.subject')} decision='ask' word={t('policy.word')}>

@@ -1,0 +1,399 @@
+--- a/src/components/ExplorePage.stories.tsx
++++ b/src/components/ExplorePage.stories.tsx
+@@ -1,4 +1,3 @@
+-import React from 'react'
+ import i18n from '../i18n-decorator.tsx'
+ import { ExploreProvider, ExploreState } from '../providers/explore.tsx'
+ import { HeliaProvider } from '../providers/helia.tsx'
+--- a/src/components/StartExploringPage.stories.tsx
++++ b/src/components/StartExploringPage.stories.tsx
+@@ -1,4 +1,3 @@
+-import React from 'react'
+ import i18n from '../i18n-decorator'
+ import StartExploringPage from './StartExploringPage'
+ import { Meta } from '@storybook/react'
+--- a/src/components/cid/Cid.stories.tsx
++++ b/src/components/cid/Cid.stories.tsx
+@@ -1,4 +1,3 @@
+-import React from 'react'
+ import Cid from './Cid'
+ import { CID } from 'multiformats/cid'
+ import { Meta, StoryObj } from '@storybook/react'
+@@ -18,30 +17,27 @@
+ export const CidV0: Story = {
+   name: 'CID v0',
+   args: {
+-    value: CID.parse('QmYPNmahJAvkMTU6tDx5zvhEkoLzEFeTDz6azDCSNqzKkW'),
++    value: CID.parse('QmYPNmahJAvkMTU6tDx5zvhEkoLzEFeTDz6azDCSNqzKkW')
+   }
+ }
+-
+ 
+ export const CidV1: Story = {
+   name: 'CID v1',
+   args: {
+-    value: CID.parse('zb2rhZMC2PFynWT7oBj7e6BpDpzge367etSQi6ZUA81EVVCxG'),
+-  },
++    value: CID.parse('zb2rhZMC2PFynWT7oBj7e6BpDpzge367etSQi6ZUA81EVVCxG')
++  }
+ }
+-
+ 
+ export const CidV1Sha3: Story = {
+   name: 'CID v1 sha3',
+   args: {
+-    value: CID.parse('zB7NbGN5wyfSbNNNwo3smZczHZutiWERdvWuMcHXTj393RnbhwsHjrP7bPDRPA79YWPbS69cZLWXSANcwUMmk4Rp3hP9Y'),
++    value: CID.parse('zB7NbGN5wyfSbNNNwo3smZczHZutiWERdvWuMcHXTj393RnbhwsHjrP7bPDRPA79YWPbS69cZLWXSANcwUMmk4Rp3hP9Y')
+   }
+ }
+-
+ 
+ export const ShortestCid: Story = {
+   name: 'Shortest CID',
+   args: {
+-    value: CID.parse('bafkqaaik'),
++    value: CID.parse('bafkqaaik')
+   }
+ }
+--- a/src/components/cid-info/CidInfo.stories.tsx
++++ b/src/components/cid-info/CidInfo.stories.tsx
+@@ -1,4 +1,3 @@
+-import React from 'react'
+ import i18n from '../../i18n-decorator'
+ import CidInfo from './CidInfo'
+ 
+@@ -8,7 +7,7 @@
+ const meta = {
+   title: 'CID Info',
+   component: CidInfo,
+-  decorators: [i18n],
++  decorators: [i18n]
+   // render: () => (
+   //   <CidInfo />
+   // )
+--- a/src/components/cid-info/decode-cid.ts
++++ b/src/components/cid-info/decode-cid.ts
+@@ -41,5 +41,6 @@
+     }
+   } catch (err) {
+     console.error('Failed to decode CID', err)
++    return undefined
+   }
+ }
+--- a/src/components/error/ErrorBoundary.tsx
++++ b/src/components/error/ErrorBoundary.tsx
+@@ -10,7 +10,7 @@
+     fallback: ErrorIcon
+   }
+ 
+-  componentDidCatch (error: Error, info: React.ErrorInfo): void {
++  componentDidCatch (error: Error, _info: React.ErrorInfo): void {
+     this.setState({ hasError: true })
+     console.error(error)
+   }
+--- a/src/components/explore/IpldCarExploreForm.stories.tsx
++++ b/src/components/explore/IpldCarExploreForm.stories.tsx
+@@ -1,4 +1,3 @@
+-import React from 'react'
+ import i18n from '../../i18n-decorator.tsx'
+ import { ExploreProvider } from '../../providers/explore.tsx'
+ import { HeliaProvider } from '../../providers/helia.tsx'
+--- a/src/components/explore/IpldCarExploreForm.tsx
++++ b/src/components/explore/IpldCarExploreForm.tsx
+@@ -15,7 +15,7 @@
+     evt.preventDefault()
+   }
+ 
+-  const handleOnChange = useCallback((evt: ChangeEvent<HTMLInputElement>): void => {
++  const handleOnChange = useCallback((_evt: ChangeEvent<HTMLInputElement>): void => {
+     // Change the state.
+     const imageFileLoader = document.getElementById('car-loader-image') as HTMLImageElement | null
+     if (imageFileLoader == null) {
+--- a/src/components/explore/IpldExploreForm.stories.tsx
++++ b/src/components/explore/IpldExploreForm.stories.tsx
+@@ -1,4 +1,3 @@
+-import React from 'react'
+ import i18n from '../../i18n-decorator.tsx'
+ import { ExploreProvider } from '../../providers/explore.tsx'
+ import { HeliaProvider } from '../../providers/helia.tsx'
+--- a/src/components/graph/IpldGraph.stories.tsx
++++ b/src/components/graph/IpldGraph.stories.tsx
+@@ -1,5 +1,4 @@
+-import { action } from '@storybook/addon-actions'
+-import React from 'react'
++import { action } from 'storybook/actions'
+ import dagNodeD from '../object-info/fixtures/object-info-0-links.json'
+ import dagNodeB from '../object-info/fixtures/object-info-36-links.json'
+ import dagNodeA from '../object-info/fixtures/object-info-8-links.json'
+@@ -13,7 +12,7 @@
+   component: IpldGraphCytoscape,
+   // decorators: [i18n],
+   render: () => (
+-    <IpldGraphCytoscape />
++    <IpldGraphCytoscape path={dagNodeA.cid} links={dagNodeA.links} />
+   )
+ }
+ 
+--- a/src/components/graph/IpldGraph.tsx
++++ b/src/components/graph/IpldGraph.tsx
+@@ -5,7 +5,7 @@
+   links: string[]
+ }
+ 
+-const IpldGraph: React.FC<IpldGraphProps> = ({ className, root, links }) => {
++const IpldGraph: React.FC<IpldGraphProps> = ({ className }) => {
+   const cls = `tc ma4 ${className}`
+   return (
+     <div className={cls}>
+--- a/src/components/graph/IpldGraphCytoscape.tsx
++++ b/src/components/graph/IpldGraphCytoscape.tsx
+@@ -72,7 +72,7 @@
+     this.state = { truncatedLinks: [] }
+   }
+ 
+-  static getDerivedStateFromProps (props: IpldGraphCytoscapeProps, state: IpldGraphCytoscapeState): IpldGraphCytoscapeState {
++  static getDerivedStateFromProps (props: IpldGraphCytoscapeProps, _state: IpldGraphCytoscapeState): IpldGraphCytoscapeState {
+     // TODO: Show that links have been truncated.
+     return {
+       truncatedLinks: props.links?.slice(0, 100) ?? []
+@@ -156,7 +156,7 @@
+     }
+   }
+ 
+-  makeLink ({ source, target, path }: any, index: number): any {
++  makeLink ({ source, target }: any, index: number): any {
+     return {
+       group: 'edges',
+       data: {
+--- a/src/components/graph-crumb/GraphCrumb.stories.tsx
++++ b/src/components/graph-crumb/GraphCrumb.stories.tsx
+@@ -1,7 +1,6 @@
+-import React, { useState } from 'react'
+ import GraphCrumb, { PathBoundary } from './GraphCrumb'
+ import { CID } from 'multiformats/cid'
+-import { Meta, StoryObj } from '@storybook/react/*'
++import type { Meta, StoryObj } from '@storybook/react-vite'
+ 
+ const meta: Meta<typeof GraphCrumb> = {
+   title: 'IPLD Graph Crumbs',
+@@ -9,7 +8,7 @@
+   args: {
+     className: 'ma3',
+     pathBoundaries: []
+-  },
++  }
+ }
+ export default meta
+ 
+@@ -18,7 +17,7 @@
+ export const SinglePath: Story = {
+   name: 'single path',
+   args: {
+-    cid: CID.parse("zdpuAs8sJjcmsPUfB1bUViftCZ8usnvs2cXrPH6MDyT4z1111"),
++    cid: CID.parse('zdpuAs8sJjcmsPUfB1bUViftCZ8usnvs2cXrPH6MDyT4z1111')
+   }
+ }
+ 
+@@ -46,7 +45,7 @@
+         source: CID.parse('zdpuAs8sJjcmsPUfB1bUViftCZ8usnvs2cXrPH6MDyT4z4444'),
+         target: CID.parse('zdpuAs8sJjcmsPUfB1bUViftCZ8usnvs2cXrPH6MDyT4z5555'),
+         path: 'avatar.jpg'
+-      },
++      }
+     ]
+   }
+ }
+@@ -56,16 +55,15 @@
+   name: 'deep path with invalid CID source',
+   args: {
+     ...DeepPath.args,
+-    // @ts-expect-error - invalid CID
+     pathBoundaries: (DeepPath.args?.pathBoundaries as PathBoundary[]).map((b) => {
+-        if (b.path === 'avatar.jpg') {
+-          return {
+-            ...b,
+-            source: 'QmHash1111',
+-          }
++      if (b.path === 'avatar.jpg') {
++        return {
++          ...b,
++          source: 'QmHash1111'
+         }
+-        return b
+-      }),
++      }
++      return b
++    })
+   }
+ }
+ 
+@@ -74,7 +72,6 @@
+   name: 'deep path with all invalid source CIDs',
+   args: {
+     ...DeepPathWithInvalidCid.args,
+-      // @ts-expect-error - invalid CIDs
+     pathBoundaries: (DeepPathWithInvalidCid.args?.pathBoundaries as PathBoundary[]).map((b) => ({
+       source: 'QmHash1111',
+       target: b.target,
+@@ -82,7 +79,6 @@
+     }))
+   }
+ }
+-
+ 
+ export const TooDeepPath: Story = {
+   name: 'too deep path',
+@@ -93,7 +89,7 @@
+       pathBoundaries.push({
+         path: `favourites${suffix}`,
+         source: CID.parse(`zdpuAs8sJjcmsPUfB1bUViftCZ8usnvs2cXrPH6MDyT4z${suffix}`),
+-        target: CID.parse(`zdpuAs8sJjcmsPUfB1bUViftCZ8usnvs2cXrPH6MDyT4z${suffix}`),
++        target: CID.parse(`zdpuAs8sJjcmsPUfB1bUViftCZ8usnvs2cXrPH6MDyT4z${suffix}`)
+       })
+     }
+     return <GraphCrumb cid={CID.parse('zdpuAs8sJjcmsPUfB1bUViftCZ8usnvs2cXrPH6MDyT4z1111')} pathBoundaries={pathBoundaries} />
+--- a/src/components/graph-crumb/graph-crumb.test.tsx
++++ b/src/components/graph-crumb/graph-crumb.test.tsx
+@@ -2,7 +2,6 @@
+ /* global describe expect */
+ import { render, screen } from '@testing-library/react'
+ import { CID } from 'multiformats/cid'
+-import React from 'react'
+ import '@testing-library/jest-dom'
+ import GraphCrumb, { type PathBoundary } from './GraphCrumb'
+ 
+--- a/src/components/loader/component-loader.stories.tsx
++++ b/src/components/loader/component-loader.stories.tsx
+@@ -1,4 +1,3 @@
+-import React from 'react'
+ import ComponentLoader from './component-loader.js'
+ 
+ /**
+--- a/src/components/object-info/ObjectInfo.stories.tsx
++++ b/src/components/object-info/ObjectInfo.stories.tsx
+@@ -1,5 +1,4 @@
+-import { action } from '@storybook/addon-actions'
+-import React from 'react'
++import { action } from 'storybook/actions'
+ import i18n from '../../i18n-decorator'
+ import ObjectInfo from './ObjectInfo'
+ import dagNodeC from './fixtures/object-info-1240-links.json'
+@@ -12,7 +11,7 @@
+ const meta = {
+   title: 'IPLD Node Info',
+   component: ObjectInfo,
+-  decorators: [i18n],
++  decorators: [i18n]
+   // render: () => (
+   //   <ObjectInfo />
+   // )
+@@ -24,7 +23,7 @@
+         className="ma2"
+         cid={dagNodeA.cid}
+         size={BigInt(dagNodeA.size)}
+-        links={dagNodeA.links}
++        links={dagNodeA.links.map((link, index) => ({ ...link, size: BigInt(link.size), index }))}
+         // @ts-expect-error - data is not properly typed
+         data={dagNodeA.data}
+         type="dag-pb"
+@@ -43,7 +42,7 @@
+         className="ma2"
+         cid={dagNodeB.cid}
+         size={BigInt(dagNodeB.size)}
+-        links={dagNodeB.links}
++        links={dagNodeB.links.map((link, index) => ({ ...link, size: BigInt(link.size), index }))}
+         // @ts-expect-error - data is not properly typed
+         data={dagNodeB.data}
+         type="dag-pb"
+@@ -62,7 +61,7 @@
+         className="ma2"
+         cid={dagNodeC.cid}
+         size={BigInt(dagNodeC.size)}
+-        links={dagNodeC.links}
++        links={dagNodeC.links.map((link, index) => ({ ...link, size: BigInt(link.size), index }))}
+         // @ts-expect-error - data is not properly typed
+         data={dagNodeC.data}
+         type="dag-pb"
+@@ -94,4 +93,3 @@
+ identityCID.story = {
+   name: 'identity CID'
+ }
+-
+--- a/src/components/object-info/keyboard-inspector.tsx
++++ b/src/components/object-info/keyboard-inspector.tsx
+@@ -28,6 +28,7 @@
+     } else if (item.getAttribute('aria-expanded') === 'true') (item.firstElementChild as HTMLElement)?.click()
+     else focus(item.parentElement?.closest<HTMLElement>('[role="treeitem"]'))
+   }
++  // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex -- A single focus entry delegates keyboard intent to react-inspector's existing treeitems.
+   return <div role='group' aria-label={label} tabIndex={0} onKeyDown={onKeyDown} onFocus={event => {
+     if (event.target === event.currentTarget) focus(event.currentTarget.querySelector<HTMLElement>('[role="treeitem"]'))
+   }}>{children}</div>
+--- a/src/components/object-info/links-table.tsx
++++ b/src/components/object-info/links-table.tsx
+@@ -122,6 +122,7 @@
+       container.addEventListener('scroll', handleScroll)
+       return () => { container.removeEventListener('scroll', handleScroll) }
+     }
++    return undefined
+   }, [handleScroll])
+ 
+   useEffect(() => {
+--- a/src/lib/hash-importer.ts
++++ b/src/lib/hash-importer.ts
+@@ -56,7 +56,7 @@
+         name: 'sha1',
+         code,
+         encode: async (data: Uint8Array): Promise<Uint8Array> => {
+-          const hashBuffer = await globalThis.crypto.subtle.digest('SHA-1', data)
++          const hashBuffer = await globalThis.crypto.subtle.digest('SHA-1', new Uint8Array(data))
+           return new Uint8Array(hashBuffer)
+         }
+       }))
+--- a/src/lib/normalise-dag-node.ts
++++ b/src/lib/normalise-dag-node.ts
+@@ -9,6 +9,7 @@
+ import type { PBLink, PBNode } from '@ipld/dag-pb'
+ 
+ function isDagPbNode (node: dagNode | PBNode, cid: string): node is PBNode {
++  void node
+   const code = getCodeOrNull(cid)
+   return code === dagPb.code
+ }
+--- a/src/lib/tours.tsx
++++ b/src/lib/tours.tsx
+@@ -1,5 +1,4 @@
+ import { type TFunction } from 'i18next'
+-import React from 'react'
+ import { type Step } from 'react-joyride'
+ 
+ export const projectsTour = {
+--- a/src/providers/explore.tsx
++++ b/src/providers/explore.tsx
+@@ -94,7 +94,8 @@
+ 
+ export const ExploreProvider = ({ children, state, explorePathPrefix = '#/explore' }: ExploreProviderProps): React.ReactNode => {
+   const [exploreState, setExploreState] = useState<ExploreState>(() => ({
+-    ...defaultState, ...state,
++    ...defaultState,
++    ...state,
+     path: processPath(state?.path === undefined ? window.location.hash : state.path, explorePathPrefix)
+   }))
+   const { helia } = useHelia()
+@@ -157,10 +158,12 @@
+       throw new Error('setExplorePath should only be used to update the state, not the URL. If you are using a routing library that doesn\'t allow you to listen to hashchange events, ensure the URL is updated prior to calling setExplorePath.')
+     }
+     const newPath = processPath(path, explorePathPrefix)
+-    setExploreState((exploreState) => exploreState.path === newPath ? exploreState : ({
+-      ...defaultState,
+-      path: newPath
+-    }))
++    setExploreState((exploreState) => exploreState.path === newPath
++      ? exploreState
++      : ({
++          ...defaultState,
++          path: newPath
++        }))
+   }, [explorePathPrefix])
+ 
+   const doExploreLink = useCallback((link: LinkObject): void => {

@@ -1,6 +1,6 @@
 import React from 'react'
 import { render } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import * as icons from './icons.js'
 
 describe('promethity icons (M11)', () => {

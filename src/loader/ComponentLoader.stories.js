@@ -2,14 +2,14 @@ import React from 'react'
 import ComponentLoader from './ComponentLoader.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'ComponentLoader'
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = {
   render: () => (

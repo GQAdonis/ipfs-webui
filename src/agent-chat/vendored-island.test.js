@@ -1,9 +1,11 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import { dirname as testDirname, join } from 'node:path'
 // agent-chat-island-integration 1.4: the vendored island in public/agent-chat/ is exactly what
 // MANIFEST.json records, and the manifest names every file in the folder.
 
 import { createHash } from 'node:crypto'
 import { readFileSync, readdirSync } from 'node:fs'
-import { join } from 'node:path'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 const dir = join(__dirname, '../../public/agent-chat')
 const manifest = JSON.parse(readFileSync(join(dir, 'MANIFEST.json'), 'utf8'))

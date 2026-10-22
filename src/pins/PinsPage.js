@@ -1,6 +1,5 @@
 import React from 'react'
-import { Helmet } from 'react-helmet'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
 import PinsStatuses from './PinsStatuses.js'
 
@@ -16,9 +15,9 @@ import PinsStatuses from './PinsStatuses.js'
 const PinsPage = ({ pendingPins, failedPins, completedPins, doDismissCompletedPin, doDismissFailedPin, doCancelPendingPin }) => {
   return (
     <div data-id='PinsPage' className='mw9 center'>
-      <Helmet>
+      <>
         <title>Pins Status</title>
-      </Helmet>
+      </>
 
       <PinsStatuses
         pendingPins={pendingPins}

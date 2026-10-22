@@ -1,8 +1,7 @@
 import React from 'react'
-import { Helmet } from 'react-helmet'
 import { withTranslation, Trans } from 'react-i18next'
-import { connect } from 'redux-bundler-react'
-import ReactJoyride from 'react-joyride'
+import { connect } from '../lib/react-store.js'
+import ReactJoyride from '../components/tour/Tour.js'
 import { IdentityProvider } from '../contexts/identity-context.jsx'
 import StatusConnected from './StatusConnected.js'
 import BandwidthStatsDisabled from './BandwidthStatsDisabled.js'
@@ -32,9 +31,9 @@ const StatusPage = ({
 }) => {
   return (
     <div data-id='StatusPage' className='mw9 center'>
-      <Helmet>
+      <>
         <title>{titleWithBrand(t('title'))}</title>
-      </Helmet>
+      </>
       <Box className='pa3 joyride-status-node' style={{ minHeight: 0 }}>
         <div className='flex'>
           <div className='flex-auto'>

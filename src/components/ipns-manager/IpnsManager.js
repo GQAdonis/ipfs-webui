@@ -1,8 +1,10 @@
+import AutoSizer from '../auto-sizer/AutoSizer.js'
 import React, { Fragment, useState, useRef, useMemo, useEffect } from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { sortByProperty } from '../../lib/sort.js'
 import { getLocalContentLink, toIpnsBase36 } from '../../lib/share-link.js'
-import { AutoSizer, Table, Column, SortDirection } from 'react-virtualized'
+import { Table, Column, SortDirection } from 'react-virtualized'
+import { useTranslation } from 'react-i18next'
 
 // Components
 import Button from '../button/button.tsx'
@@ -25,7 +27,7 @@ const AutoOptionsCell = ({ t, name, showRenameKeyModal, showRemoveKeyModal }) =>
 )
 
 const OptionsCell = ({ t, name, showRenameKeyModal, showRemoveKeyModal }) => {
-  const buttonRef = useRef()
+  const buttonRef = useRef(null)
   const [isContextVisible, setContextVisibility] = useState(false)
 
   const handle = fn => () => {
@@ -35,7 +37,7 @@ const OptionsCell = ({ t, name, showRenameKeyModal, showRemoveKeyModal }) => {
 
   return (
     <div>
-      <button className="button-inside-focus" onClick={() => setContextVisibility(true)} ref={buttonRef} aria-label={t('showOptions')}>
+      <button className="button-inside-focus" onClick={() => setContextVisibility(true)} ref={buttonRef} aria-label={`${t('showOptions')}: ${name}`}>
         <GlyphDots width={24} className='fill-gray-muted hover-fill-gray transition-all'/>
       </button>
       <ContextMenu className="pv2 ph1" style={{ zIndex: 1001 }} visible={isContextVisible}
@@ -51,7 +53,8 @@ const OptionsCell = ({ t, name, showRenameKeyModal, showRemoveKeyModal }) => {
   )
 }
 
-export const IpnsManager = ({ t, ipfsReady, doFetchIpnsKeys, doGenerateIpnsKey, doRenameIpnsKey, doRemoveIpnsKey, localGatewayUrl, publicGateway, shareLinkType, ipnsKeys }) => {
+export const IpnsManager = ({ t, ipfsReady, doFetchIpnsKeys, doGenerateIpnsKey, doRenameIpnsKey, doRemoveIpnsKey, localGatewayUrl, publicGateway, shareLinkType, ipnsKeys = [], ipnsKeysStatus = 'idle' }) => {
+  const { i18n } = useTranslation()
   const [isGenerateKeyModalOpen, setGenerateKeyModalOpen] = useState(false)
   const showGenerateKeyModal = () => setGenerateKeyModalOpen(true)
   const hideGenerateKeyModal = () => setGenerateKeyModalOpen(false)
@@ -76,8 +79,19 @@ export const IpnsManager = ({ t, ipfsReady, doFetchIpnsKeys, doGenerateIpnsKey, 
   })
 
   const sortedKeys = useMemo(() =>
-    (ipnsKeys || []).sort(sortByProperty(sortSettings.sortBy, sortSettings.sortDirection === SortDirection.ASC ? 1 : -1)),
+    [...(ipnsKeys || [])].sort(sortByProperty(sortSettings.sortBy, sortSettings.sortDirection === SortDirection.ASC ? 1 : -1)),
   [ipnsKeys, sortSettings.sortBy, sortSettings.sortDirection])
+
+  const hasCurrentKeys = ipfsReady && ipnsKeysStatus === 'ready' && sortedKeys.length > 0
+  const statusText = !ipfsReady
+    ? t('app:status.disconnectedShort')
+    : ipnsKeysStatus === 'loading'
+      ? t('app:terms.loading')
+      : ipnsKeysStatus === 'error'
+        ? t('errors.failedToFetch')
+        : ipnsKeysStatus === 'ready'
+          ? new Intl.NumberFormat(i18n.resolvedLanguage || i18n.language || undefined).format(0)
+          : t('app:terms.unknown')
 
   // Local gateway link honoring the Share Link type from Settings (subdomain
   // origin when chosen), falling back to the public gateway, or no link at all.
@@ -96,9 +110,12 @@ export const IpnsManager = ({ t, ipfsReady, doFetchIpnsKeys, doGenerateIpnsKey, 
     <Fragment>
       <div className="mv4 pinningManager">
         <div className='ph1 ph3-l flex items-center bg-white lh-copy charcoal f6 fw5'>
-          <AutoSizer disableHeight>
+          {hasCurrentKeys
+            ? <AutoSizer disableHeight>
             {({ width }) => (
               <Table
+                aria-label={t('ipnsPublishingKeys.title')}
+                containerRole='presentation'
                 className='tl fw4 w-100 f6'
                 headerClassName='gray ttc fw4 f6 ph2'
                 width={width}
@@ -136,6 +153,9 @@ export const IpnsManager = ({ t, ipfsReady, doFetchIpnsKeys, doGenerateIpnsKey, 
                   }} />
                 <Column
                   dataKey='options'
+                  label={t('showOptions')}
+                  headerRenderer={() => <span className='clip'>{t('showOptions')}</span>}
+                  disableSort
                   width={width * 0.1}
                   flexShrink={1}
                   cellRenderer={({ rowData }) => <AutoOptionsCell t={t} name={rowData.name} showRenameKeyModal={showRenameKeyModal} showRemoveKeyModal={showRemoveKeyModal} />}
@@ -143,6 +163,9 @@ export const IpnsManager = ({ t, ipfsReady, doFetchIpnsKeys, doGenerateIpnsKey, 
               </Table>
             )}
           </AutoSizer>
+            : <p role='status' aria-label={t('ipnsPublishingKeys.title')} aria-atomic='true' className='fw4'>
+            {t('ipnsPublishingKeys.title')}: {statusText}
+          </p>}
         </div>
 
         <div className='flex justify-end w-100 mt2'>
@@ -190,13 +213,10 @@ export const IpnsManager = ({ t, ipfsReady, doFetchIpnsKeys, doGenerateIpnsKey, 
   )
 }
 
-IpnsManager.defaultProps = {
-  ipnsKeys: []
-}
-
 export default connect(
   'selectIpfsReady',
   'selectIpnsKeys',
+  'selectIpnsKeysStatus',
   'selectLocalGatewayUrl',
   'selectPublicGateway',
   'selectShareLinkType',

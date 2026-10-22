@@ -1,12 +1,12 @@
 import { cmpVersionStrings } from './compare-version-strings'
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals'
-import { Spied } from 'jest-mock'
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
+import type { MockInstance } from 'vitest'
 
 describe('cmpVersionStrings', () => {
-  let consoleWarnSpy: Spied<typeof console.warn>
+  let consoleWarnSpy: MockInstance<typeof console.warn>
 
   beforeEach(() => {
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
   })
 
   afterEach(() => {

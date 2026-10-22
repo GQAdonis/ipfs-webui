@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
 import GatewayForm from '../gateway-form/GatewayForm.js'
 

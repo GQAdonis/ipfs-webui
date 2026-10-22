@@ -33,7 +33,7 @@ const openShareLinkInput = async (page) => {
   await expect(row).toBeVisible({ timeout: 30000 })
   await files.contextMenuButton(page, FILENAME).click()
   await files.contextMenuItem(page, 'Share link').click()
-  return page.locator('div[role="dialog"] input[readonly]')
+  return page.getByRole('dialog').locator('input[readonly]')
 }
 
 test.describe.serial('Share Link types', () => {

@@ -1,17 +1,17 @@
 import React from 'react'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 
 import Button from './button'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Button'
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Colors = () => (
   <div>

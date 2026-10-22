@@ -1,3 +1,5 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import { dirname as testDirname } from 'node:path'
 // Round 5 correction L4: each control on a Files row has its own accessible
 // name. The checkbox selects, the pin button pins or unpins, the options button
 // opens the menu; none of them reuses another's label.
@@ -5,6 +7,7 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import filesEn from '../../../public/locales/en/files.json'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 const read = (f) => readFileSync(join(__dirname, f), 'utf8')
 

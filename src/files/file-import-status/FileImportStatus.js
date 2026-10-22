@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useCallback } from 'react'
+import React, { useMemo, useState, useCallback, useId, useRef } from 'react'
 import { humanSize } from '../../lib/files.js'
 import PropTypes from 'prop-types'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
 // Icons
 import { GenericFileIcon as DocumentIcon, FolderIcon, ExpandChevronIcon as GlyphSmallArrows, CheckIcon as GlyphTick, CloseIcon as GlyphCancel, CloseIcon as GlyphSmallCancel } from '../../promethity/icons.js'
@@ -9,8 +9,8 @@ import './FileImportStatus.css'
 import ProgressBar from '../../components/progress-bar/ProgressBar.js'
 import { ACTIONS } from '../../bundles/files/consts.js'
 
-const Import = (job, t) =>
-  [...groupByPath(job?.message?.entries || new Map()).values()].map(item => (
+const Import = (job, t, cancelUpload, toggleRef) =>
+  [...groupByPath(job?.message?.entries || new Map()).values()].map((item, index) => (
     <li className="flex w-100 items-center f6 charcoal" key={item.path}>
       {viewIcon(item)}
       <span className="fileImportStatusName truncate">{item.path}</span>
@@ -18,7 +18,19 @@ const Import = (job, t) =>
         { item.entries && (<span> { t('filesImportStatus.count', { count: item.entries.length }) } | </span>) }
         <span className='ml2'>{ humanSize(item.size) }</span>
       </span>
-      {viewImportStatus(job, item.progress)}
+      {viewImportStatus(job)}
+      {job.status === 'Cancelled' && <span className='fileImportStatusOutcome'>{t('filesImportStatus.cancelledUpload')}</span>}
+      {index === 0 && job.type === ACTIONS.WRITE && job.status === 'Pending' && job.init?.uploadToken && (
+        <button type='button' className='fileImportStatusStop' disabled={job.cancelRequested || job.message.cancellable === false}
+          aria-label={`${t('filesImportStatus.cancelUpload', { name: job.message.entries[0].path })}${job.message.cancellable === false ? `: ${t('filesImportStatus.finishing')}` : job.cancelRequested ? `: ${t('filesImportStatus.cancelling')}` : ''}`}
+          onClick={event => {
+            event.stopPropagation()
+            if (document.activeElement === event.currentTarget) toggleRef.current?.focus()
+            cancelUpload(job.init.uploadToken)
+          }}>
+          {t(job.message.cancellable === false ? 'filesImportStatus.finishing' : job.cancelRequested ? 'filesImportStatus.cancelling' : 'filesImportStatus.cancel')}
+        </button>
+      )}
     </li>
   ))
 
@@ -49,10 +61,14 @@ const viewIcon = (entry) =>
     ? <FolderIcon className="fileImportStatusIcon fill-aqua pa1" />
     : <DocumentIcon className="fileImportStatusIcon fill-aqua pa1" />
 
-const viewImportStatus = (job, progress) => {
+const viewImportStatus = (job) => {
   switch (job.status) {
     case 'Pending': {
-      return <LoadingIndicator complete={ progress === 100 } />
+      // All bytes may be uploaded while MFS copies are still pending.
+      return <LoadingIndicator complete={false} />
+    }
+    case 'Cancelled': {
+      return (<GlyphCancel className='fileImportStatusCancelled w2 ph1' fill='currentColor' />)
     }
     case 'Failed': {
       return (<GlyphCancel className="dark-red w2 ph1" fill="currentColor"/>)
@@ -106,24 +122,21 @@ const baseDirectoryOf = ({ path }) => {
 const LoadingIndicator = ({ complete }) =>
   complete ? <GlyphTick className="green w2 ph1" fill="currentColor"/> : <span className="w2 ph1"/>
 
-export const FileImportStatus = ({ filesFinished, filesPending, filesErrors, doFilesClear, initialExpanded, t }) => {
-  const sortedFilesFinished = useMemo(() => filesFinished.sort((fileA, fileB) => fileB.start - fileA.start), [filesFinished])
+export const FileImportStatus = ({ filesFinished = [], filesPending = [], filesErrors = [], filesCancelled = [], doFilesClear, doFilesCancelUpload, initialExpanded = true, t }) => {
+  const sortedFilesFinished = useMemo(() => [...filesFinished].sort((fileA, fileB) => fileB.start - fileA.start), [filesFinished])
   const [expanded, setExpanded] = useState(initialExpanded)
+  const listId = useId()
+  const titleId = useId()
+  const toggleRef = useRef(null)
 
   const handleImportStatusClose = useCallback((ev) => {
     doFilesClear()
+    setExpanded(false)
     ev.stopPropagation() // Prevent setExpanded from being called
   }, [doFilesClear])
 
-  if (!filesFinished.length && !filesPending.length && !filesErrors.length) {
+  if (!filesFinished.length && !filesPending.length && !filesErrors.length && !filesCancelled.length) {
     return null
-  }
-
-  const handleExpandByKeyboard = (ev) => {
-    const isTargetElementBeingClicked = ev.nativeEvent.target.tagName === 'BUTTON'
-    if (ev.nativeEvent?.code !== 'Space' || isTargetElementBeingClicked) return
-
-    setExpanded(!expanded)
   }
 
   // Separate WRITE errors (have message.entries) from ADD_BY_PATH errors (no message.entries)
@@ -133,6 +146,7 @@ export const FileImportStatus = ({ filesFinished, filesPending, filesErrors, doF
   const numberOfImportedItems = !filesFinished.length ? 0 : filesFinished.reduce((prev, finishedFile) => prev + (finishedFile.message?.entries?.length ?? 1), 0)
   const numberOfFailedItems = writeErrors.reduce((prev, failedFile) => prev + (failedFile.message?.entries?.length ?? 1), 0) + importPathErrors.length
   const numberOfPendingItems = filesPending.reduce((total, pending) => total + groupByPath(pending.message?.entries || []).size, 0)
+  const numberOfCancelledItems = filesCancelled.reduce((total, job) => total + (job.message?.entries?.length ?? 1), 0)
   const progress = Math.floor(filesPending.reduce((total, { message: { progress } }) => total + progress, 0) / filesPending.length)
 
   // Find the most recent operation by comparing timestamps
@@ -142,42 +156,40 @@ export const FileImportStatus = ({ filesFinished, filesPending, filesErrors, doF
   const lastFailed = filesErrors.length > 0
     ? Math.max(...filesErrors.map(f => f.start))
     : 0
+  const lastCancelled = filesCancelled.length > 0 ? Math.max(...filesCancelled.map(job => job.start)) : 0
 
   // Show error styling only if the most recent operation was a failure
-  const hasErrors = lastFailed > lastFinished && !filesPending.length
+  const hasErrors = lastFailed > Math.max(lastFinished, lastCancelled) && !filesPending.length
+  const showCancelled = filesCancelled.length > 0 && lastCancelled >= lastFinished && !filesPending.length
   const containerClass = hasErrors ? 'fileImportStatusError' : ''
+  const summary = filesPending.length
+    ? `${t('filesImportStatus.importing', { count: numberOfPendingItems })} (${progress}%)`
+    : hasErrors
+      ? t('filesImportStatus.failed', { count: numberOfFailedItems })
+      : showCancelled
+        ? t('filesImportStatus.cancelled', { count: numberOfCancelledItems })
+        : t('filesImportStatus.imported', { count: numberOfImportedItems })
 
   return (
     <div className='fileImportStatus fixed bottom-1 w-100 flex justify-center' style={{ zIndex: 14, pointerEvents: 'none' }}>
-      <div className={`relative br1 dark-gray w-40 center bg-near-white ${containerClass}`} style={{ pointerEvents: 'auto' }}>
-        <div
-          tabIndex="0"
-          onClick={() => setExpanded(!expanded)}
-          onKeyPress={handleExpandByKeyboard}
-          role="button"
-          className="fileImportStatusButton pv2 ph3 relative flex items-center no-select pointer charcoal w-100 justify-between"
-          aria-expanded={expanded}
-          style={{ background: 'var(--raised)' }}
-        >
-          <span>
-            { filesPending.length
-              ? `${t('filesImportStatus.importing', { count: numberOfPendingItems })} (${progress}%)`
-              : hasErrors
-                ? t('filesImportStatus.failed', { count: numberOfFailedItems })
-                : t('filesImportStatus.imported', { count: numberOfImportedItems })
-            }
-          </span>
-          <div className="flex items-center">
-            <button className='fileImportStatusArrow ph0 flex' onClick={() => setExpanded(!expanded)} aria-expanded={expanded} aria-label={ t('filesImportStatus.toggleDropdown') }>
+      <div className={`fileImportStatusPanel relative br1 dark-gray center bg-near-white ${containerClass}`} style={{ pointerEvents: 'auto' }}>
+        <div className="fileImportStatusButton relative flex items-center charcoal w-100" style={{ background: 'var(--raised)' }}>
+          <button type='button' ref={toggleRef} className='fileImportStatusToggle' onClick={() => setExpanded(!expanded)} aria-expanded={expanded} aria-controls={listId} aria-label={`${t('filesImportStatus.toggleDropdown')}: ${summary}`}>
+            <span className='fileImportStatusTitle' id={titleId}>{summary}</span>
+            <span className='fileImportStatusArrow flex' aria-hidden='true'>
               <GlyphSmallArrows viewBox="10 10 80 80" fill="currentColor" opacity="0.7" aria-hidden="true"/>
-            </button>
-            <button className='fileImportStatusCancel ph0 flex' onClick={handleImportStatusClose} aria-label={ t('filesImportStatus.closeDropdown') }>
-              <GlyphSmallCancel fill="currentColor" opacity="0.7"/>
-            </button>
-          </div>
+            </span>
+          </button>
+          <button type='button' className='fileImportStatusCancel ph0 flex' onClick={handleImportStatusClose} aria-label={ t('filesImportStatus.closeDropdown') }>
+            <GlyphSmallCancel fill="currentColor" opacity="0.7" aria-hidden='true'/>
+          </button>
         </div>
-        <ul className='fileImportStatusRow pa0 ma0' aria-hidden={!expanded}>
-          { filesPending.map(file => Import(file, t)) }
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard scrolling remains available when settled rows have no controls. */}
+        <div id={listId} className='fileImportStatusRow' role='region' tabIndex={expanded ? 0 : -1} aria-labelledby={titleId} aria-hidden={!expanded} inert={!expanded}>
+          <ul className='pa0 ma0'>
+          { filesPending.map(file => Import(file, t, doFilesCancelUpload, toggleRef)) }
+          { filesCancelled.map(file => Import(file, t)) }
+          { filesCancelled.length > 0 && <li className='fileImportStatusNotice f7 pa2'><span role='status'>{t('filesImportStatus.cancelledNotice')}</span></li> }
           { hasErrors && (
             <>
               { writeErrors.map(file => Import(file, t)) }
@@ -191,7 +203,8 @@ export const FileImportStatus = ({ filesFinished, filesPending, filesErrors, doF
               { importPathErrors.map(file => FailedImport(file, t)) }
             </>
           )}
-        </ul>
+          </ul>
+        </div>
         {
           filesPending.length
             ? <ProgressBar progress={progress} bg="bg-teal" br="br0" className="absolute bottom-0" style={{ height: '4px' }} />
@@ -206,21 +219,18 @@ FileImportStatus.propTypes = {
   filesFinished: PropTypes.array,
   filesPending: PropTypes.array,
   filesErrors: PropTypes.array,
+  filesCancelled: PropTypes.array,
   doFilesClear: PropTypes.func,
+  doFilesCancelUpload: PropTypes.func,
   initialExpanded: PropTypes.bool
-}
-
-FileImportStatus.defaultProps = {
-  filesFinished: [],
-  filesPending: [],
-  filesErrors: [],
-  initialExpanded: true
 }
 
 export default connect(
   'selectFilesFinished',
   'selectFilesPending',
   'selectFilesErrors',
+  'selectFilesCancelled',
   'doFilesClear',
+  'doFilesCancelUpload',
   withTranslation('files')(FileImportStatus)
 )

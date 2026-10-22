@@ -1,22 +1,22 @@
-import React, { useRef, useState, useLayoutEffect, useEffect } from 'react'
+import React, { useRef, useState, useLayoutEffect } from 'react'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
-import { DropdownMenu } from '@tableflip/react-dropdown'
+import { DropdownMenu } from '../../files/dropdown/Dropdown.js'
 import Portal from '../../helpers/Portal.js'
 
 /**
  * Shows a context menu with specified children elements relative to a target element
  *
- * Important: Child elements should contain role="listitem" to allow for better acessibiity
+ * Important: Child elements should contain role="menuitem" to allow for keyboard navigation
  * @component
  * @example
  * <ContextMenu>
- *  <button role="listitem">1</button>
- *  <button role="listitem" onClick={stuff}>2</button>
+ *  <button role="menuitem">1</button>
+ *  <button role="menuitem" onClick={stuff}>2</button>
  * </ContextMenu>
  */
-const ContextMenu = ({ className, children, target, visible, arrowAlign, arrowMarginRight, onDismiss }) => {
-  const containerRef = useRef()
+const ContextMenu = ({ className, children, target, visible, arrowAlign, arrowMarginRight = 13, onDismiss }) => {
+  const containerRef = useRef(null)
   const [coordinates, setCoordinates] = useState({})
 
   useLayoutEffect(() => {
@@ -28,18 +28,18 @@ const ContextMenu = ({ className, children, target, visible, arrowAlign, arrowMa
 
     calculateCoordinates()
 
-    const event = window.addEventListener('scroll', () => {
-      requestAnimationFrame(() => calculateCoordinates())
-    })
-
-    return () => window.removeEventListener('scroll', event)
-  }, [target, visible])
-
-  useEffect(() => {
-    if (!target?.current) return
-
-    const firstButton = target.current.querySelector('[role="menuitem"]')
-    firstButton && firstButton.focus()
+    let frame
+    const onMove = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(calculateCoordinates)
+    }
+    window.addEventListener('scroll', onMove, true)
+    window.addEventListener('resize', onMove)
+    return () => {
+      window.removeEventListener('scroll', onMove, true)
+      window.removeEventListener('resize', onMove)
+      cancelAnimationFrame(frame)
+    }
   }, [target, visible])
 
   if (!visible || !target || !target.current) return null
@@ -48,11 +48,12 @@ const ContextMenu = ({ className, children, target, visible, arrowAlign, arrowMa
 
   return (
     <Portal id="portal-dropdown">
-      <div className={ classNames('absolute', className) } style={{
+      <div className={ classNames('fixed', className) } style={{
         top: coordinates.top,
         left: coordinates.left
       }}>
         <DropdownMenu
+          ref={containerRef}
           open={ visible }
           className='sans-serif br2 charcoal'
           boxShadow='none'
@@ -64,7 +65,7 @@ const ContextMenu = ({ className, children, target, visible, arrowAlign, arrowMa
           left={-coordinates.width - offsetLeft}
           translateX={-coordinates.width}
           onDismiss={ onDismiss }>
-          <div className='flex flex-column pa2' ref={containerRef} role="menu">
+          <div className='flex flex-column pa2'>
             {children}
           </div>
         </DropdownMenu>
@@ -80,10 +81,6 @@ ContextMenu.propTypes = {
   target: PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
   onDismiss: PropTypes.func,
   arrowMarginRight: PropTypes.number
-}
-
-ContextMenu.defaultProps = {
-  arrowMarginRight: 13
 }
 
 const getOffsetLeftByArrowAlignment = (arrowAlign, { width, arrowMarginRight }) => {

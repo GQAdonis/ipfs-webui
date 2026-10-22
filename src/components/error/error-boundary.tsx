@@ -2,6 +2,7 @@ import React from 'react'
 import { CloseIcon as ErrorIcon } from '../../promethity/icons.js'
 
 interface ErrorBoundaryProps {
+  children?: React.ReactNode
   /**
    * Component that receives { error } (optional).
    */
@@ -55,7 +56,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   componentDidCatch (error: Error, info: React.ErrorInfo) {
     console.error(`${error.message} - ${info.componentStack}`)
     // only use the first line of the component stack for rendering the fallback
-    this.setState({ componentStack: info.componentStack.split('\n')[0].trim() })
+    this.setState({ componentStack: (info.componentStack ?? '').split('\n')[0].trim() })
     this.props.onError?.(error, info)
   }
 

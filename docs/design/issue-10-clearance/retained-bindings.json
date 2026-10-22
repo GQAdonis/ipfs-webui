@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue10-retained-packet-runtime-and-source-bindings",
+  "acceptanceAuthority": false,
+  "createdAt": "2026-10-21T22:37:56.993Z",
+  "pid": 71376,
+  "argv": [
+    "/Users/gqadonis/.local/share/fnm/node-versions/v26.5.0/installation/bin/node",
+    "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue10-clearance/verify-retained.mjs"
+  ],
+  "status": "PASS",
+  "results": [
+    {
+      "lane": "webui",
+      "sourceFiles": 3443,
+      "runtimeFacts": 24,
+      "sourceCurrent": true,
+      "runtimeCurrent": true,
+      "outerCommandExit": 2,
+      "originalStatus": "BLOCKED",
+      "sourceBeforeAfterEqual": true,
+      "runtimeBeforeAfterEqual": true,
+      "outputsBeforeAfterEqual": true
+    },
+    {
+      "lane": "desktop",
+      "sourceFiles": 3443,
+      "runtimeFacts": 24,
+      "sourceCurrent": true,
+      "runtimeCurrent": true,
+      "outerCommandExit": 2,
+      "originalStatus": "BLOCKED",
+      "sourceBeforeAfterEqual": true,
+      "runtimeBeforeAfterEqual": true,
+      "outputsBeforeAfterEqual": true
+    }
+  ],
+  "sourceBundle": {
+    "path": "/Users/gqadonis/.codex/worktrees/agentic-ui-frontend/kubo/evidence/agentic-ui-frontend/issue10-clearance/source-bundle/manifest.json",
+    "sha256": "e2331fdf3e634f11d83ac743ecc2b2b2382a284986817ca077f76d23ae3242df",
+    "files": 18,
+    "currentMatches": true,
+    "copiesMatch": true
+  },
+  "limitation": "Read-only validation of retained packets; no new browser/axe/producer execution or whole UI-112 acceptance."
+}

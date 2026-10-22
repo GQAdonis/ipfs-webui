@@ -1,4 +1,5 @@
 import React from 'react'
+import { useOriginPolicy } from '../agent-chat/use-origin-policy.js'
 import { useTranslation } from 'react-i18next'
 import Title from '../settings/Title.js'
 import { getStatus, subscribe as subscribeStatus } from './registration-status.js'
@@ -16,6 +17,7 @@ function statusText (t, status) {
   switch (status.state) {
     case 'unavailable':
       return t('status.unavailable')
+    case 'origin-restricted': return t('status.originRestricted')
     case 'waiting':
       return t('status.waiting')
     case 'registered': {
@@ -65,6 +67,7 @@ function Toggle ({ id, checked, disabled = false, label, help, onChange }) {
  */
 const WebMcpSettings = () => {
   const { t } = useTranslation('webmcp')
+  const { origin } = useOriginPolicy()
   const settings = useStore(getSettings, subscribeSettings)
   const status = useStore(getStatus, subscribeStatus)
 
@@ -91,9 +94,9 @@ const WebMcpSettings = () => {
       <Toggle
         id='webmcp-writes-toggle'
         checked={settings.writes}
-        disabled={!settings.enabled}
+        disabled={!settings.enabled || !origin.allowed}
         label={t('writes.label')}
-        help={settings.enabled ? t('writes.help') : `${t('writes.help')} ${t('writes.needsFirst')}`}
+        help={!origin.allowed ? t('status.originRestricted') : settings.enabled ? t('writes.help') : `${t('writes.help')} ${t('writes.needsFirst')}`}
         onChange={(writes) => updateSettings({ writes })} />
 
       <p className='f6 mt0 mb2' role='status' data-testid='webmcp-status'>{statusText(t, status)}</p>

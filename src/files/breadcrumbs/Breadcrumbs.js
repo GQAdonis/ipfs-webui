@@ -2,29 +2,29 @@ import React, { useEffect, useState, useRef, useMemo } from 'react'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 import { basename, join } from 'path'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
 import { useDrop } from 'react-dnd'
 import { NativeTypes } from 'react-dnd-html5-backend'
 
-import { normalizeFiles } from '../../lib/files.js'
+import { addNativeFiles, reportDropError } from '../native-drop.js'
 
 import './Breadcrumbs.css'
 
 const DropableBreadcrumb = ({ index, link, immutable, onAddFiles, onMove, onClick, onContextMenuHandle, getPathInfo, checkIfPinned }) => {
   const [{ isOver }, drop] = useDrop({
     accept: [NativeTypes.FILE, 'FILE'],
-    drop: async ({ files, filesPromise, path: filePath }) => {
-      if (files) {
-        (async () => {
-          const files = await filesPromise
-          onAddFiles(await normalizeFiles(files), link.path)
-        })()
+    canDrop: () => !immutable,
+    drop: (item, monitor) => {
+      if (monitor.didDrop()) return
+      if (monitor.getItemType() === NativeTypes.FILE) {
+        void addNativeFiles(item, files => onAddFiles(files, link.path)).catch(reportDropError)
       } else {
+        const filePath = item.path
         const src = filePath
         const dst = join(link.path, basename(filePath))
 
-        try { await onMove(src, dst) } catch (e) { console.error(e) }
+        Promise.resolve(onMove(src, dst)).catch(reportDropError)
       }
     },
     collect: (monitor) => ({
@@ -32,7 +32,7 @@ const DropableBreadcrumb = ({ index, link, immutable, onAddFiles, onMove, onClic
     })
   })
 
-  const buttonRef = useRef()
+  const buttonRef = useRef(null)
 
   const handleOnContextMenuHandle = async (ev) => {
     ev.preventDefault()
@@ -51,7 +51,7 @@ const DropableBreadcrumb = ({ index, link, immutable, onAddFiles, onMove, onClic
   }
 
   return (
-    <span className='dib pv1 pr1' ref={drop}>
+    <span className='dib pv1 pr1' ref={node => { drop(node) }}>
       <button ref={buttonRef} title={link.realName}
         className={classNames('BreadcrumbsButton relative',
           index !== 0 && 'navy',
@@ -69,7 +69,7 @@ const DropableBreadcrumb = ({ index, link, immutable, onAddFiles, onMove, onClic
 const Breadcrumbs = ({ t, tReady, path, onClick, className, onContextMenuHandle, onAddFiles, onMove, doGetPathInfo, doCheckIfPinned, ...props }) => {
   const [overflows, setOverflows] = useState(false)
   const [isImmutable, setImmutable] = useState(false)
-  const anchors = useRef()
+  const anchors = useRef(null)
 
   useEffect(() => {
     const a = anchors.current

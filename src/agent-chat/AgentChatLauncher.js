@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useOriginPolicy } from './use-origin-policy.js'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { ELEMENT_TAG, loadIsland as defaultLoadIsland } from './island-loader.js'
 import { validateEndpoint } from './endpoint.js'
 import { useAgentChatSettings } from './use-agent-chat-settings.js'
 import { getBridge } from './bridge.js'
+import { isSessionMode } from './session.js'
+import { useSession } from './use-session.js'
 import { StatusLine } from '../promethity/components/index.js'
 import { useTheme } from '../promethity/use-theme.js'
 import './launcher.css'
@@ -21,6 +24,7 @@ const OPEN_CHANGE_EVENT = 'ipfs-agent-chat-openchange'
 const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
   const { t } = useTranslation('agentChat')
   const { settings, token } = useAgentChatSettings()
+  const { policy: originPolicy, origin } = useOriginPolicy()
   // The island follows the shell: dark or light, as the theme store resolved it (system, dark or light).
   const { resolvedTheme } = useTheme()
   // Under IPFS Desktop the bridge owns the connection: "enabled" follows its presence and
@@ -28,7 +32,7 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
   const [bridge] = useState(getBridge)
   const [bridgeEndpoint, setBridgeEndpoint] = useState(/** @type {string | null} */(null))
   useEffect(() => {
-    if (!bridge) return undefined
+    if (!bridge || !originPolicy.allowsAgent()) return undefined
     let cancelled = false
     Promise.resolve()
       .then(() => bridge.getEndpoint())
@@ -38,10 +42,13 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
       })
       .catch(() => { if (!cancelled) setBridgeEndpoint(null) })
     return () => { cancelled = true }
-  }, [bridge])
+  }, [bridge, origin.allowed, originPolicy])
   const endpoint = bridge ? null : (settings.enabled ? validateEndpoint(settings.endpoint) : null)
   const endpointValue = bridge ? bridgeEndpoint : (endpoint && endpoint.ok ? endpoint.value : null)
-  const available = endpointValue !== null
+  // An ended console sign-in leaves the chat unusable and its panel would cover the "Sign in again" bar
+  // (and its buttons), so the chat is taken away until the person signs in again.
+  const sessionEnded = useSession()?.expired === true
+  const available = endpointValue !== null && !sessionEnded && origin.allowed
 
   /** @type {React.MutableRefObject<any>} */
   const elementRef = useRef(null)
@@ -70,10 +77,19 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
   }, [])
 
   // The token goes by property only: the bridge's provider under Desktop, else the in-memory token.
+  // In console session mode the cookie session is the credential: the element sends the page's own
+  // cookies and no Authorization header, and is given no token.
   const applyToken = useCallback((el) => {
-    if (bridge) el.tokenProvider = bridge.getToken
+    if (bridge) {
+      el.tokenProvider = async () => {
+        if (!originPolicy.allowsAgent()) return undefined
+        const origin = originPolicy.getSnapshot()
+        const value = await bridge.getToken()
+        return originPolicy.allowsAgent() && originPolicy.getSnapshot() === origin ? value : undefined
+      }
+    } else if (isSessionMode()) el.session = true
     else el.token = token
-  }, [bridge, token])
+  }, [bridge, token, originPolicy])
 
   // Keep a live element in step with the settings.
   useEffect(() => {
@@ -88,7 +104,16 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
     elementRef.current?.setAttribute('theme', resolvedTheme)
   }, [resolvedTheme])
 
+  useEffect(() => originPolicy.subscribe(() => {
+    if (originPolicy.allowsAgent()) return
+    elementRef.current?.remove()
+    elementRef.current = null
+    setOpen(false)
+  }), [originPolicy])
+
   const press = useCallback(async () => {
+    if (!originPolicy.allowsAgent()) return
+    const origin = originPolicy.getSnapshot()
     const existing = elementRef.current
     if (existing) {
       existing.toggle()
@@ -102,6 +127,7 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
       setStatus('error')
       return
     }
+    if (!originPolicy.allowsAgent() || originPolicy.getSnapshot() !== origin) { setStatus('idle'); return }
     const el = document.createElement(ELEMENT_TAG)
     el.setAttribute('endpoint', endpointValue)
     el.setAttribute('theme', resolvedTheme)
@@ -111,7 +137,7 @@ const AgentChatLauncher = ({ loadIsland = defaultLoadIsland }) => {
     elementRef.current = el
     setStatus('idle')
     el.open = true
-  }, [endpointValue, loadIsland, status, applyToken, resolvedTheme])
+  }, [endpointValue, loadIsland, status, applyToken, resolvedTheme, originPolicy])
 
   // The launcher is fixed at the bottom right. A sticky Apply bar (or any bottom action area)
   // must sit above it, so its height is published as --ac-launcher-clearance while it shows.

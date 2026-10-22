@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useSyncExternalStore } from 'react'
 import PropTypes from 'prop-types'
-import { Helmet } from 'react-helmet'
 import { useTranslation } from 'react-i18next'
 import { StatusLine } from '../promethity/components/index.js'
 import { getBridge } from '../agent-chat/bridge.js'
@@ -13,6 +12,8 @@ import ResultItem from './ResultItem.js'
 import ErrorNotice from './ErrorNotice.js'
 import IndexStatusPanel from './IndexStatusPanel.js'
 import { AGENT_SETTINGS_HASH, SEARCH_DOCS_URL } from './docs-link.js'
+import { getConnectionStore } from '../agent-chat/connection-store.js'
+import { searchHandoff } from '../shell/search-handoff.js'
 import './search.css'
 
 const RUN_POLL_MS = 5000
@@ -77,15 +78,20 @@ Results.propTypes = { state: PropTypes.object.isRequired, onRetry: PropTypes.fun
  */
 export const SearchPage = ({ useSearchSeams }) => {
   const { t } = useTranslation('search')
+  const pending = useSyncExternalStore(searchHandoff.subscribe, searchHandoff.getSnapshot)
+  const [connectionStore] = React.useState(getConnectionStore)
+  const scope = useSyncExternalStore(connectionStore.subscribe, connectionStore.getSnapshot)
+  const [submittedQuery, setSubmittedQuery] = React.useState('')
+  const [handoffCount, setHandoffCount] = React.useState(0)
   const { enabled } = useSearchSettings()
   const availability = useSearchAvailability()
   const { refresh } = availability
   const { state, run } = useSearch(useSearchSeams)
-  const [lastRequest, setLastRequest] = React.useState(/** @type {{ query: string, kinds: string[], sources: string[] } | undefined} */ (undefined))
+  const [lastRequest, setLastRequest] = React.useState(/** @type {{ query: string, kinds: string[], sources: string[], generation: string } | undefined} */ (undefined))
 
   // Off switch: no page, no request, back to the start page.
   useEffect(() => {
-    if (!enabled) globalThis.location.replace('#/')
+    if (!enabled) { searchHandoff.clear(); globalThis.location.replace('#/') }
   }, [enabled])
 
   // A fresh status each time the page opens.
@@ -104,20 +110,37 @@ export const SearchPage = ({ useSearchSeams }) => {
   }, [enabled, running, refresh])
 
   const onSearch = useCallback((/** @type {{ query: string, kinds: string[], sources: string[] }} */ req) => {
-    setLastRequest(req)
+    const current = connectionStore.getSnapshot()
+    if (!enabled || availability.phase !== 'available' || current.status !== 'ready' || current.generation !== scope.generation || (availability.generation && availability.generation !== current.generation)) return
+    setLastRequest({ ...req, generation: current.generation })
     void run({ query: req.query, kinds: req.kinds, sources: req.sources })
-  }, [run])
-  const onRetry = useCallback(() => { if (lastRequest) onSearch(lastRequest) }, [lastRequest, onSearch])
+  }, [run, enabled, availability.phase, availability.generation, connectionStore, scope.generation])
+  useEffect(() => {
+    setLastRequest(undefined)
+    setSubmittedQuery('')
+    searchHandoff.retire(scope.generation)
+  }, [scope.generation])
+
+  useEffect(() => {
+    if (!pending || !enabled || availability.phase !== 'available' || (availability.generation && availability.generation !== scope.generation)) return
+    const request = searchHandoff.take(scope.generation)
+    if (!request || scope.status !== 'ready' || connectionStore.getSnapshot().generation !== scope.generation) return
+    setSubmittedQuery(request.query)
+    setHandoffCount(count => count + 1)
+    onSearch({ query: request.query, kinds: [], sources: [] })
+  }, [pending, enabled, availability.phase, availability.generation, scope.generation, scope.status, connectionStore, onSearch])
+
+  const onRetry = useCallback(() => { if (lastRequest?.generation === connectionStore.getSnapshot().generation) onSearch(lastRequest) }, [lastRequest, onSearch, connectionStore])
 
   if (!enabled) return null
 
   const { phase, connection } = availability
-  const canSearch = phase === 'available' || phase === 'denied' || phase === 'checking'
+  const canSearch = phase === 'available'
   const gate = phase === 'unconnected'
     ? (
       <div className='sr-gate'>
         <StatusLine tone='warn' word={t('gate.unconnected.word')}>
-          {connection === 'no-token' ? t('gate.unconnected.noToken') : t('gate.unconnected.noEndpoint')}
+          {connection === 'origin-blocked' ? 'Search is unavailable on this page origin. Ordinary IPFS navigation remains available; use an isolated or dedicated configured agent origin.' : connection === 'no-token' ? t('gate.unconnected.noToken') : connection === 'signing-out' ? 'Signing out. This local connection has been retired.' : connection === 'session-expired' ? 'Sign in again before searching.' : connection === 'resolving' ? 'Checking the connection.' : t('gate.unconnected.noEndpoint')}
         </StatusLine>
         <a className='sr-link' href={AGENT_SETTINGS_HASH}>{t('gate.unconnected.link')}</a>
       </div>
@@ -143,9 +166,9 @@ export const SearchPage = ({ useSearchSeams }) => {
 
   return (
     <div data-id='SearchPage' className='mw8 center sr-page'>
-      <Helmet>
+      <>
         <title>{titleWithBrand(t('title'))}</title>
-      </Helmet>
+      </>
       <header className='sr-header'>
         <h1 className='sr-h1'>{t('title')}</h1>
         <p className='sr-lede'>{t('lede')}</p>
@@ -153,10 +176,12 @@ export const SearchPage = ({ useSearchSeams }) => {
       <div className='sr-layout'>
         <div className='sr-main'>
           {gate}
+          {phase === 'checking' ? <StatusLine tone='info' word='Checking indexed search' /> : null}
+          {phase === 'denied' && availability.error ? <ErrorNotice error={availability.error} onRetry={refresh} /> : null}
           {canSearch
             ? (
               <>
-                <SearchForm busy={state.phase === 'loading'} onSearch={onSearch} />
+                <SearchForm key={`${scope.generation}:${handoffCount}`} submittedQuery={submittedQuery} busy={state.phase === 'loading'} onSearch={onSearch} />
                 {phase === 'denied' && availability.error ? <ErrorNotice error={availability.error} /> : null}
                 <div className='sr-visually-hidden' role='status' aria-live='polite' aria-atomic='true'>
                   {announcement(state, t)}

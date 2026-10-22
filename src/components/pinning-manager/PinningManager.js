@@ -1,6 +1,7 @@
+import AutoSizer from '../auto-sizer/AutoSizer.js'
 import React, { Fragment, useEffect, useState, useMemo, useRef } from 'react'
-import { connect } from 'redux-bundler-react'
-import { AutoSizer, Table, Column, SortDirection } from 'react-virtualized'
+import { connect } from '../../lib/react-store.js'
+import { Table, Column, SortDirection } from 'react-virtualized'
 import { sortByProperty } from '../../lib/sort.js'
 
 // Components
@@ -16,7 +17,7 @@ import './PinningManager.css'
 const ROW_HEIGHT = 50
 const HEADER_HEIGHT = 32
 
-export const PinningManager = ({ pinningServices, ipfsReady, arePinningServicesSupported, doFetchPinningServices, doFetchPinningServicesStats, doFetchLocalPinsStats, doRemovePinningService, localPinsSize, localNumberOfPins, t }) => {
+export const PinningManager = ({ pinningServices = [], ipfsReady, arePinningServicesSupported, doFetchPinningServices, doFetchPinningServicesStats, doFetchLocalPinsStats, doRemovePinningService, localPinsSize, localNumberOfPins, t }) => {
   const [isModalOpen, setModalOpen] = useState(false)
   const [isToggleModalOpen, setToggleModalOpen] = useState(false)
   const onModalOpen = () => setModalOpen(true)
@@ -38,7 +39,7 @@ export const PinningManager = ({ pinningServices, ipfsReady, arePinningServicesS
   [localNumberOfPins, localPinsSize, t])
 
   const sortedServices = useMemo(() =>
-    (pinningServices || []).sort(sortByProperty(sortSettings.sortBy, sortSettings.sortDirection === SortDirection.ASC ? 1 : -1)),
+    [...(pinningServices || [])].sort(sortByProperty(sortSettings.sortBy, sortSettings.sortDirection === SortDirection.ASC ? 1 : -1)),
   [pinningServices, sortSettings.sortBy, sortSettings.sortDirection])
 
   const sortedList = useMemo(() => [localPinning, ...sortedServices], [localPinning, sortedServices])
@@ -49,6 +50,8 @@ export const PinningManager = ({ pinningServices, ipfsReady, arePinningServicesS
           <AutoSizer disableHeight>
             {({ width }) => (
               <Table
+                aria-label={t('pinningServices.title')}
+                containerRole='presentation'
                 className='tl fw4 w-100 f6'
                 headerClassName='gray ttc fw4 f6 ph2'
                 width={width}
@@ -97,10 +100,6 @@ export const PinningManager = ({ pinningServices, ipfsReady, arePinningServicesS
   )
 }
 
-PinningManager.defaultProps = {
-  pinningServices: []
-}
-
 const serviceOnline = (s) => (s.type === 'LOCAL' || s.online)
 
 const Icon = ({ rowData, index }) => {
@@ -142,7 +141,7 @@ const AutoUploadCell = ({ autoUpload, visitServiceUrl, name, doRemovePinningServ
 )
 
 const OptionsCell = ({ doRemovePinningService, name, visitServiceUrl, autoUpload, t, onToggleModalOpen }) => {
-  const buttonRef = useRef()
+  const buttonRef = useRef(null)
   const [isContextVisible, setContextVisibility] = useState(false)
 
   const handleRemove = () => {

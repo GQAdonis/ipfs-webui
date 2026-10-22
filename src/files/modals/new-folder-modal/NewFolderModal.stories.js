@@ -1,10 +1,10 @@
 import React from 'react'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 import i18n from '../../../i18n-decorator.js'
 import NewFolderModal from './NewFolderModal.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Files/Modals',
@@ -12,7 +12,7 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const NewFolder = () => (
   <div className="ma3">

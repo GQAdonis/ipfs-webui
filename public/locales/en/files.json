@@ -34,7 +34,13 @@
     "descriptionNative": "This native IPFS address opens in apps and browsers that support IPFS, like the <1>IPFS Companion</1> extension.",
     "useLocalLink": "Local HTTP link for other apps on this machine",
     "useSubdomains": "Use localhost subdomains for web apps",
-    "linkError": "Could not generate the link. Check that your IPFS node is running."
+    "linkError": "Could not generate the link. Check that your IPFS node is running.",
+    "linkLabel": "Share address",
+    "contentHelpTitle": "What this address shares",
+    "contentIdentity": "An IPFS CID identifies content-addressed bytes. An IPNS name can point to changing content. A display name or filename in the link does not change the content address.",
+    "availability": "A link does not guarantee availability or keep content online. Retrieval needs a node or service that still provides the requested bytes. A local link is usable only where that local gateway is reachable.",
+    "accessControl": "A CID is not a password or access-control rule. Someone who obtains it may request available bytes through a permitted node or gateway. Choose confidentiality protections separately.",
+    "encryption": "Sharing a CID does not encrypt or decrypt anything. If the content was encrypted before it was added, the CID addresses encrypted bytes; reading the plaintext requires the right decryption key and software. The CID itself does not provide that key."
   },
   "renameModal": {
     "titleFile": "Rename file",
@@ -46,11 +52,19 @@
     "titleItem": "{count, plural, one {Remove item? {name}} other {Remove {count} items?}}",
     "titleFolder": "{count, plural, one {Remove folder? {name}} other {Remove {count} folders?}}",
     "titleFile": "{count, plural, one {Remove file? {name}} other {Remove {count} files?}}",
-    "descriptionItem": "{count, plural, one {Are you sure you want to remove this item? It will no longer appear on the Files screen, and will be permanently removed in the next scheduled cleanup (though copies may exist on other IPFS nodes). This action and cannot be reversed.} other {Are you sure you want to remove these {count} items? They will no longer appear on the Files screen, and will be permanently removed in the next scheduled cleanup (though copies may exist on other IPFS nodes). This action cannot be reversed.}}",
-    "descriptionFolder": "{count, plural, one {Are you sure you want to remove this folder? It will no longer appear on the Files screen, and will be permanently removed in the next scheduled cleanup (though copies may exist on other IPFS nodes). This action cannot be reversed.} other {Are you sure you want to remove these {count} folders? They will no longer appear on the Files screen, and will be permanently removed in the next scheduled cleanup (though copies may exist on other IPFS nodes). This action cannot be reversed.}}",
-    "descriptionFile": "{count, plural, one {Are you sure you want to remove this file? It will no longer appear on the Files screen, and will be permanently removed in the next scheduled cleanup (though copies may exist on other IPFS nodes). This action cannot be reversed.} other {Are you sure you want to remove these {count} files? They will no longer appear on the Files screen, and will be permanently removed in the next scheduled cleanup (though copies may exist on other IPFS nodes). This action cannot be reversed.}}",
-    "checkboxRemoveLocalPin": "Also remove local pin (recommended)",
-    "checkboxUnpinFromServices": "Unpin from all pinning services"
+    "scopeDescriptionItem": "{count, plural, one {Remove this item from this node’s Mutable File System (Files)?} other {Remove these {count} items from this node’s Mutable File System (Files)?}}",
+    "scopeDescriptionFolder": "{count, plural, one {Remove this folder from this node’s Mutable File System (Files)?} other {Remove these {count} folders from this node’s Mutable File System (Files)?}}",
+    "scopeDescriptionFile": "{count, plural, one {Remove this file from this node’s Mutable File System (Files)?} other {Remove these {count} files from this node’s Mutable File System (Files)?}}",
+    "checkboxRemoveLocalPinScope": "Also remove this node’s local pin",
+    "checkboxUnpinFromServicesScope": "Also request unpinning from configured remote services",
+    "mfsRetention": "This removes the selected MFS path names. It does not immediately delete all underlying blocks. Content referenced by another MFS path or protected by a pin can remain; unreferenced, unpinned blocks may later be reclaimed by local garbage collection. Other nodes or services may retain copies.",
+    "localPinHelp": "If MFS removal succeeds, this also requests removal of the corresponding local pin. Unpinning changes retention protection; it is not immediate block deletion.",
+    "remotePinHelp": "If MFS removal succeeds, this also requests unpinning from the named services listed below. It does not delete copies throughout IPFS or change a service’s own retention policy.",
+    "localPinRequested": "Local scope: remove the selected MFS paths and request removal of their local pins where reported pinned.",
+    "localPinUnchanged": "Local scope: remove the selected MFS paths; no local pin removal is requested.",
+    "remoteServicesRequested": "Remote scope: also request unpinning from these configured services:",
+    "noRemoteTargets": "No configured remote service targets are listed for this request.",
+    "remotePinsUnchanged": "Remote scope: no remote pin removal is requested."
   },
   "shortcutModal": {
     "title": "Keyboard shortcuts",
@@ -80,7 +94,13 @@
     "complianceLabel": "Check pinning services' compliance",
     "footer": "Need to add or configure a pinning service? Go to <1>Settings</1>.",
     "localNode": "Local node",
-    "totalSize": "Total size: {size}"
+    "totalSize": "Total size: {size}",
+    "retentionHelp": "Each selection controls pin retention at the named location. Unpinning is not block deletion or removal of copies from the IPFS network. Pin selection does not remove MFS paths.",
+    "localRemoval": "Local change: request removal of this node’s pin. Data may remain protected by MFS or other pins; unprotected blocks may later be reclaimed by local garbage collection.",
+    "remoteOnlyRemoval": "The listed removals affect remote services; this node’s local pin selection and MFS paths are unchanged.",
+    "remoteRemoval": "Request pin removal from these named remote services. Remote requests affect only those services; any selected local change is listed separately. Deletion or retention at a service is not guaranteed:",
+    "localAddition": "Local change: request adding a pin on this node. Any remote pin removals listed below are separate requests.",
+    "localUnknown": "Local pin state is not reported. Review the Local node selection separately from the remote service choices."
   },
   "addByPathModal": {
     "title": "Import from IPFS",
@@ -118,6 +138,13 @@
     "imported": "{count, plural, one {Imported 1 item} other {Imported {count} items}}",
     "importing": "{count, plural, one {Importing 1 item} other {Importing {count} items}}",
     "failed": "{count, plural, one {Failed to import 1 item} other {Failed to import {count} items}}",
+    "cancel": "Cancel",
+    "cancelUpload": "Cancel upload: {name}",
+    "cancelling": "Cancelling…",
+    "finishing": "Finishing…",
+    "cancelled": "{count, plural, one {Cancelled 1 item} other {Cancelled {count} items}}",
+    "cancelledUpload": "Cancelled",
+    "cancelledNotice": "Cancellation does not undo work already completed. Imported blocks or copied files may remain.",
     "toggleDropdown": "Toggle dropdown",
     "closeDropdown": "Close dropdown",
     "count": "{count} of {count}"

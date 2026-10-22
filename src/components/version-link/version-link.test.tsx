@@ -1,8 +1,7 @@
-import React from 'react'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import VersionLink from './version-link'
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 
 describe('VersionLink', () => {
   describe('when agentVersion is not provided', () => {

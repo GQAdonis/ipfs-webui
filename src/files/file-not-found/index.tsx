@@ -1,4 +1,3 @@
-import React from 'react'
 import Box from '../../components/box/Box.js'
 import Button from '../../components/button/button.js'
 import { AttentionIcon as GlyphAttention } from '../../promethity/icons.js'

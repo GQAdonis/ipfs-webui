@@ -1,0 +1,277 @@
+--- a/src/components/cid-info/CidInfo.tsx
++++ b/src/components/cid-info/CidInfo.tsx
+@@ -11,17 +11,22 @@
+   const [cidErr, setCidErr] = useState<Error | null>(null)
+   const [cidInfo, setCidInfo] = useState<ExtractedInfo | null>(null)
+   useEffect(() => {
++    let active = true
++    setCidErr(null)
++    setCidInfo(null)
+     const asyncFn = async (): Promise<void> => {
+       try {
+         if (cid != null) {
+-          setCidInfo(await extractInfo(cid))
++          const info = await extractInfo(cid)
++          if (active) setCidInfo(info)
+         }
+       } catch (err: any) {
+         console.error(err)
+-        setCidErr(err)
++        if (active) setCidErr(err)
+       }
+     }
+     void asyncFn()
++    return () => { active = false }
+   }, [cid])
+ 
+   if (cid == null) {
+--- a/src/components/graph/IpldGraphCytoscape.tsx
++++ b/src/components/graph/IpldGraphCytoscape.tsx
+@@ -61,7 +61,7 @@
+ }
+ 
+ export default class IpldGraphCytoscape extends React.Component<IpldGraphCytoscapeProps, IpldGraphCytoscapeState> {
+-  readonly graphRef: React.RefObject<HTMLDivElement>
++  readonly graphRef: React.RefObject<HTMLDivElement | null>
+   cy: cytoscape.Core | null
+   constructor (props: IpldGraphCytoscapeProps) {
+     super(props)
+@@ -94,9 +94,14 @@
+     this.cy = this.renderTree({ path, links, container })
+   }
+ 
++  componentWillUnmount (): void {
++    this.cy?.destroy()
++    this.cy = null
++  }
++
+   render (): React.ReactNode {
+     // pluck out custom props. Pass anything else on
+-    const { onNodeClick, path, className, ...props } = this.props
++    const { onNodeClick, path, links, className, ...props } = this.props
+     return <div className={className} ref={this.graphRef} {...props} />
+   }
+ 
+--- a/src/providers/explore.tsx
++++ b/src/providers/explore.tsx
+@@ -1,5 +1,5 @@
+ import { CID } from 'multiformats/cid'
+-import React, { createContext, useContext, useState, useEffect, type ReactNode, useCallback } from 'react'
++import React, { createContext, useContext, useState, useEffect, type ReactNode, useCallback, useMemo } from 'react'
+ import { type LinkObject } from '../components/object-info/links-table'
+ import { ensureLeadingSlash } from '../lib/helpers.js'
+ import { importCar } from '../lib/import-car.js'
+@@ -61,7 +61,7 @@
+ const processPath = (path: string | null, pathPrefix: string): string | null => {
+   let newPath = path
+   if (newPath != null) {
+-    if (newPath.includes(pathPrefix)) {
++    if (newPath.startsWith(pathPrefix)) {
+       newPath = newPath.slice(pathPrefix.length)
+     }
+     if (newPath.startsWith('/')) {
+@@ -70,7 +70,7 @@
+     if (newPath === '') {
+       newPath = null
+     } else {
+-      newPath = decodeURIComponent(newPath)
++      try { newPath = decodeURIComponent(newPath) } catch { /* CID parsing renders malformed input as an error. */ }
+     }
+   }
+   return newPath
+@@ -93,23 +93,16 @@
+ }
+ 
+ export const ExploreProvider = ({ children, state, explorePathPrefix = '#/explore' }: ExploreProviderProps): React.ReactNode => {
+-  if (state == null) {
+-    state = {
+-      path: processPath(window.location.hash, explorePathPrefix)
+-    }
+-  } else {
+-    if (state.path === '') {
+-      state.path = null
+-    } else if (state.path != null) {
+-      state.path = processPath(state.path, explorePathPrefix)
+-    }
+-  }
+-  const [exploreState, setExploreState] = useState<ExploreState>({ ...defaultState, ...state })
++  const [exploreState, setExploreState] = useState<ExploreState>(() => ({
++    ...defaultState, ...state,
++    path: processPath(state?.path === undefined ? window.location.hash : state.path, explorePathPrefix)
++  }))
+   const { helia } = useHelia()
+   const [isLoading, setIsLoading] = useState<boolean>(false)
+   const { path } = exploreState
+ 
+   useEffect(() => {
++    let active = true
+     setIsLoading(true);
+ 
+     (async () => {
+@@ -119,7 +112,8 @@
+       // Clear the target node when a new path is requested
+       setExploreState((exploreState) => ({
+         ...exploreState,
+-        targetNode: null
++        targetNode: null,
++        error: null
+       }))
+       const pathParts = parseIpldPath(path)
+       if (pathParts == null || helia == null) return
+@@ -128,6 +122,7 @@
+       try {
+         const cid = getCidFromCidOrFqdn(cidOrFqdn)
+         const { targetNode, canonicalPath, localPath, nodes, pathBoundaries } = await resolveIpldPath(helia, cid, rest)
++        if (!active) return
+ 
+         setExploreState((curr) => ({
+           ...curr,
+@@ -139,29 +134,32 @@
+           error: null
+         }))
+       } catch (error: any) {
++        if (!active) return
+         console.warn('Failed to resolve path', path, error)
+         setExploreState((prevState) => ({ ...prevState, error }))
+       }
+     })().catch((err) => {
++      if (!active) return
+       console.error('Error fetching explore data', err)
+       setExploreState((prevState) => ({ ...prevState, error: err }))
+     }).finally(() => {
+-      setIsLoading(false)
++      if (active) setIsLoading(false)
+     })
++    return () => { active = false }
+   }, [helia, path])
+ 
+-  const setExplorePath = (path: string | null): void => {
++  const setExplorePath = useCallback((path: string | null): void => {
+     if (path != null && !window.location.href.includes(path)) {
+       throw new Error('setExplorePath should only be used to update the state, not the URL. If you are using a routing library that doesn\'t allow you to listen to hashchange events, ensure the URL is updated prior to calling setExplorePath.')
+     }
+     const newPath = processPath(path, explorePathPrefix)
+-    setExploreState((exploreState) => ({
++    setExploreState((exploreState) => exploreState.path === newPath ? exploreState : ({
+       ...exploreState,
+       path: newPath
+     }))
+-  }
+-
+-  const doExploreLink = (link: LinkObject): void => {
++  }, [explorePathPrefix])
++
++  const doExploreLink = useCallback((link: LinkObject): void => {
+     const { nodes, pathBoundaries } = exploreState
+     const cid = nodes[0].cid
+     const pathParts = pathBoundaries.map((p) => p.path)
+@@ -174,15 +172,15 @@
+     const hash = `${explorePathPrefix}/${path}`
+     window.location.hash = hash
+     setExplorePath(path)
+-  }
++  }, [exploreState, explorePathPrefix, setExplorePath])
+ 
+   /**
+    * @deprecated - use setExplorePath instead
+    */
+-  const doExploreUserProvidedPath = (path: string): void => {
++  const doExploreUserProvidedPath = useCallback((path: string): void => {
+     const hash = path != null ? `${explorePathPrefix}${ensureLeadingSlash(path)}` : explorePathPrefix
+     window.location.hash = hash
+-  }
++  }, [explorePathPrefix])
+ 
+   const doUploadUserProvidedCar = useCallback(async (file: File, uploadImage: string): Promise<void> => {
+     if (helia == null) {
+@@ -203,8 +201,9 @@
+     }
+   }, [explorePathPrefix, helia])
+ 
++  const value = useMemo(() => ({ exploreState, explorePathPrefix, isLoading, doExploreLink, doExploreUserProvidedPath, doUploadUserProvidedCar, setExplorePath }), [exploreState, explorePathPrefix, isLoading, doExploreLink, doExploreUserProvidedPath, doUploadUserProvidedCar, setExplorePath])
+   return (
+-    <ExploreContext.Provider value={{ exploreState, explorePathPrefix, isLoading, doExploreLink, doExploreUserProvidedPath, doUploadUserProvidedCar, setExplorePath }}>
++    <ExploreContext.Provider value={value}>
+       {children}
+     </ExploreContext.Provider>
+   )
+--- a/src/providers/helia.tsx
++++ b/src/providers/helia.tsx
+@@ -1,5 +1,5 @@
+ import { type Helia } from '@helia/interface'
+-import React, { createContext, useContext, useState, useCallback } from 'react'
++import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from 'react'
+ import packageJson from '../../package.json'
+ import initHelia from '../lib/init-helia.js'
+ import type { KuboGatewayOptions } from '../types.js'
+@@ -42,34 +42,53 @@
+ 
+ export const HeliaProvider = ({ children }: React.ComponentProps<any>): any => {
+   const [helia, setHelia] = useState<Helia | null>(null)
+-  const [kuboGatewayOptions, setKuboGatewayOptions] = useState<KuboGatewayOptions>(getDefaultKuboGatewayOptions())
++  const [kuboGatewayOptions, setKuboGatewayOptions] = useState<KuboGatewayOptions>(getDefaultKuboGatewayOptions)
+   const [error, setError] = useState<Error | null>(null)
++  const request = useRef<{ promise: Promise<Helia>, completion: Promise<void> } | null>(null)
+ 
+-  const selectHeliaReady = (): boolean => helia !== null
++  useEffect(() => () => {
++    const current = request.current
++    request.current = null
++    // Initialization may finish after the provider has left the root. It still
++    // owns that node and must stop it; stale work must never publish new state.
++    void current?.promise.then(node => node.stop().catch(failure => {
++      console.warn('Unable to stop Explorer node', failure)
++    }), () => { /* Initialization failures are handled by doInitHelia. */ })
++  }, [])
+ 
+-  const selectHeliaIdentity = (): string => {
+-    const heliaHttpVersion = packageJson.dependencies['@helia/http']
++  const selectHeliaReady = useCallback((): boolean => helia !== null, [helia])
++
++  const selectHeliaIdentity = useCallback((): string => {
++    const heliaHttpVersion = packageJson.devDependencies['@helia/http']
+     return `@helia/http@${heliaHttpVersion}`
+-  }
++  }, [])
+ 
+-  const setKuboGatewayOptionsPublic = (kuboGatewayOptions: Partial<KuboGatewayOptions>): void => {
++  const setKuboGatewayOptionsPublic = useCallback((kuboGatewayOptions: Partial<KuboGatewayOptions>): void => {
+     setKuboGatewayOptions((current) => ({ ...current, ...kuboGatewayOptions }))
+-  }
++  }, [])
+ 
+-  const doInitHelia = useCallback(async (): Promise<void> => {
+-    try {
+-      const helia = await initHelia(kuboGatewayOptions)
++  const doInitHelia = useCallback((): Promise<void> => {
++    if (request.current != null) return request.current.completion
++    const current = { promise: initHelia(kuboGatewayOptions), completion: Promise.resolve() }
++    request.current = current
++    current.completion = current.promise.then(node => {
++      if (request.current !== current) return
+       setError(null)
+-      setHelia(helia)
+-    } catch (error: any) {
+-      console.error('doInitHelia error', error)
+-      setError(error)
++      setHelia(node)
++    }).catch((failure: Error) => {
++      if (request.current !== current) return
++      request.current = null
++      console.error('doInitHelia error', failure)
++      setError(failure)
+       setHelia(null)
+-    }
+-  }, [kuboGatewayOptions, setHelia])
++    })
++    return current.completion
++  }, [kuboGatewayOptions])
++
++  const value = useMemo(() => ({ helia, error, kuboGatewayOptions, selectHeliaReady, selectHeliaIdentity, doInitHelia, setKuboGatewayOptions: setKuboGatewayOptionsPublic }), [helia, error, kuboGatewayOptions, selectHeliaReady, selectHeliaIdentity, doInitHelia, setKuboGatewayOptionsPublic])
+ 
+   return (
+-    <HeliaContext.Provider value={{ helia, error, kuboGatewayOptions, selectHeliaReady, selectHeliaIdentity, doInitHelia, setKuboGatewayOptions: setKuboGatewayOptionsPublic }}>
++    <HeliaContext.Provider value={value}>
+       {children}
+     </HeliaContext.Provider>
+   )

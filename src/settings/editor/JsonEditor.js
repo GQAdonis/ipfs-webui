@@ -1,8 +1,13 @@
 import React from 'react'
 import AceEditor from 'react-ace'
 
-import 'brace/mode/json.js'
+import ace from 'ace-builds/src-noconflict/ace'
+import 'ace-builds/src-noconflict/mode-json'
+import jsonWorkerUrl from 'ace-builds/src-noconflict/worker-json.js?url'
+
 import './theme/ipfs_dark.js'
+
+ace.config.setModuleUrl('ace/mode/json_worker', jsonWorkerUrl)
 
 export class JsonEditor extends React.Component {
   render () {

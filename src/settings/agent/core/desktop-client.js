@@ -5,6 +5,7 @@
 // Desktop: the main process stores the key in safeStorage and applies it. This
 // wrapper only normalises what a rejected IPC call looks like.
 
+import { getOriginPolicy } from '../../../agent-chat/origin-policy.js'
 import { SettingsError, isSettingsError, toSettingsError } from './errors.js'
 
 const METHODS = Object.freeze(['get', 'set', 'testConnection', 'setApiKey', 'clearApiKey', 'status', 'onChange'])
@@ -18,6 +19,7 @@ const METHODS = Object.freeze(['get', 'set', 'testConnection', 'setApiKey', 'cle
  * @returns {import('./types.js').SettingsClient | undefined}
  */
 export function createDesktopSettingsClient (scope = globalThis) {
+  if (!getOriginPolicy().allowsAgent()) return undefined
   const bridge = scope?.ipfsDesktop?.agentSettings
   if (!bridge || !METHODS.every((m) => typeof bridge[m] === 'function')) return undefined
 
@@ -27,8 +29,14 @@ export function createDesktopSettingsClient (scope = globalThis) {
    * @returns {Promise<T>}
    */
   const guard = async (call) => {
+    const origin = getOriginPolicy()
+    let retired = false
+    const unsubscribe = origin.subscribe(() => { if (!origin.allowsAgent()) retired = true })
     try {
-      return await call()
+      if (retired || !origin.allowsAgent()) throw new SettingsError('unavailable', 'Agent settings are unavailable on this page origin.')
+      const result = await call()
+      if (retired || !origin.allowsAgent()) throw new SettingsError('unavailable', 'The page origin changed while the request was pending. Check reported outcomes before retrying.')
+      return result
     } catch (e) {
       const known = toSettingsError(e)
       // The main process rejects with a plain Error for Touch ID declined, service not running,
@@ -38,7 +46,7 @@ export function createDesktopSettingsClient (scope = globalThis) {
         throw new SettingsError('unavailable', known.message, { detail: e.message })
       }
       throw known
-    }
+    } finally { unsubscribe() }
   }
 
   return {
@@ -49,12 +57,21 @@ export function createDesktopSettingsClient (scope = globalThis) {
     clearApiKey: (req) => guard(() => bridge.clearApiKey(req)),
     status: () => guard(() => bridge.status()),
     onChange: (cb) => {
+      const origin = getOriginPolicy()
+      if (!origin.allowsAgent()) return () => {}
+      /** @type {(() => void) | undefined} */
+      let unsubscribeOrigin
+      /** @type {(() => void) | undefined} */
+      let release
+      let live = true
+      const stop = () => { live = false; release?.(); release = undefined; unsubscribeOrigin?.(); unsubscribeOrigin = undefined }
       try {
-        const off = bridge.onChange(cb)
-        return typeof off === 'function' ? off : () => {}
-      } catch (_) {
-        return () => {}
-      }
+        const off = bridge.onChange((/** @type {import('./types.js').SettingsChangedEvent} */ event) => { if (!live) return; if (origin.allowsAgent()) cb(event); else stop() })
+        release = typeof off === 'function' ? off : undefined
+        unsubscribeOrigin = origin.subscribe(() => { if (!origin.allowsAgent()) stop() })
+        if (!origin.allowsAgent()) stop()
+        return stop
+      } catch (_) { stop(); return () => {} }
     }
   }
 }
@@ -69,7 +86,21 @@ export function createDesktopSettingsClient (scope = globalThis) {
  * @returns {{ get: () => Promise<boolean>, set: (enabled: boolean) => Promise<void> } | undefined}
  */
 export function getDesktopConfirmSwitch (scope = globalThis) {
+  if (!getOriginPolicy().allowsAgent()) return undefined
   const sw = scope?.ipfsDesktop?.desktopConfirm
   if (!sw || typeof sw.get !== 'function' || typeof sw.set !== 'function') return undefined
-  return sw
+  /** @template T
+   * @param {() => Promise<T>} call */
+  const guarded = async call => {
+    const origin = getOriginPolicy()
+    let retired = false
+    const unsubscribe = origin.subscribe(() => { if (!origin.allowsAgent()) retired = true })
+    try {
+      if (retired || !origin.allowsAgent()) throw new SettingsError('unavailable', 'Native settings are unavailable on this page origin.')
+      const result = await call()
+      if (retired || !origin.allowsAgent()) throw new SettingsError('unavailable', 'The page origin changed while the request was pending. Check reported outcomes before retrying.')
+      return result
+    } finally { unsubscribe() }
+  }
+  return { get: () => guarded(() => sw.get()), set: enabled => guarded(() => sw.set(enabled)) }
 }

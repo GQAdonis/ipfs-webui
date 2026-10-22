@@ -1,6 +1,6 @@
 {
   "title": "Agent chat",
-  "description": "A chat sidebar that talks to your node's `ipfs mcp` agent endpoint. It is on by default but does nothing until an address is set: there is no default endpoint, you choose it. While it is off, or has no address, nothing is loaded and no request is made.",
+  "description": "The conversation talks only to your configured node's /agui endpoint. There is no default service address. Turning chat off stops its stream and clears the current conversation and unsent draft; ordinary IPFS pages keep working. Indexed Search and browser tools have separate controls.",
   "originAllowlist": "The endpoint refuses browser origins it does not list. Before you turn the chat on, add this Web UI's origin to the node's agent.origin_allowlist setting. The list is empty by default.",
   "originValue": "This Web UI's origin:",
   "toggle": {
@@ -32,5 +32,64 @@
     "loadError": "The chat could not be loaded. Press the button to try again.",
     "errorWord": "Not loaded"
   },
-  "desktopManaged": "IPFS Desktop manages the agent chat connection. The endpoint and token are set up by the app, so there is nothing to configure here."
+  "desktopManaged": "IPFS Desktop manages the agent chat connection. The endpoint and token are set up by the app, so there is nothing to configure here.",
+  "session": {
+    "signedIn": {
+      "word": "Signed in",
+      "as": "as {email}.",
+      "anonymous": "to this console."
+    },
+    "expired": {
+      "word": "Session ended",
+      "text": "Your sign-in has ended. Sign in again to keep working. Unsent chat text is cleared."
+    },
+    "stepUp": {
+      "word": "Verify again",
+      "text": "Agent settings need a recent sign-in with a second factor. A new sign-in starts from a signed-out console: sign out here, then sign in again and complete the second factor. If you stay signed in on know-me.tools, you may need to sign out there too.",
+      "action": "Sign out and verify again"
+    },
+    "help": "This console signs you in, so there is no endpoint or token to enter here. This page keeps no credential.",
+    "signInAgain": "Sign in again",
+    "signOut": "Sign out",
+    "signOutNote": "Signing out here ends this console session only. It does not sign you out of know-me.tools. That is a separate step on that site."
+  },
+  "presentation": {
+    "title": "Browser-local display preferences",
+    "localOnly": "These choices apply to this Web UI origin in this browser profile. They are not server settings, route permissions or approval grants. If storage is blocked, they last for this page only.",
+    "on": "On",
+    "off": "Off",
+    "decisions": {
+      "label": "Show Home decisions and Activity",
+      "help": "Turning this off cancels decision reads, closes the current review and clears its local observations. It does not answer or cancel a server decision.",
+      "off": "Decision display is off in this browser. No decision feed or detail review is active. Server and native confirmation controls are unchanged."
+    },
+    "a2ui": {
+      "label": "Show agent-generated UI",
+      "help": "Turning this off retires the current generated surfaces and their local actions. Plain chat and reported tool results remain available. It does not disable the server feature or authorize a tool."
+    },
+    "contextReferences": {
+      "label": "Show context references when available",
+      "help": "A local preference for supported reference controls. Turning it off clears current reference selections. A reference alone does not read content or attach bytes."
+    },
+    "runFacts": {
+      "label": "Show run facts when available",
+      "help": "A local preference for supported run-fact views. Missing facts remain unreported. This does not change what the server collects or returns."
+    },
+    "helpTitle": "What these controls change",
+    "serverControls": "This settings API does not report the server switches for decisions, generated UI, context references or run facts. Use the node operator’s supported configuration controls to disable a server feature. A hidden local view is not proof that the server is off.",
+    "independent": "Agent chat, indexed Search and WebMCP tools keep their separate controls above and below. Turning off a browser bearer chat also forgets its saved token; other features using that credential may need a new one. Navigation and ordinary Files, Pins and Explore remain available.",
+    "native": "IPFS Desktop owns its agent service and native confirmation setting. Use its existing confirmation control or tray setting. Browser display choices cannot replace a required native prompt, grant approval or disable its protection.",
+    "history": "Decision observations are bounded retained server history, not durable chat history. Missing history and unknown outcomes never authorize an automatic retry.",
+    "unpin": "Removing a pin stops protecting that content from garbage collection. It does not by itself delete the blocks or copies held by other nodes. Read the actual operation scope before confirming.",
+    "settings": "Change browser display preferences",
+    "decisionsTitle": "Decisions",
+    "activityTitle": "Activity"
+  },
+  "originGuard": {
+    "title": "Agent actions unavailable on this origin",
+    "shared": "This page is served through a shared IPFS/IPNS content path. Other content can share its origin and browser storage. Chat, agent settings and approvals are blocked here, including on a loopback path gateway. Ordinary IPFS navigation and read-only browser tools remain available.",
+    "unconfigured": "This page has no established isolated or dedicated agent origin. Chat, agent settings and approvals stay unavailable. An address saved by a page cannot establish that trust.",
+    "destination": "Open the isolated or dedicated Web UI address actually configured by your node operator or IPFS Desktop. No verified alternate Web UI address is known here, so this page does not invent a localhost or gateway link.",
+    "auth": "A per-content subdomain provides origin separation, not trusted content or permission. Authentication, endpoint origin policy, current capabilities and required native confirmation still apply."
+  }
 }

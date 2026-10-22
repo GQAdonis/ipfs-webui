@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 
 // Components
 import { Modal, ModalBody, ModalActions } from '../modal/modal'
@@ -10,7 +10,7 @@ import Overlay from '../overlay/overlay'
 import Shell from '../shell/Shell.js'
 import { cliCmdKeys, cliCommandList, cliCmdPrefixes } from '../../bundles/files/consts.js'
 
-export const CliTutorialModal = ({ command, t, onLeave, className, downloadConfig, ...props }) => {
+export const CliTutorialModal = ({ command, t, onLeave, className = '', downloadConfig, ...props }) => {
   const onClickCopyToClipboard = (cmd) => {
     navigator.clipboard.writeText(cmd).then(() => {
       onLeave()
@@ -94,10 +94,6 @@ CliTutorialModal.propTypes = {
   onLeave: PropTypes.func.isRequired,
   t: PropTypes.func.isRequired,
   command: PropTypes.string.isRequired
-}
-
-CliTutorialModal.defaultProps = {
-  className: ''
 }
 
 export default connect(

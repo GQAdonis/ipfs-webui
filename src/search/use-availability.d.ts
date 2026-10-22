@@ -7,7 +7,9 @@ export interface SearchAvailability {
   phase: AvailabilityPhase
   status: unknown
   error: unknown
-  connection: 'none' | 'no-endpoint' | 'no-token' | 'ready'
+  connection: 'none' | 'no-endpoint' | 'no-token' | 'ready' | 'resolving' | 'session-expired' | 'signing-out' | 'origin-blocked'
+  /** Opaque local connection lifetime, not a server identity or permission. */
+  generation?: string
   /** Whether the navigation entry shows. */
   visible: boolean
   refresh: () => Promise<void>

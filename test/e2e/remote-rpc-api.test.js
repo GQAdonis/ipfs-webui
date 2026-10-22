@@ -1,14 +1,11 @@
 // @ts-check
 import { test, expect } from './setup/coverage.js'
 import { settings, status, nav } from './setup/locators.js'
-import { createNode } from 'ipfsd-ctl'
-import getPort from 'aegir/get-port'
+import { availablePort as getPort, startOwnedKubo } from '../helpers/owned-kubo.mjs'
 import { createServer } from 'http'
 import httpProxy from 'http-proxy'
 import basicAuth from 'basic-auth'
 import { multiaddrToUri as toUri } from '@multiformats/multiaddr-to-uri'
-import { path as kuboPath } from 'kubo'
-import { create } from 'kubo-rpc-client'
 const { createProxyServer } = httpProxy
 
 // we need these tests to run in serial otherwise we try to start up two nodes on the same port
@@ -29,35 +26,14 @@ test.describe('Remote RPC API tests', () => {
   let password
   let proxyPort
 
-  let rpcPort
   let rpcAddr
   let rpcUrl
   let rpcId
 
   test.beforeAll(async () => {
-    rpcPort = await getPort(55055, '0.0.0.0')
-    rpcAddr = `/ip4/127.0.0.1/tcp/${rpcPort}`
     // spawn an ephemeral local node to ensure we connect to a different, remote node
-    ipfsd = await createNode({
-      type: 'kubo',
-      bin: kuboPath(),
-      rpc: create,
-      init: {
-        config: {
-          Addresses: {
-            API: rpcAddr
-          },
-          Gateway: {
-            NoFetch: true
-          },
-          Routing: {
-            Type: 'none'
-          }
-        }
-      },
-      test: true,
-      disposable: true
-    })
+    ipfsd = await startOwnedKubo()
+    rpcAddr = ipfsd.rpcAddr
 
     const { id } = await ipfsd.api.id()
     rpcId = id
@@ -108,18 +84,18 @@ test.describe('Remote RPC API tests', () => {
   test.beforeEach(async ({ page }) => {
   // Swap RPC API port for each test, ensure we don't get false-positives
     proxyPort = await getPort()
-    await proxyd.listen(proxyPort)
+    await new Promise((resolve, reject) => { proxyd.once('error', reject); proxyd.listen(proxyPort, '127.0.0.1', resolve) })
     // remove default api port set in test/e2e/setup/global-setup.js
     await page.goto('/')
     await page.evaluate('localStorage.removeItem(\'ipfsApi\')')
   })
 
   test.afterEach(async () => {
-    if (proxyd.listening) await proxyd.close()
+    if (proxyd.listening) await new Promise((resolve, reject) => proxyd.close(error => error ? reject(error) : resolve()))
   })
 
   test.afterAll(async () => {
-    if (proxyd.listening) await proxyd.close()
+    if (proxyd.listening) await new Promise((resolve, reject) => proxyd.close(error => error ? reject(error) : resolve()))
     await ipfsd.stop()
   })
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import ApiAddressForm from '../api-address-form/api-address-form'
@@ -62,20 +62,20 @@ const IsNotConnected = () => {
               <div className='bg-black-70 snow pa2 f7 lh-copy monospace nowrap overflow-x-auto'>
                 { activeTab === TABS.UNIX && (
                   <div>
-                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '[{addOrigin && `"${origin}", `}"{defaultDomains.join('", "')}"]'</code>
-                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'</code>
+                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin &apos;[{addOrigin && `"${origin}", `}&quot;{defaultDomains.join('", "')}&quot;]&apos;</code>
+                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods &apos;[&quot;PUT&quot;, &quot;POST&quot;]&apos;</code>
                   </div>
                 )}
                 { activeTab === TABS.POWERSHELL && (
                   <div>
-                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '[{addOrigin && `\\"${origin}\\", `}\"{defaultDomains.join('\\", \\"')}\"]'</code>
-                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '[\"PUT\", \"POST\"]'</code>
+                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin &apos;[{addOrigin && `\\"${origin}\\", `}\&quot;{defaultDomains.join('\\", \\"')}\&quot;]&apos;</code>
+                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods &apos;[\&quot;PUT\&quot;, \&quot;POST\&quot;]&apos;</code>
                   </div>
                 )}
                 { activeTab === TABS.WINDOWS && (
                   <div>
-                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin "[{addOrigin && `"""${origin}""", `}"""{defaultDomains.join('""", """')}"""]"</code>
-                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods "["""PUT""", """POST"""]"</code>
+                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin &quot;[{addOrigin && `"""${origin}""", `}&quot;&quot;&quot;{defaultDomains.join('""", """')}&quot;&quot;&quot;]&quot;</code>
+                    <code className='db'><b className='no-select'>$ </b>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods &quot;[&quot;&quot;&quot;PUT&quot;&quot;&quot;, &quot;&quot;&quot;POST&quot;&quot;&quot;]&quot;</code>
                   </div>
                 )}
               </div>

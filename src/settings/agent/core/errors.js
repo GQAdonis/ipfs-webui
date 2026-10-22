@@ -11,11 +11,13 @@ export const SERVER_ERROR_CODES = Object.freeze([
   'backend_not_configured',
   'revision_conflict',
   'egress_confirmation_required',
-  'secrets_not_accepted'
+  'secrets_not_accepted',
+  // 403 in session mode: the admin principal needs a recent second-factor sign-in (ADR-0013 section 5).
+  'step_up_required'
 ])
 
 /** @typedef {'backend_not_configured' | 'revision_conflict' | 'egress_confirmation_required' | 'secrets_not_accepted'} ServerErrorCode */
-/** @typedef {ServerErrorCode | 'unauthorized' | 'route_absent' | 'not_configured' | 'network' | 'http' | 'protocol' | 'unavailable'} SettingsErrorKind */
+/** @typedef {ServerErrorCode | 'unauthorized' | 'forbidden' | 'route_absent' | 'not_configured' | 'network' | 'http' | 'protocol' | 'unavailable'} SettingsErrorKind */
 
 const MAX_DETAIL = 300
 

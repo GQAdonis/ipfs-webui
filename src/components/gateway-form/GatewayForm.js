@@ -10,12 +10,12 @@ import { checkValidHttpUrl } from '../../bundles/gateway.js'
  * ipfs:// share link).
  */
 const GatewayForm = ({ t, savedValue, onUpdate, inputId, clearButtonId, submitButtonId, ariaLabel, placeholder }) => {
-  const [value, setValue] = useState(savedValue)
+  const [value, setValue] = useState(savedValue ?? '')
   const isValid = value === '' || checkValidHttpUrl(value)
 
   const onSubmit = (event) => {
     event.preventDefault()
-    if (!isValid) return
+    if (!isValid || value === (savedValue ?? '')) return
     onUpdate(value)
   }
 
@@ -23,12 +23,6 @@ const GatewayForm = ({ t, savedValue, onUpdate, inputId, clearButtonId, submitBu
     event.preventDefault()
     setValue('')
     onUpdate('')
-  }
-
-  const onKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      onSubmit(event)
-    }
   }
 
   return (
@@ -40,7 +34,7 @@ const GatewayForm = ({ t, savedValue, onUpdate, inputId, clearButtonId, submitBu
         type='text'
         className={`w-100 lh-copy monospace f5 pa2 mb2 charcoal input-reset ba b--black-20 br1 ${isValid ? 'focus-outline-green b--green-muted' : 'focus-outline-red b--red-muted'}`}
         onChange={(event) => setValue(event.target.value)}
-        onKeyPress={onKeyPress}
+        aria-invalid={!isValid || undefined}
         value={value}
       />
       <div className='tr'>
@@ -50,6 +44,7 @@ const GatewayForm = ({ t, savedValue, onUpdate, inputId, clearButtonId, submitBu
           height={40}
           bg='bg-charcoal'
           className='tc'
+          buttonType='button'
           disabled={value === ''}
           onClick={onClear}>
           {t('app:actions.clear')}
@@ -59,7 +54,7 @@ const GatewayForm = ({ t, savedValue, onUpdate, inputId, clearButtonId, submitBu
           minWidth={100}
           height={40}
           className='mt2 mt0-l ml2 tc'
-          disabled={!isValid || value === savedValue}>
+          disabled={!isValid || value === (savedValue ?? '')}>
           {t('actions.submit')}
         </Button>
       </div>

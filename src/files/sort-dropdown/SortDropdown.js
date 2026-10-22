@@ -1,14 +1,14 @@
 import { ChevronDownIcon } from '../../promethity/icons.js'
 import React, { useState, useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { DropdownMenu } from '@tableflip/react-dropdown'
+import { DropdownMenu } from '../dropdown/Dropdown.js'
 import { withTranslation } from 'react-i18next'
 import { sorts } from '../../bundles/files/index.js'
 
 const SortDropdown = ({ currentSort, onSortChange, t }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const buttonRef = useRef()
-  const dropdownRef = useRef()
+  const buttonRef = useRef(null)
+  const dropdownRef = useRef(null)
 
   const sortOptions = [
     {
@@ -105,7 +105,7 @@ const SortDropdown = ({ currentSort, onSortChange, t }) => {
           translateY="5px"
           onDismiss={() => setIsOpen(false)}
         >
-          <div className="flex flex-column" role="menu">
+          <div className="flex flex-column">
             {sortOptions.map((option, index) => (
               <button
                 key={`${option.value}-${option.asc}`}

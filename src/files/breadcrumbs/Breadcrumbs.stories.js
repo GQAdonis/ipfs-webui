@@ -2,7 +2,7 @@
 import Breadcrumbs from './Breadcrumbs.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Files/Header',
@@ -13,7 +13,7 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = {
   args: {
@@ -22,7 +22,7 @@ export const Default = {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Combined = {
   args: {

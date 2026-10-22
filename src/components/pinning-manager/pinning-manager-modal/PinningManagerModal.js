@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../../lib/react-store.js'
 import { withTranslation, Trans } from 'react-i18next'
 import PinningServiceModal from '../pinning-manager-service-modal/PinningManagerServiceModal.js'
 import './PinningManagerModal.css'
@@ -10,7 +10,7 @@ import { Modal, ModalBody, ModalActions } from '../../modal/modal'
 import Button from '../../button/button.tsx'
 import Overlay from '../../overlay/overlay'
 
-const PinningManagerModal = ({ t, tReady, onLeave, className, remoteServiceTemplates, pinningServicesDefaults, ...props }) => {
+const PinningManagerModal = ({ t, tReady, onLeave, className = '', remoteServiceTemplates, pinningServicesDefaults, ...props }) => {
   const [selectedService, setSelectedService] = useState(false)
 
   const onCustomModalOpen = () => setSelectedService({ type: 'CUSTOM' })
@@ -55,10 +55,6 @@ const PinningManagerModal = ({ t, tReady, onLeave, className, remoteServiceTempl
 PinningManagerModal.propTypes = {
   t: PropTypes.func.isRequired,
   onLeave: PropTypes.func.isRequired
-}
-
-PinningManagerModal.defaultProps = {
-  className: ''
 }
 
 export default connect(

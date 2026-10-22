@@ -1,14 +1,17 @@
+import { vi } from 'vitest'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import React from 'react'
 import { execFileSync } from 'node:child_process'
-import { join } from 'node:path'
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import { initReactI18next } from 'react-i18next'
 import i18n from 'i18next'
 import ICU from 'i18next-icu'
 import webmcpEn from '../../public/locales/en/webmcp.json'
 import { contextBridge } from '../helpers/context-bridge'
 import { TOOL_DEFINITIONS, EXCLUDED_TOOLS } from './vendor/index.js'
+import { getOriginPolicy } from '../agent-chat/origin-policy.js'
 import { WebMcpController } from './WebMcpHost.js'
 import { ARM_MS } from './WebMcpConfirmDialog.js'
 import { WebMcpHost, WebMcpSettings } from './index.js'
@@ -16,11 +19,12 @@ import * as queue from './confirmation-queue.js'
 import * as status from './registration-status.js'
 import * as store from './settings-store.js'
 import { isTrustedEvent } from './trust.js'
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // jsdom never produces a trusted event, so the trust check is a seam: by default it says
 // "untrusted" (what a script's .click() looks like) and a test says "trusted" to stand in
 // for a real press.
-jest.mock('./trust.js', () => ({ isTrustedEvent: jest.fn(() => false) }))
+vi.mock('./trust.js', () => ({ isTrustedEvent: vi.fn(() => false) }))
 
 // The Web UI loads translations through i18next-icu (src/i18n.js), so the tests do too.
 // Plain i18next would accept a message the real app renders as literal braces.
@@ -44,7 +48,7 @@ function fakeModelContext () {
   const registered = []
   return {
     registered,
-    registerTool: jest.fn((tool, options) => { registered.push({ tool, signal: options?.signal }) }),
+    registerTool: vi.fn((tool, options) => { registered.push({ tool, signal: options?.signal }) }),
     names: () => registered.map((r) => r.tool.name),
     tool: (name) => registered.find((r) => r.tool.name === name)?.tool,
     live: () => registered.filter((r) => !r.signal?.aborted).map((r) => r.tool.name)
@@ -73,7 +77,7 @@ const flush = () => act(async () => { await Promise.resolve() })
 const deny = () => screen.getByRole('button', { name: /^Deny: / })
 const approveButton = () => screen.getByRole('button', { name: /^Approve: / })
 const denyAllButton = () => screen.getByRole('button', { name: 'Deny all and turn off agent writes' })
-const advance = (ms) => act(async () => { jest.advanceTimersByTime(ms) })
+const advance = (ms) => act(async () => { vi.advanceTimersByTime(ms) })
 
 /** A real press on Approve: armed, a fresh trusted pointerdown, then a trusted click with detail 1. */
 async function pressApprove () {
@@ -96,16 +100,16 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup()
-  jest.useRealTimers()
+  vi.useRealTimers()
   contextBridge.setContext('selectIpfs', undefined)
   document.title = ''
 })
 
 describe('the vendored package', () => {
-  it('matches its MANIFEST.json, including its provenance', () => {
+  it('matches its MANIFEST.json, including its provenance', async () => {
     const out = execFileSync(process.execPath, [join(__dirname, 'vendor-webmcp.mjs'), '--check'], { encoding: 'utf8' })
     expect(out).toMatch(/^ok: \d+ files match/)
-    const manifest = require('./vendor/MANIFEST.json')
+    const { default: manifest } = await import('./vendor/MANIFEST.json')
     expect(manifest.kuboCommit).toMatch(/^([0-9a-f]{40}|uncommitted)$/)
     expect(manifest.contractVersion).toBe('0.1.0')
     expect(manifest.generatedToolsSha256).toMatch(/^[0-9a-f]{64}$/)
@@ -338,7 +342,7 @@ describe('settings store', () => {
   })
 
   it('works when storage is blocked: the settings then last for the page only', () => {
-    const spy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
     try {
       store.updateSettings({ enabled: true })
       expect(store.getSettings().enabled).toBe(true)
@@ -437,7 +441,7 @@ describe('DNSLink toggle', () => {
 })
 
 describe('confirmation dialog', () => {
-  beforeEach(() => { jest.useFakeTimers() })
+  beforeEach(() => { vi.useFakeTimers() })
 
   async function setup (handlers = {}) {
     store.updateSettings({ enabled: true, writes: true })
@@ -858,5 +862,63 @@ describe('settings', () => {
   it('stores nothing about the user: only the switches', () => {
     store.updateSettings({ enabled: true, writes: true, dnslink: true })
     expect(Object.keys(JSON.parse(localStorage.getItem(store.STORAGE_KEY))).sort()).toEqual(['dnslink', 'enabled'])
+  })
+})
+
+describe('shared path origin preserves reads but retires write authority', () => {
+  let previous
+  beforeEach(() => { previous = location.href; store.updateSettings({ enabled: true, writes: true }) })
+  afterEach(() => { cleanup(); queue.denyAll(); history.replaceState(null, '', previous); getOriginPolicy().refresh() })
+  const shared = () => history.replaceState(null, '', '/proxy/ipfs/bafyfixture/')
+  it('registers read-only tools on arbitrary shared paths and still performs an explicit ordinary read', async () => {
+    shared(); getOriginPolicy().refresh()
+    const mc = fakeModelContext(); const ipfs = fakeIpfs({ 'key.list': async () => [] })
+    render(<WebMcpController ipfs={ipfs.client} doc={{ modelContext: mc }} />)
+    await flush()
+    expect(mc.names()).toHaveLength(READ_COUNT)
+    expect(mc.tool('mfs_mkdir')).toBeUndefined()
+    expect(status.getStatus()).toMatchObject({ state: 'registered', writes: 0 })
+    expect(await mc.tool('key_list').execute({})).toMatchObject({ ok: true })
+    expect(ipfs.calls).toEqual(['key.list'])
+    expect(queue.getPending()).toEqual([])
+    expect(screen.queryByRole('alertdialog')).toBeNull()
+  })
+  it('declines a retained write callback after location changed without an event', async () => {
+    const mc = fakeModelContext(); const ipfs = fakeIpfs()
+    render(<WebMcpController ipfs={ipfs.client} doc={{ modelContext: mc }} />)
+    await flush()
+    const retained = mc.tool('mfs_mkdir')
+    shared()
+    let result
+    await act(async () => { result = await retained.execute({ path: '/blocked-origin' }) })
+    expect(result).toMatchObject({ ok: false, status: 'declined' })
+    expect(ipfs.calls).toEqual([])
+    expect(queue.getPending()).toEqual([])
+  })
+  it('cancels a pending confirmation before an unsafe approve callback can settle it', async () => {
+    const mc = fakeModelContext(); const ipfs = fakeIpfs()
+    render(<WebMcpController ipfs={ipfs.client} doc={{ modelContext: mc }} />)
+    await flush()
+    let pending
+    await act(async () => { pending = mc.tool('mfs_mkdir').execute({ path: '/pending-origin' }) })
+    const id = queue.getPending()[0].id
+    shared()
+    await act(async () => { queue.decide(id, true) })
+    expect(await pending).toMatchObject({ ok: false, status: 'declined' })
+    expect(queue.getPending()).toEqual([])
+    expect(queue.getLastDecision().outcome).toBe('cancelled')
+    expect(ipfs.calls).toEqual([])
+    expect(screen.queryByRole('alertdialog')).toBeNull()
+  })
+  it('rechecks origin after a decision and before the executor, without changing generated tools', async () => {
+    const mc = fakeModelContext(); const ipfs = fakeIpfs()
+    render(<WebMcpController ipfs={ipfs.client} doc={{ modelContext: mc }} />)
+    await flush()
+    let pending
+    await act(async () => { pending = mc.tool('mfs_mkdir').execute({ path: '/last-boundary' }) })
+    const id = queue.getPending()[0].id
+    await act(async () => { queue.decide(id, true); shared() })
+    expect(await pending).toMatchObject({ ok: false, status: 'declined' })
+    expect(ipfs.calls).toEqual([])
   })
 })

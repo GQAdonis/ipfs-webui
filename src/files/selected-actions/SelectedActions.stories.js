@@ -1,25 +1,24 @@
 import React from 'react'
-import { withKnobs, number } from '@storybook/addon-knobs'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 import i18n from '../../i18n-decorator.js'
 import SelectedActions from './SelectedActions.js'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'Files',
-  decorators: [withKnobs, i18n]
+  decorators: [i18n]
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
-export const _SelectedActions = () => (
+export const _SelectedActions = (args) => (
   <div className="ma3">
     <SelectedActions
       className="mb4"
-      count={number('Count', 1)}
+      count={args.count}
       size={345345}
       unselect={action('Unselect All')}
       remove={action('Remove Files')}
@@ -30,3 +29,6 @@ export const _SelectedActions = () => (
     />
   </div>
 )
+
+_SelectedActions.args = { count: 1 }
+_SelectedActions.argTypes = { count: { control: { type: 'number', min: 0 } } }

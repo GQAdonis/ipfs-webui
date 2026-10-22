@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 import { createSearchClient, readStatus, readSearch } from './client.js'
 import { isSearchError } from './errors.js'
 import { reply, CONFIGURED, hit, RUN, CID_A } from './test-helpers.js'
@@ -12,10 +13,15 @@ const failsWith = async (promise, kind, extra = {}) => {
   for (const [k, v] of Object.entries(extra)) expect(caught[k]).toEqual(v)
   return caught
 }
+const deferred = () => {
+  let resolve
+  const promise = new Promise(_resolve => { resolve = _resolve })
+  return { promise, resolve }
+}
 
 describe('status', () => {
   it('reads a configured index and its bulk run', async () => {
-    const fetch = jest.fn(async () => reply(200, { ...CONFIGURED, bulk_run: RUN }))
+    const fetch = vi.fn(async () => reply(200, { ...CONFIGURED, bulk_run: RUN }))
     const status = await make(fetch).status()
     expect(status.configured).toBe(true)
     expect(status.indexedCids).toBe(1284)
@@ -39,13 +45,13 @@ describe('status', () => {
   })
 
   it('does not carry the token in the URL', async () => {
-    const fetch = jest.fn(async () => reply(200, CONFIGURED))
+    const fetch = vi.fn(async () => reply(200, CONFIGURED))
     await make(fetch).status()
     expect(String(fetch.mock.calls[0][0])).not.toContain('tok-123')
   })
 
   it('sends nothing without a token', async () => {
-    const fetch = jest.fn()
+    const fetch = vi.fn()
     await failsWith(make(fetch, '').status(), 'unauthenticated')
     expect(fetch).not.toHaveBeenCalled()
   })
@@ -53,7 +59,7 @@ describe('status', () => {
 
 describe('search', () => {
   it('posts the contract body with the chosen filters', async () => {
-    const fetch = jest.fn(async () => reply(200, { model: 'bge-m3', results: [hit()] }))
+    const fetch = vi.fn(async () => reply(200, { model: 'bge-m3', results: [hit()] }))
     const out = await make(fetch).search({ query: '  roofer invoice  ', kinds: ['document'], sources: ['extracted', 'ocr'], topK: 7 })
     const [url, init] = fetch.mock.calls[0]
     expect(url).toBe(`${ROOT}/index/search`)
@@ -64,7 +70,7 @@ describe('search', () => {
   })
 
   it('omits empty filters, meaning every kind and source', async () => {
-    const fetch = jest.fn(async () => reply(200, { model: 'm', results: [] }))
+    const fetch = vi.fn(async () => reply(200, { model: 'm', results: [] }))
     await make(fetch).search({ query: 'x', kinds: [], sources: [] })
     expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ query: 'x', top_k: 20 })
   })
@@ -123,5 +129,43 @@ describe('error mapping', () => {
   it('a thrown fetch is a network error, and the message names no credential', async () => {
     const e = await failsWith(search(async () => { throw new TypeError('Failed to fetch') }), 'network')
     expect(e.message).not.toContain('tok-123')
+  })
+})
+
+describe('request retirement', () => {
+  it('does not ask the credential provider or fetch when already aborted', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    const fetch = vi.fn()
+    const getToken = vi.fn()
+    const client = createSearchClient({ root: ROOT, fetch, getToken })
+    await expect(client.status({ signal: controller.signal })).rejects.toMatchObject({ name: 'AbortError' })
+    expect(getToken).not.toHaveBeenCalled()
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('never fetches if retirement occurs while awaiting a credential', async () => {
+    const token = deferred()
+    const controller = new AbortController()
+    const fetch = vi.fn()
+    const client = createSearchClient({ root: ROOT, fetch, getToken: () => token.promise })
+    const pending = client.search({ query: 'private query' }, { signal: controller.signal })
+    controller.abort()
+    token.resolve('fixture-retired-token')
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('rejects late body parsing even if the fetch implementation ignores abort', async () => {
+    const body = deferred()
+    const json = vi.fn(() => body.promise)
+    const controller = new AbortController()
+    const client = createSearchClient({ root: ROOT, fetch: async () => ({ ok: true, json }), getToken: () => 'fixture-token' })
+    const pending = client.status({ signal: controller.signal })
+    for (let i = 0; i < 5; i++) await Promise.resolve()
+    expect(json).toHaveBeenCalledOnce()
+    controller.abort()
+    body.resolve(CONFIGURED)
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' })
   })
 })

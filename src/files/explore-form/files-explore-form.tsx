@@ -5,7 +5,6 @@ import { isValidIpfsPath, normalizeToPath } from '../../lib/ipfs-path.js'
 import { BrowseIcon, InspectIcon } from '../../promethity/icons.js'
 import Button from '../../components/button/button'
 import './files-explore-form.css'
-// @ts-expect-error - need to fix types for ipfs-webui since we are a CJS consumer...
 import { useExplore } from 'ipld-explorer-components/providers'
 import { useBridgeSelector } from '../../helpers/context-bridge'
 import type { KuboRPCClient } from 'kubo-rpc-client'
@@ -116,8 +115,8 @@ const FilesExploreForm: React.FC<FilesExploreFormProps> = ({ onBrowse: onBrowseP
       <div data-id='FilesExploreForm' className='sans-serif'>
         <div className='ExploreForm'>
           <div className='ExploreFormInputWrap'>
-            <input id='ipfs-path' className={`input-reset ExploreFormInput placeholder-light ${inputClass}`} type='text' placeholder='cid, ipfs://cid, or /ipfs/cid' aria-describedby='ipfs-path-desc' onChange={onChange} onKeyDown={onKeyDown} value={path} />
-            <small id='ipfs-path-desc' className='ExploreFormHint'>Paste in a CID or IPFS path</small>
+            <input id='ipfs-path' className={`input-reset ExploreFormInput placeholder-light ${inputClass}`} type='text' placeholder='cid, ipfs://cid, or /ipfs/cid' onChange={onChange} onKeyDown={onKeyDown} value={path} />
+            <label htmlFor='ipfs-path' className='ExploreFormHint'>Paste in a CID or IPFS path</label>
           </div>
           <div className='ExploreFormButtons'>
             <Button

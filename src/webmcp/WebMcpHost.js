@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { useOriginPolicy } from '../agent-chat/use-origin-policy.js'
 import PropTypes from 'prop-types'
 import { useBridgeSelector } from '../helpers/context-bridge'
 import { createWebMcpTools, getModelContext, registerWebMcpTools } from './vendor/index.js'
@@ -10,7 +11,8 @@ import WebMcpConfirmDialog from './WebMcpConfirmDialog.js'
 
 /**
  * Registers the mcp/webmcp tools with `document.modelContext` while, and only while,
- * both conditions hold: the Settings switch is on and the browser has WebMCP. It reads the
+ * the Settings switch is on and the browser has WebMCP. Write registration additionally needs
+ * current page-origin eligibility; read-only offerings remain independent. It reads the
  * node connection from the Web UI's existing API address setting through the ipfs client
  * the app already holds; it opens no connection of its own.
  *
@@ -27,6 +29,8 @@ import WebMcpConfirmDialog from './WebMcpConfirmDialog.js'
 export function WebMcpController ({ ipfs, doc = globalThis.document }) {
   const settings = useStore(getSettings, subscribeSettings)
   const { enabled, writes } = settings
+  const { policy, origin } = useOriginPolicy()
+  const offerWrites = writes && origin.allowed
 
   useEffect(() => {
     if (!enabled) {
@@ -48,12 +52,17 @@ export function WebMcpController ({ ipfs, doc = globalThis.document }) {
     let registration
     const tools = createWebMcpTools({
       client: ipfs,
-      confirm: requestConfirmation,
-      includeWrites: writes,
+      confirm: (request, options) => policy.allowsAgent() ? requestConfirmation(request, options) : Promise.resolve('writes_off'),
+      includeWrites: offerWrites,
       // Read at call time, not captured: these are the live switches.
       isActive: () => !cancelled && getSettings().enabled,
-      writesAllowed: () => !cancelled && getSettings().writes,
+      writesAllowed: () => !cancelled && getSettings().writes && policy.allowsAgent(),
       dnsLinkAllowed: () => getSettings().dnslink
+    })
+    const unsubscribeOrigin = policy.subscribe(() => {
+      if (policy.allowsAgent()) return
+      denyAll()
+      if (offerWrites) { cancelled = true; registration?.unregister(); setStatus({ state: 'origin-restricted' }) }
     })
     registerWebMcpTools(modelContext, tools).then((result) => {
       if (cancelled) {
@@ -71,13 +80,14 @@ export function WebMcpController ({ ipfs, doc = globalThis.document }) {
     })
     return () => {
       cancelled = true
+      unsubscribeOrigin()
       registration?.unregister()
       // Anything still waiting for a person belongs to a tool that is no longer offered.
       denyAll()
     }
-  }, [enabled, writes, ipfs, doc])
+  }, [enabled, offerWrites, ipfs, doc, policy])
 
-  return <WebMcpConfirmDialog />
+  return origin.allowed ? <WebMcpConfirmDialog /> : null
 }
 
 WebMcpController.propTypes = {

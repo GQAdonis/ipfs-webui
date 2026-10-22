@@ -1,0 +1,44 @@
+# Current final-boundary registration contract
+
+Q/1 authors the complete eighteen-scenario inventory. Nothing here was executed during production. Run only after the lead closes Q/1 and opens Q/2. The adopted identity/path/file SHA are exported by `requirements.mjs`; the retained run ID intentionally starts `agentic-ui-implementation`, while the phase is `agentic-ui-frontend`. A changed oracle file, identity, source, lock, runtime or produced artifact invalidates affected evidence. Historical PASS receipts are not reused.
+
+Default evidence is Kubo `evidence/agentic-ui-frontend/final-boundary/`. Each lane creates an exclusive `runs/<id>` with actual command PID/argv/cwd/exit/log hashes, every owned named slot, observations and artifact hashes. WU owns every requirement except UI-110 and UI-118/desktop-shell-overlays. SU owns UI-101/react-runtime, four UI-110, four UI-112 and UI-118/desktop-shell-overlays (ten slots). Every absent, failed or unexercised slot stays named. An empty callback, source presence, skipped test or generic external PASS cannot pass a slot. Native hardware absence remains NOT_EXERCISED; missing host fields remain a separate BLOCKED prerequisite.
+
+| Scenarios | Source-controlled executor |
+| --- | --- |
+| UI-101 / compatibility UI-113 | foundation.mjs; compatibility consumes Claude's actual source-bound receipt |
+| UI-102 | roles.mjs, baseline-fonts.mjs; real incumbent/token-only sources, current font/module provenance |
+| UI-103/104/106/108/111/116 | chat-runtime.mjs and disjoint chat-runtime fixtures; real lease flows stay separate from supplemental presentation/controller fixtures |
+| UI-105/107/109, feature-off UI-113, UI-117 | workspace.mjs and host-fixtures; actual production shell plus protected current read/controller factories |
+| UI-112 | accessibility.mjs; required decisions/shell/a2ui/inbox/context contributions, all four slots each |
+| UI-114/115 | operations.mjs and node-controls.mjs; unchanged real existing controls/RPC assertions |
+| WU UI-118 | host-overlays.mjs; actual ordinary, closed-shadow and iframe shared hosts |
+| SU | Desktop-owned registrations and production protection factories; WU evidence cannot replace them |
+
+Registrations export `default [{scenario,id,requires,run(ctx)}]`. `requires` is one of browser (current production artifact, pinned browser), fixture-browser (pinned browser without an implicit daemon import), daemon, builtin or uar. Unknown/duplicate slots and collaborators are rejected. Missing dependencies block only their dependent slots; independent package/browser/fixture assertions continue.
+
+## Frozen context
+
+`root/kubo/scratch/evidence/directory`, contract/config/scenario/slot, isolated env, processes, assert, record and screenshot retain their existing meanings. All fixture content is explicit, synthetic and task-owned; no operator repo, endpoint or content is used. `attach(path)` hashes an already-retained file confined to this run. `getNode/getPeer` use the existing Makefile-built binary identity and isolated nondefault-port fixture nodes; they never compile Kubo. `getArtifact` creates one strict local export unless `--use-current-export` is selected; that flag only asserts existing exact source/artifact bytes and never rebuilds a failed/stale export.
+
+`getBrowser()` returns the runner-owned pinned Chromium. `serveFixture({directory,theme,width,height,allowedOrigins?})` serves scratch-only built static bytes on owned loopback and returns page/context/baseURL/close plus a loopback-only allowOrigin method. There is no dev server, response mock or backend authority in this static host. Fixture producers record actual compiled modules/runtime/output sources. Synthetic presentation/memory-client/graph fixtures are labelled supplemental and cannot satisfy real-backend or native oracles.
+
+`browserSession({hosting:'shared-path'|'dedicated',backendLease?,theme,width,height})` serves exact current production bytes. Default shared `/ipfs/<CID>` hosting preserves relative-asset/navigation and negative origin evidence; it is deliberately blocked for positive agent actions by production O/1. `productionOrigin()` reserves an actual dedicated production-static origin. Optional config.hosting.port makes its nondefault loopback port preconfigurable. Dedicated positive agent sessions still require the actual canonical lease's allowed_origins and actual credentials; the runner does not expand CORS or create a trust flag. The existing settings/token keys are initialized only from the lease in a disposable browser context, using actual production connection logic. Credential-bearing sessions omit traces, request payloads and error bodies, never put a token in a URL/record/attribute and destroy their context on close.
+
+## Claude dependency intake
+
+Config is explicit test-only JSON: `{testOnly:true,hosting?:{port},compatibilityReceipt?:absolutePath,leases?:{builtin?,uar?,decisions?}}`. A lease entry supplies absolute executable/receipt paths, canonical private FD3 setup and optional actual UAR releaseReceiptPath. Do not commit provider credentials. Public manifests retain only config file hash/modes/hosting, never setup. `getLeaseExecutable(kind)` and `acquireBackendLease('builtin'|'uar')` validate current source, Makefile-built binary, compile argv/cwd/PID/exit/log bytes and executable hash. They do not compile or repair backend code. Missing or invalid intake is BLOCKED; supplied valid input launches the actual documented FD3/4/5 lease and attempts the flow. `startDecisionLease(ctx,origin)` retains the documented prepare/release/snapshot/negative/observe/answer/wait/close controls, with source-bound executable intake. Current reviewed positive controls use the real authenticated feed, private host adapter/controller and actual browser activation; Node control answers alone cannot certify frontend consent.
+
+A frontend intake receipt is schemaVersion1, owner claude, execution actual-command, status PASS, full adopted contract identity, kuboSourceSha256 and makeBuildSha256. Lease receipts have kind backend-lease-executable, leaseKind, executable:{path,sha256}, and command for exact `go test -c -o <executable> ./test/cli` or ./mcp/server, including actual cwd/PID/start/end/exit and stdout/stderr path+SHA. This is evidence wrapping an already-produced Claude artifact, not a new backend wire contract or command authorized in this runner. Native is deliberately unsupported until a real published host lease protocol exists.
+
+Compatibility receipts use kind kubo-compatibility and the exact isolated CLI argv for TestMCP, TestDefaultMatchesExpectedProfile, TestCommandDocsWidth, TestGateway, TestTelemetry and TestProvider. Every family must actually run/pass without masked required skips; no-tests output fails. The standalone TestMCPBoundaryLease skip alone is permitted because the dedicated fixture is exercised separately. Actual public receipt/log bytes are retained and revalidated in aggregation against current Kubo source and binary. UAR's existing actual release-inspection bytes/fresh lease binding and private FD credential handling remain required. A descriptor alone grants no PASS or native capability.
+
+Known absent subject/history/restart/egress/model-delay/native controls remain explicit after available assertions run. No replay, fake receipt, fabricated transcript interrupt, native presence substitute, unconditional external PASS or undocumented server control is added.
+
+## Q/2 execution and preview
+
+Use the source-owned `mcp/ui/scripts/frontend-final-packet.mjs` recorder after all Q/1 owners release. It keeps all fourteen adopted checks and records independent results even after failure. Shared check/visual producers precede WebUI consumer config imports; WebUI build precedes one strict final export; consumer eslint/typecheck/unit then exercise refreshed generated/vendor bytes. WU boundary consumes that export with --use-current-export; Desktop assembles those exact bytes. See the phase execution note for exact order.
+
+A supplemental current production-static preview is `node scripts/preview-static.mjs [--port <nondefault-loopback-port>]` from WebUI after the current export. Use a fresh browser profile at 375/1440; no backend/credential is supplied. Unavailable features must remain truthful. This preview is useful independent visual evidence, never real agent acceptance.
+
+The lane aggregator accepts explicit WU/SU receipts and optional --packet-receipt, preserving every missing contribution. It rehashes actual current source/runtime/artifact/implementation/evidence bytes and links outer command logs/source without importing its verdict as phase authority. phaseStatus remains BLOCKED and phaseAcceptance false even if all lane contributions pass: separate fresh-context security/quality/UI reviews, live prerequisites and any required hardware evidence remain necessary.

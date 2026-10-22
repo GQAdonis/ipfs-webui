@@ -3,9 +3,9 @@
   "entry": "ipfs-agent-chat.js",
   "note": "Built from mcp/chat in the kubo repository. Regenerate with src/agent-chat/vendor-island.mjs.",
   "files": {
-    "ipfs-agent-chat.js": "04228aa2ada7c4776403f3abb2c3ae8968822d14a169b13eb80b6ea4879dbcf1",
+    "ipfs-agent-chat.js": "5eb066581e61ded54001280d5875adf4a8ca1ba8e70656558c5d6d71c7119dc1",
     "chunks/endpoint-BhoYC3ie.js": "6dd9720fce273cd75bf263aad3453429dc70a46e5f8e6c7fd4095bcc21306ca8",
     "chunks/fonts-data-D_fXGTRc-DVfbGgFJ.js": "e751e016c15a0faf024a6eab0be972ce99cf1715b7fedffa552044c95ed61b04",
-    "chunks/mount-DYmoEgTR.js": "7bd987fc03e1b1ca162e38bf5bc5d1086cc3983a680a1e6d594adeead8405e3a"
+    "chunks/mount-CCm0zBMP.js": "2f75ee097eaa06a40cd46e4bd957dc060110638f8dc8ea9f171df340524b3ec7"
   }
 }

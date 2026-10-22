@@ -1,0 +1,315 @@
+--- a/src/components/ExplorePage.tsx
++++ b/src/components/ExplorePage.tsx
+@@ -1,7 +1,6 @@
+ import React from 'react'
+-import { Helmet } from 'react-helmet'
+ import { useTranslation } from 'react-i18next'
+-import ReactJoyride from 'react-joyride'
++import { Joyride } from 'react-joyride'
+ import { Loader } from '../components/loader/loader.js'
+ import { explorerTour } from '../lib/tours.js'
+ import { useExplore } from '../providers/explore.js'
+@@ -23,7 +22,7 @@
+   runTour?: boolean
+   joyrideCallback?: any
+   gatewayUrl?: any
+-  publicGatewayUrl?: string
++  publicGatewayUrl?: string | null
+ }): null | React.ReactNode => {
+   const { t, ready: tReady } = useTranslation('explore')
+ 
+@@ -46,9 +45,7 @@
+ 
+   return (
+       <div className='nt4-l'>
+-        <Helmet>
+-          <title>{t('ExplorePage.title')}</title>
+-        </Helmet>
++        <title>{t('ExplorePage.title')}</title>
+ 
+         {pathBoundaries != null && targetNode != null
+           ? (
+@@ -117,14 +114,13 @@
+           </div>
+         </div>
+ 
+-        <ReactJoyride
++        <Joyride
+           run={runTour}
+           steps={explorerTour.getSteps({ t })}
+-          styles={explorerTour.styles}
+-          callback={joyrideCallback}
++          options={{ ...explorerTour.options, showProgress: true }}
++          onEvent={joyrideCallback}
+           continuous
+           scrollToFirstStep
+-          showProgress
+         />
+       </div>
+   )
+--- a/src/components/StartExploringPage.tsx
++++ b/src/components/StartExploringPage.tsx
+@@ -1,14 +1,13 @@
+ import React from 'react'
+-import Helmet from 'react-helmet'
+ import { useTranslation } from 'react-i18next'
+-import ReactJoyride from 'react-joyride'
++import { Joyride } from 'react-joyride'
+ import { type ExplorePageLink, explorePageLinks } from '../lib/explore-page-suggestions.js'
+ import { projectsTour } from '../lib/tours.js'
+ import { AboutIpld } from './about/AboutIpld.js'
+ import IpldExploreForm from './explore/IpldExploreForm.js'
+ import { type NodeStyle, colorForNode, nameForNode, shortNameForNode } from './object-info/ObjectInfo.js'
+ 
+-const ExploreSuggestion = ({ cid, name, type }: { cid: string, name: string, type: NodeStyle }): JSX.Element => (
++const ExploreSuggestion = ({ cid, name, type }: { cid: string, name: string, type: NodeStyle }): React.JSX.Element => (
+   <a className='flex items-center lh-copy pl3 pl0-l pv3 bb b--black-10 link focus-outline' href={`#/explore/${cid}`}>
+     <span className='flex items-center justify-center w3 h3 w3-m h3-m w3-l h3-l flex-none br-100 tc' style={{ background: colorForNode(type) }}>
+       <span className='montserrat fw3 f6 snow' title={nameForNode(type)}>{shortNameForNode(type)}</span>
+@@ -32,9 +31,7 @@
+ 
+   return (
+     <div className='mw9 center explore-sug-2'>
+-      <Helmet>
+-        <title>{t('StartExploringPage.title')}</title>
+-      </Helmet>
++      <title>{t('StartExploringPage.title')}</title>
+       <div className='flex-l'>
+         <div className='flex-auto-l mr3-l'>
+           <div className='pl3 pl0-l pt4 pt2-l'>
+@@ -55,11 +52,11 @@
+         </div>
+       </div>
+ 
+-      <ReactJoyride
++      <Joyride
+         run={runTour}
+         steps={projectsTour.getSteps({ t })}
+-        styles={projectsTour.styles}
+-        callback={joyrideCallback}
++        options={projectsTour.options}
++        onEvent={joyrideCallback}
+         scrollToFirstStep
+       />
+     </div>
+--- a/src/components/cid/Cid.tsx
++++ b/src/components/cid/Cid.tsx
+@@ -30,7 +30,7 @@
+ }
+ 
+ export interface CidProps extends Omit<HTMLProps<HTMLSpanElement>, 'value'> {
+-  value: CID
++  value: CID | string
+ }
+ 
+ const Cid: React.FC<CidProps> = ({ value, title, style, ...props }) => {
+--- a/src/components/graph-crumb/GraphCrumb.tsx
++++ b/src/components/graph-crumb/GraphCrumb.tsx
+@@ -7,12 +7,12 @@
+ 
+ export interface PathBoundary {
+   path: string
+-  source: CID
+-  target: CID
++  source: CID | string
++  target: CID | string
+ }
+ 
+ export interface GraphCrumbProps extends React.HTMLAttributes<HTMLDivElement> {
+-  cid: CID
++  cid: CID | string
+   pathBoundaries: PathBoundary[]
+   /**
+    * Used to represent the current path segment that is being explored or displayed within the component. This path
+@@ -92,13 +92,13 @@
+   )
+ }
+ 
+-function calculateHrefBase (hrefBase: string, cid: CID, boundaries: any, boundaryIndex: any): string {
++function calculateHrefBase (hrefBase: string, cid: CID | string, boundaries: any, boundaryIndex: any): string {
+   const relPath: string = boundaries.slice(0, boundaryIndex).map((b: any) => b.path).join('/')
+   const cidHref = hrefBase + '/' + cid.toString()
+   return isTruthy(relPath) ? cidHref + '/' + relPath : cidHref
+ }
+ 
+-const NodeUnderline: React.FC<PropsWithChildren<{ cid: CID }>> = ({ cid, children }) => {
++const NodeUnderline: React.FC<PropsWithChildren<{ cid: CID | string }>> = ({ cid, children }) => {
+   const type = getCodecOrNull(cid)
+   // @ts-expect-error - todo: resolve this type error
+   const color = colorForNode(type)
+@@ -109,7 +109,7 @@
+   )
+ }
+ 
+-const Path: React.FC<{ path: string, hrefBase: string, sourceCid: CID }> = ({ path, hrefBase, sourceCid }) => {
++const Path: React.FC<{ path: string, hrefBase: string, sourceCid: CID | string }> = ({ path, hrefBase, sourceCid }) => {
+   const parts = [path]
+ 
+   return (
+--- a/src/components/object-info/ObjectInfo.tsx
++++ b/src/components/object-info/ObjectInfo.tsx
+@@ -7,6 +7,7 @@
+ import getCodecNameFromCode from '../../lib/get-codec-name-from-code'
+ import { type NormalizedDagNode, type UnixFsNodeDataWithNumbers } from '../../types.js'
+ import LargeLinksTable, { type LinkObject, type LargeLinksTableProps } from './links-table'
++import { KeyboardInspector } from './keyboard-inspector.js'
+ 
+ const humansize = partial({ round: 0 })
+ 
+@@ -113,7 +114,7 @@
+   format: string
+   onLinkClick: LargeLinksTableProps['onLinkClick']
+   gatewayUrl: string
+-  publicGatewayUrl: string
++  publicGatewayUrl: string | null
+ }
+ 
+ // eslint-disable-next-line complexity
+@@ -193,8 +194,10 @@
+           ? null
+           : (
+           <div className='pa3 mt2 bg-white f5 nl3 nr3 mh0-l overflow-x-auto'>
++            <KeyboardInspector label={cid}>
+             {/* @ts-expect-error - object inspector types are wrong. see https://www.npmjs.com/package/react-inspector#theme  */}
+             <ObjectInspector showMaxKeys={100} data={getObjectInspectorData(data)} theme={objectInspectorTheme} expandPaths={toExpandPathsNotation(localPath)} />
++            </KeyboardInspector>
+           </div>
+             )}
+       </div>
+--- /dev/null
++++ b/src/components/object-info/keyboard-inspector.tsx
+@@ -0,0 +1,34 @@
++import React from 'react'
++
++// react-inspector supplies the same expandable previews as upstream. Delegate
++// keyboard intent to those controls so byte/object views remain operable without
++// maintaining a second object renderer or changing decoded IPLD data.
++export function KeyboardInspector ({ children, label }: React.PropsWithChildren<{ label: string }>): React.ReactNode {
++  const focus = (item?: HTMLElement | null): void => {
++    if (!item) return
++    item.tabIndex = -1
++    item.focus()
++  }
++  const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
++    if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End', 'Enter', ' '].includes(event.key)) return
++    const items = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('[role="treeitem"]'))
++    const item = (event.target as HTMLElement).closest<HTMLElement>('[role="treeitem"]') ?? items[0]
++    if (!item) return
++    event.preventDefault()
++    event.stopPropagation()
++    const index = items.indexOf(item)
++    if (event.key === 'ArrowDown') focus(items[Math.min(index + 1, items.length - 1)])
++    else if (event.key === 'ArrowUp') focus(items[Math.max(index - 1, 0)])
++    else if (event.key === 'Home') focus(items[0])
++    else if (event.key === 'End') focus(items.at(-1))
++    else if (event.key === 'Enter' || event.key === ' ') (item.firstElementChild as HTMLElement)?.click()
++    else if (event.key === 'ArrowRight') {
++      if (item.getAttribute('aria-expanded') === 'false') (item.firstElementChild as HTMLElement)?.click()
++      else focus(item.querySelector<HTMLElement>('[role="treeitem"]'))
++    } else if (item.getAttribute('aria-expanded') === 'true') (item.firstElementChild as HTMLElement)?.click()
++    else focus(item.parentElement?.closest<HTMLElement>('[role="treeitem"]'))
++  }
++  return <div role='group' aria-label={label} tabIndex={0} onKeyDown={onKeyDown} onFocus={event => {
++    if (event.target === event.currentTarget) focus(event.currentTarget.querySelector<HTMLElement>('[role="treeitem"]'))
++  }}>{children}</div>
++}
+--- a/src/components/object-info/links-table.tsx
++++ b/src/components/object-info/links-table.tsx
+@@ -49,20 +49,25 @@
+   const backgroundColor = key % 2 === 0 ? '#fff' : 'rgb(251, 251, 251)'
+ 
+   return (
+-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+     <div
+       key={key}
+-      className={`pv2 pointer items-center f7 ${styles.rowGrid} bb b--near-white`}
++      role='button'
++      tabIndex={0}
++      aria-label={`${link.path} ${link.target}`}
++      onKeyDown={event => {
++        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onLinkClick(link) }
++      }}
++      className={`pv2 pointer items-center f7 ${styles['row-grid']} bb b--near-white`}
+       style={{ position: 'absolute', top: key * rowHeight, width: '100%', backgroundColor }}
+       onClick={() => { onLinkClick(link) }}
+     >
+-      <div className={`mid-gray tr pr1 f7 ${styles.gridCellRow} monospace}`}>
++      <div className={`mid-gray tr pr1 f7 ${styles['grid-cell-row']} monospace}`}>
+         {key}
+       </div>
+-      <div className={`navy f6-ns f7 ${styles.gridCellRow}`}>
++      <div className={`navy f6-ns f7 ${styles['grid-cell-row']}`}>
+         {link.path}
+       </div>
+-      <div className={`mid-gray tl ${styles.gridCellRow} ml1 f7 monospace}`}>
++      <div className={`mid-gray tl ${styles['grid-cell-row']} ml1 f7 monospace}`}>
+         {link.target}
+       </div>
+     </div>
+@@ -75,14 +80,14 @@
+ 
+ const Header: React.FC<HeaderProps> = () => {
+   return (
+-    <div className={`mid-gray ${styles.headerGrid} items-center pv2 fw1 tracked bb b--near-white`}>
+-      <div className={`mid-gray tr pr1 f7 ${styles.gridCellHeader}`}>
++    <div className={`mid-gray ${styles['header-grid']} items-center pv2 fw1 tracked bb b--near-white`}>
++      <div className={`mid-gray tr pr1 f7 ${styles['grid-cell-header']}`}>
+         #
+       </div>
+-      <div className={`navy tl tracked f7 ${styles.gridCellHeader}`}>
++      <div className={`navy tl tracked f7 ${styles['grid-cell-header']}`}>
+         PATH
+       </div>
+-      <div className={`mid-gray tl tracked ${styles.gridCellHeader}`}>
++      <div className={`mid-gray tl tracked ${styles['grid-cell-header']}`}>
+         CID
+       </div>
+     </div>
+@@ -131,7 +136,7 @@
+   const visibleLinks = links.slice(startIndex, endIndex)
+ 
+   return (
+-    <div className={`collapse br2 pv2 ph3 mv2 nl3 nr3 mh0-l f7 ${styles.linksTable}`}>
++    <div className={`collapse br2 pv2 ph3 mv2 nl3 nr3 mh0-l f7 ${styles['links-table']}`}>
+       <Header cidRowStyle={cidRowStyle ?? { width: tableWidth }} />
+       <div
+         ref={containerRef}
+--- a/src/lib/tours.tsx
++++ b/src/lib/tours.tsx
+@@ -13,13 +13,11 @@
+     placement: 'center',
+     target: 'body'
+   }],
+-  styles: {
+-    options: {
+-      width: '500px',
+-      primaryColor: '#69c4cd',
+-      textColor: '#34373f',
+-      zIndex: 999
+-    }
++  options: {
++    width: '500px',
++    primaryColor: '#69c4cd',
++    textColor: '#34373f',
++    zIndex: 999
+   }
+ }
+ 
+@@ -78,12 +76,10 @@
+       target: '.joyride-explorer-graph'
+     }
+   ],
+-  styles: {
+-    options: {
+-      width: '500px',
+-      primaryColor: '#69c4cd',
+-      textColor: '#34373f',
+-      zIndex: 999
+-    }
++  options: {
++    width: '500px',
++    primaryColor: '#69c4cd',
++    textColor: '#34373f',
++    zIndex: 999
+   }
+ }

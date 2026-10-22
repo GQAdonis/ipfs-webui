@@ -1,7 +1,10 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import { dirname as testDirname } from 'node:path'
 // Review M1: the launcher's clearance protects every page, not only the ones that read the
 // variable themselves. The rules are plain CSS, so the test reads them as text.
 import fs from 'fs'
 import path from 'path'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 const css = fs.readFileSync(path.join(__dirname, 'launcher.css'), 'utf8')
 

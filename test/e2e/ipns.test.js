@@ -129,7 +129,7 @@ test.describe('IPNS publishing', () => {
       await publishMenuItem.click()
 
       await expect(ipns.publishModalKeys(page)).toBeVisible()
-      await page.locator(`div[role="dialog"] .publishModalKeys button:has-text("${keyName}")`).click()
+      await page.getByRole('dialog').locator(`.publishModalKeys button:has-text("${keyName}")`).click()
       await page.getByText(keyName).click()
 
       const publishButton = ipns.publishButton(page)
@@ -146,7 +146,7 @@ test.describe('IPNS publishing', () => {
 
       // Default share link type is the public subdomain gateway, so the
       // published link puts the base36 IPNS name in a dweb.link subdomain
-      await expect(page.locator('div[role="dialog"] input[readonly]')).toHaveValue(/^https:\/\/k\w+\.ipns\.dweb\.link$/)
+      await expect(page.getByRole('dialog').locator('input[readonly]')).toHaveValue(/^https:\/\/k\w+\.ipns\.dweb\.link$/)
 
       await ipns.doneButton(page).click()
 

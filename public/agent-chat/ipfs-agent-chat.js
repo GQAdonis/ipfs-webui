@@ -1,18 +1,19 @@
 import { t as e } from "./chunks/endpoint-BhoYC3ie.js";
 //#region src/island-loader.ts
-var t = () => import("./chunks/mount-DYmoEgTR.js"), n = "ipfs-agent-chat", r = "ipfs-agent-chat-openchange", i = "ipfs-agent-chat-notice", a = [
+var t = () => import("./chunks/mount-CCm0zBMP.js"), n = "ipfs-agent-chat", r = "ipfs-agent-chat-openchange", i = "ipfs-agent-chat-notice", a = "ipfs-agent-chat-session-expired", o = [
 	"dark",
 	"light",
 	"auto"
-], o = "\n:host { all: initial; position: fixed; inset: 0; z-index: var(--ipfs-agent-chat-z-index, 1000); display: block;\n  overflow: hidden; pointer-events: none; contain: layout style; }\n:host(:not([data-active])) { display: none; }\n", s = () => new Promise((e) => {
+], s = "\n:host { all: initial; position: fixed; inset: 0; z-index: var(--ipfs-agent-chat-z-index, 1000); display: block;\n  overflow: hidden; pointer-events: none; contain: layout style; }\n:host(:not([data-active])) { display: none; }\n", c = () => new Promise((e) => {
 	let t = globalThis.requestAnimationFrame;
 	if (typeof t != "function") return void setTimeout(e, 16);
 	t(() => t(() => e()));
-}), c = class extends HTMLElement {
+}), l = class extends HTMLElement {
 	static observedAttributes = [
 		"endpoint",
 		"open",
-		"theme"
+		"theme",
+		"session"
 	];
 	#e;
 	#t;
@@ -21,6 +22,11 @@ var t = () => import("./chunks/mount-DYmoEgTR.js"), n = "ipfs-agent-chat", r = "
 	#i;
 	#a = null;
 	#o = 0;
+	#s = 0;
+	#c = new AbortController();
+	#l() {
+		this.#c.abort(), this.#c = new AbortController(), this.#s++;
+	}
 	get endpoint() {
 		return this.getAttribute("endpoint") ?? void 0;
 	}
@@ -33,23 +39,29 @@ var t = () => import("./chunks/mount-DYmoEgTR.js"), n = "ipfs-agent-chat", r = "
 	set open(e) {
 		this.toggleAttribute("open", !!e);
 	}
+	get session() {
+		return this.hasAttribute("session");
+	}
+	set session(e) {
+		this.toggleAttribute("session", !!e);
+	}
 	get theme() {
 		let e = this.getAttribute("theme");
-		return a.includes(e) ? e : "auto";
+		return o.includes(e) ? e : "auto";
 	}
 	set theme(e) {
 		this.setAttribute("theme", e);
 	}
 	get token() {}
 	set token(e) {
-		this.#e = typeof e == "string" && e !== "" ? e : void 0, this.#u();
+		this.#l(), this.#e = typeof e == "string" && e !== "" ? e : void 0, this.#m();
 	}
 	get tokenProvider() {}
 	set tokenProvider(e) {
-		this.#t = typeof e == "function" ? e : void 0, this.#u();
+		this.#l(), this.#t = typeof e == "function" ? e : void 0, this.#m();
 	}
 	get tokenSet() {
-		return this.#e !== void 0 || this.#t !== void 0;
+		return this.session || this.#e !== void 0 || this.#t !== void 0;
 	}
 	openPanel() {
 		this.open = !0;
@@ -61,15 +73,15 @@ var t = () => import("./chunks/mount-DYmoEgTR.js"), n = "ipfs-agent-chat", r = "
 		this.open = !this.open;
 	}
 	connectedCallback() {
-		this.#n || (this.#n = this.attachShadow({ mode: "closed" }), l(this.#n)), this.hasAttribute("token") && (this.removeAttribute("token"), this.dispatchEvent(new CustomEvent(i, { detail: { message: "The token attribute is ignored and removed. Set the token property." } }))), this.#u();
+		this.#n || (this.#n = this.attachShadow({ mode: "closed" }), u(this.#n)), this.hasAttribute("token") && (this.removeAttribute("token"), this.dispatchEvent(new CustomEvent(i, { detail: { message: "The token attribute is ignored and removed. Set the token property." } }))), this.#m();
 	}
 	disconnectedCallback() {
-		this.#o++, this.#r?.unmount(), this.#r = void 0, this.#i = void 0, this.removeAttribute("data-active");
+		this.#o++, this.#l(), this.#r?.unmount(), this.#r = void 0, this.#i = void 0, this.removeAttribute("data-active");
 	}
 	attributeChangedCallback(e, t, n) {
-		t !== n && (e === "open" && this.#c(n !== null), this.#u());
+		t !== n && ((e === "endpoint" || e === "session") && this.#l(), e === "open" && this.#f(n !== null), this.#m());
 	}
-	#s = async () => {
+	#u = async () => {
 		if (this.#e !== void 0) return this.#e;
 		try {
 			return await this.#t?.() || void 0;
@@ -77,7 +89,13 @@ var t = () => import("./chunks/mount-DYmoEgTR.js"), n = "ipfs-agent-chat", r = "
 			return;
 		}
 	};
-	#c(e) {
+	#d = () => {
+		this.dispatchEvent(new CustomEvent(a, {
+			bubbles: !0,
+			composed: !0
+		}));
+	};
+	#f(e) {
 		if (e) {
 			let e = document.activeElement;
 			this.#a = e && e !== this ? e : null;
@@ -91,11 +109,15 @@ var t = () => import("./chunks/mount-DYmoEgTR.js"), n = "ipfs-agent-chat", r = "
 			composed: !0
 		}));
 	}
-	#l(e) {
+	#p(e) {
 		return {
 			endpoint: this.endpoint,
-			getToken: this.#s,
+			getToken: this.#u,
 			tokenSet: this.tokenSet,
+			session: this.session,
+			onSessionExpired: this.#d,
+			connectionGeneration: this.#s,
+			connectionSignal: this.#c.signal,
 			open: e,
 			theme: this.theme,
 			onOpenChange: (e) => {
@@ -103,32 +125,32 @@ var t = () => import("./chunks/mount-DYmoEgTR.js"), n = "ipfs-agent-chat", r = "
 			}
 		};
 	}
-	#u() {
-		this.isConnected && this.#n && (this.#r || this.open) && this.#d();
+	#m() {
+		this.isConnected && this.#n && (this.#r || this.open) && this.#h();
 	}
-	async #d() {
+	async #h() {
 		let e = this.#o, n = this.#n;
-		n && (this.#r ? this.#r.update(this.#l(this.open)) : (this.#i ??= t().then(async ({ mountIsland: t }) => {
-			e !== this.#o || this.#r || (this.#r = t(n, this.#l(!1)), this.setAttribute("data-active", ""), this.open && (await s(), e === this.#o && this.#r?.update(this.#l(this.open))));
+		n && (this.#r ? this.#r.update(this.#p(this.open)) : (this.#i ??= t().then(async ({ mountIsland: t }) => {
+			e !== this.#o || this.#r || (this.#r = t(n, this.#p(!1)), this.setAttribute("data-active", ""), this.open && (await c(), e === this.#o && this.#r?.update(this.#p(this.open))));
 		}), await this.#i));
 	}
 };
-function l(e) {
+function u(e) {
 	if (typeof CSSStyleSheet < "u" && "adoptedStyleSheets" in e) try {
 		let t = new CSSStyleSheet();
-		t.replaceSync(o), e.adoptedStyleSheets = [t];
+		t.replaceSync(s), e.adoptedStyleSheets = [t];
 		return;
 	} catch {}
 	let t = document.createElement("style");
-	t.textContent = o, e.append(t);
+	t.textContent = s, e.append(t);
 }
-function u(e = n) {
-	customElements.get(e) || customElements.define(e, c);
+function d(e = n) {
+	customElements.get(e) || customElements.define(e, l);
 }
 //#endregion
 //#region src/index.ts
-u();
+d();
 //#endregion
-export { n as ELEMENT_TAG, c as IpfsAgentChatElement, i as NOTICE_EVENT, r as OPEN_CHANGE_EVENT, e as SUGGESTED_AGUI_ENDPOINT, u as defineIpfsAgentChat };
+export { n as ELEMENT_TAG, l as IpfsAgentChatElement, i as NOTICE_EVENT, r as OPEN_CHANGE_EVENT, a as SESSION_EXPIRED_EVENT, e as SUGGESTED_AGUI_ENDPOINT, d as defineIpfsAgentChat };
 
 //# sourceMappingURL=ipfs-agent-chat.js.map

@@ -1,6 +1,7 @@
+import { vi } from 'vitest'
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import ErrorBoundary from './error-boundary'
 
 // Helpers
@@ -18,10 +19,10 @@ const CustomFallback: React.FC<{ error?: Error; componentStack?: string }> = ({ 
 )
 
 describe('ErrorBoundary', () => {
-  let consoleErrorSpy: jest.SpyInstance
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -51,7 +52,7 @@ describe('ErrorBoundary', () => {
   })
 
   it('calls onError callback with error and component stack info', () => {
-    const onError = jest.fn()
+    const onError = vi.fn()
     render(
       <ErrorBoundary onError={onError}>
         <Thrower />

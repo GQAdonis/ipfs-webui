@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Box from '../../components/box/Box.js'
 import LogWarningModal from './log-warning-modal'
 import { useLogs } from '../../contexts/logs/index'

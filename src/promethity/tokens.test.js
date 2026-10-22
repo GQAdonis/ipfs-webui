@@ -1,10 +1,12 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import path, { dirname as testDirname } from 'node:path'
 // Contrast guard for tokens.css. Recomputes every WCAG 2.2 pairing from kubo
 // DESIGN.md (Color) out of the shipped stylesheet, in both themes, so a token
 // edit that breaks a documented floor fails here. The `documented` values are
 // the DESIGN.md contrast table as printed there (one decimal).
 
 import fs from 'node:fs'
-import path from 'node:path'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 const css = fs.readFileSync(path.join(__dirname, 'tokens.css'), 'utf8')
 

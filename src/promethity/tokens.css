@@ -102,6 +102,9 @@
   --text-code: 13px;
   --focus-ring: 2px solid var(--accent);
   --focus-ring-offset: 2px;
+  /* Two-tone ring: the offset gap is filled with the ground colour, so the accent ring stays
+     distinct on an accent-filled control (WCAG 2.2 SC 2.4.7). Pair with outline-offset. */
+  --focus-halo: 0 0 0 var(--focus-ring-offset) var(--ground);
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-duration: 180ms;
 }

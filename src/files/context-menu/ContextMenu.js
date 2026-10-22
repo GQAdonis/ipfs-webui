@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { withTranslation } from 'react-i18next'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { CopyToClipboard } from '../../components/copy-to-clipboard/CopyToClipboard.js'
 import { Dropdown, DropdownMenu, Option } from '../dropdown/Dropdown.js'
 import { CopyIcon as StrokeCopy, ShareIcon as StrokeShare, PublishIcon as StrokeSpeaker, PencilIcon as StrokePencil, IpldIcon as StrokeIpld, LabIcon as StrokeLab, TrashIcon as StrokeTrash, DownloadIcon as StrokeDownload, CarFileIcon as StrokeData, PinnedIcon as StrokePin } from '../../promethity/icons.js'
 import { cliCmdKeys } from '../../bundles/files/consts.js'
@@ -43,7 +43,12 @@ class ContextMenu extends React.Component {
     return (
       <Dropdown className={className}>
         <DropdownMenu
-          ref={this.dropdownMenuRef}
+          ref={node => {
+            this.dropdownMenuRef.current = node
+            const { menuRef } = this.props
+            if (typeof menuRef === 'function') menuRef(node)
+            else if (menuRef) menuRef.current = node
+          }}
           top={-8}
           arrowMarginRight='11px'
           left='calc(100% - 200px)'
@@ -163,4 +168,4 @@ ContextMenu.defaultProps = {
   className: ''
 }
 
-export default withTranslation('files', { withRef: true })(ContextMenu)
+export default withTranslation('files')(ContextMenu)

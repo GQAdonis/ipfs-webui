@@ -1,0 +1,37 @@
+/* Console session mode: the "Sign in again" bar. Tokens only, so light and dark follow data-theme.
+   It sits in the document flow above the shell and sticks to the top while the page scrolls. */
+
+.ac-session-banner {
+  position: sticky;
+  top: 0;
+  z-index: 950;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--err);
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+.ac-session-banner > .pm-status {
+  flex: 1 1 18rem;
+  margin: 0;
+}
+
+.ac-session-panel > .pm-status {
+  margin-bottom: var(--space-3);
+}
+
+.ac-session-panel .as-inline {
+  margin: var(--space-3) 0;
+}
+
+@media (max-width: 30em) {
+  .ac-session-banner {
+    padding: var(--space-3);
+  }
+}

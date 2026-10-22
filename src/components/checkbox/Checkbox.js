@@ -6,13 +6,15 @@ import './Checkbox.css'
 /**
  * @param {Object} props
  * @param {string} [props.className]
+ * @param {React.CSSProperties} [props.style]
+ * @param {React.Ref<HTMLInputElement>} [props.ref]
  * @param {React.ReactNode} [props.label]
  * @param {boolean} [props.disabled]
- * @param {boolean} [props.checked]
- * @param {function(boolean): void} props.onChange
+ * @param {boolean | null} [props.checked]
+ * @param {(arg0: boolean) => void} props.onChange
  * @returns {React.ReactElement}
  */
-const Checkbox = ({ className, label, disabled, checked, onChange, ...props }) => {
+const Checkbox = ({ className = '', style, label = '', disabled = false, checked = false, onChange = () => {}, ref, ...props }) => {
   className = `Checkbox dib sans-serif ${className}`
   if (!disabled) {
     className += ' pointer'
@@ -26,8 +28,8 @@ const Checkbox = ({ className, label, disabled, checked, onChange, ...props }) =
   }
 
   return (
-    <label className={className} {...props}>
-      <input className='absolute' type='checkbox' checked={checked} disabled={disabled} onChange={change} />
+    <label className={className} style={style}>
+      <input {...props} ref={ref} className='absolute' type='checkbox' checked={Boolean(checked)} disabled={disabled} onChange={change} />
       <span className='dib v-mid br1 w1 h1 pointer'>
         <Tick className='w1 h1 o-0' />
       </span>
@@ -44,14 +46,6 @@ Checkbox.propTypes = {
   disabled: PropTypes.bool,
   checked: PropTypes.bool,
   onChange: PropTypes.func
-}
-
-Checkbox.defaultProps = {
-  className: '',
-  label: '',
-  disabled: false,
-  checked: null,
-  onChange: () => {}
 }
 
 export default Checkbox

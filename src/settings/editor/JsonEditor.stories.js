@@ -5,7 +5,7 @@ import { JsonEditor } from './JsonEditor.js'
 import config from './fixtures/example-config.json'
 
 /**
- * @type {import('@storybook/react').Meta}
+ * @type {import('@storybook/react-vite').Meta}
  */
 export default {
   title: 'JSON Editor',
@@ -17,6 +17,6 @@ export default {
 }
 
 /**
- * @type {import('@storybook/react').StoryObj}
+ * @type {import('@storybook/react-vite').StoryObj}
  */
 export const Default = {}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import PropTypes from 'prop-types'
 import { withTranslation } from 'react-i18next'
 import { normalizeFiles } from '../../lib/files.js'
@@ -18,7 +18,7 @@ const AddButton = withTranslation('app')(
   )
 )
 
-class FileInput extends React.Component {
+export class FileInput extends React.Component {
   state = {
     dropdown: false
   }
@@ -37,9 +37,12 @@ class FileInput extends React.Component {
     return this.filesInput.click()
   }
 
-  onInputChange = (input) => async () => {
-    this.props.onAddFiles(normalizeFiles(input.files))
-    input.value = null
+  onInputChange = (event) => {
+    const input = event.currentTarget
+    const files = Array.from(input.files || [])
+    // Reset before publishing so the same file can be chosen after a failure.
+    input.value = ''
+    if (files.length) this.props.onAddFiles(normalizeFiles(files))
   }
 
   onAddByPath = () => {
@@ -117,7 +120,7 @@ class FileInput extends React.Component {
           className='dn'
           multiple
           ref={el => { this.filesInput = el }}
-          onChange={this.onInputChange(this.filesInput)} />
+          onChange={this.onInputChange} />
 
         <input
           id='directory-input'
@@ -126,7 +129,7 @@ class FileInput extends React.Component {
           multiple
           webkitdirectory='true'
           ref={el => { this.folderInput = el }}
-          onChange={this.onInputChange(this.folderInput)} />
+          onChange={this.onInputChange} />
       </div>
     )
   }

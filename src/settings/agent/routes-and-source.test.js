@@ -1,8 +1,10 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import { dirname as testDirname, join } from 'node:path'
 // Structural acceptance checks that read the source: the route is lazy, and the
 // admin token never reaches localStorage.
 
 import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 const here = __dirname
 const routes = readFileSync(join(here, '../../bundles/routes.js'), 'utf8')

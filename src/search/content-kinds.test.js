@@ -1,6 +1,9 @@
+import { fileURLToPath as testFileURLToPath } from 'node:url'
+import { dirname as testDirname } from 'node:path'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import { KINDS, SOURCES, PROVENANCE_KEY } from './content-kinds.js'
+const __dirname = testDirname(testFileURLToPath(import.meta.url))
 
 // The kubo checkout normally sits beside this repository. When it does, the lists here must
 // match the contract; when it does not (CI of this fork alone), the comparison is skipped.

@@ -1,11 +1,12 @@
+import AutoSizer from '../../components/auto-sizer/AutoSizer.js'
 import React, { useCallback, useMemo, useState } from 'react'
 import classNames from 'classnames'
 import ms from 'milliseconds'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import { withTranslation } from 'react-i18next'
-import { Table, Column, AutoSizer, SortDirection } from 'react-virtualized'
-import CountryFlag from 'react-country-flag'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { Table, Column, SortDirection } from 'react-virtualized'
+import CountryFlag from '../../components/country-flag/CountryFlag.js'
+import { CopyToClipboard } from '../../components/copy-to-clipboard/CopyToClipboard.js'
 import Cid from '../../components/cid/Cid.js'
 import { sortByProperty } from '../../lib/sort.js'
 import { GlobeIcon, NetworkIcon } from '../../promethity/icons.js'
@@ -23,7 +24,7 @@ const flagRenderer = (flagCode, isPrivate) => {
   )
 }
 
-const locationCellRenderer = (t) => ({ rowData }) => {
+const locationCellRenderer = (t) => function locationCell ({ rowData }) {
   const ref = React.createRef()
   const location = rowData.isPrivate
     ? t('localNetwork')
@@ -50,7 +51,7 @@ const latencyCellRenderer = ({ cellData }) => {
   return (<span className='dib no-select'>{latency}</span>)
 }
 
-const peerIdCellRenderer = (t) => ({ cellData: peerId }) => {
+const peerIdCellRenderer = (t) => function peerIdCell ({ cellData: peerId }) {
   const ref = React.createRef()
   const p2pMultiaddr = `/p2p/${peerId}`
   return (
@@ -60,7 +61,7 @@ const peerIdCellRenderer = (t) => ({ cellData: peerId }) => {
   )
 }
 
-const protocolsCellRenderer = (t) => ({ rowData }) => {
+const protocolsCellRenderer = (t) => function protocolsCell ({ rowData }) {
   const ref = React.createRef()
   const { protocols } = rowData
   const title = protocols.split(', ').join('\n')
@@ -76,7 +77,7 @@ const protocolsCellRenderer = (t) => ({ rowData }) => {
   )
 }
 
-const agentVersionCellRenderer = (t) => ({ rowData }) => {
+const agentVersionCellRenderer = (t) => function agentVersionCell ({ rowData }) {
   const ref = React.createRef()
   const { agentVersion } = rowData
   if (!agentVersion) return (<span className='dib o-40 no-select'>-</span>)
@@ -92,7 +93,7 @@ const agentVersionCellRenderer = (t) => ({ rowData }) => {
   )
 }
 
-const connectionCellRenderer = (t) => ({ rowData }) => {
+const connectionCellRenderer = (t) => function connectionCell ({ rowData }) {
   const ref = React.createRef()
   const { address, direction, peerId } = rowData
   const p2pMultiaddr = `${address}/p2p/${peerId}`

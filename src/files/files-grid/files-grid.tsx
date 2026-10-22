@@ -2,13 +2,15 @@ import React, { useRef, useState, useEffect, useCallback, useMemo, type FC, type
 import { Trans, withTranslation } from 'react-i18next'
 import { useDrop } from 'react-dnd'
 import { NativeTypes } from 'react-dnd-html5-backend'
-import { normalizeFiles } from '../../lib/files.js'
-import GridFile from './grid-file.jsx'
+import { addNativeFiles, reportDropError, type NativeFileItem } from '../native-drop.js'
+import { selectedMoveOperations } from '../move-selection.js'
+import { ownsFileKeyboard } from '../keyboard-scope.js'
+import GridFile from './grid-file.js'
 import Checkbox from '../../components/checkbox/Checkbox.js'
-import { connect } from 'redux-bundler-react'
+import { connect } from '../../lib/react-store.js'
 import './files-grid.css'
 import { TFunction } from 'i18next'
-import type { ContextMenuFile, ExtendedFile, FileStream } from '../types'
+import type { ContextMenuFile, FileStream } from '../types'
 import type { CID } from 'multiformats/cid'
 import SearchFilter from '../search-filter/SearchFilter'
 
@@ -40,7 +42,7 @@ interface FilesGridPropsConnected extends FilesGridProps {
   selected: string[]
 }
 
-const FilesGrid = ({
+export const FilesGrid = ({
   files, pins = [], remotePins = [], pendingPins = [], failedPins = [], filesPathInfo, t, onRemove, onRename, onNavigate, onAddFiles,
   onMove, handleContextMenuClick, filesIsFetching, onSetPinning, onDismissFailedPin, selected = [], onSelect, showSearch, filterRef
 }: FilesGridPropsConnected) => {
@@ -49,23 +51,20 @@ const FilesGrid = ({
   const filesRefs = useRef<Record<string, HTMLDivElement>>({})
   const gridRef = useRef<HTMLDivElement | null>(null)
 
-  const [{ isOver, canDrop }, drop] = useDrop({
+  const [dropState, drop] = useDrop<NativeFileItem, unknown, Record<'isOver' | 'canDrop', boolean>>({
     accept: NativeTypes.FILE,
     drop: (_, monitor) => {
       if (monitor.didDrop()) return
-      const { filesPromise } = monitor.getItem()
-      addFiles(filesPromise, onAddFiles)
+      void addNativeFiles(monitor.getItem(), onAddFiles).catch(reportDropError)
     },
+    canDrop: () => !!filesPathInfo?.isMfs,
     collect: (monitor) => ({
       isOver: monitor.isOver({ shallow: true }),
-      canDrop: filesPathInfo?.isMfs
+      canDrop: monitor.canDrop()
     })
   })
 
-  const addFiles = async (filesPromise: Promise<ExtendedFile[]>, onAddFiles: (files: FileStream[]) => void) => {
-    const files = await filesPromise
-    onAddFiles(normalizeFiles(files))
-  }
+  const { isOver, canDrop } = dropState
 
   const filteredFiles = useMemo(() => {
     if (!filter) return files
@@ -98,7 +97,7 @@ const FilesGrid = ({
     setFocused(null)
   }, [filterRef])
 
-  const allSelected = selected.length !== 0 && selected.length === filteredFiles.length
+  const allSelected = filteredFiles.length > 0 && filteredFiles.every(file => selected.includes(file.name))
 
   const toggleAll = useCallback((checked: boolean) => {
     if (checked) {
@@ -116,22 +115,9 @@ const FilesGrid = ({
   }, [showSearch, filterRef])
 
   const keyHandler = useCallback((e: KeyboardEvent) => {
-    // Don't capture keyboard events when user is typing in a text input or textarea
-    const target = e.target as HTMLElement
-    if (target.tagName === 'TEXTAREA') {
-      return
-    }
-    if (target.tagName === 'INPUT') {
-      const inputType = (target as HTMLInputElement).type
-      // Allow keyboard navigation for checkboxes and radio buttons
-      if (inputType !== 'checkbox' && inputType !== 'radio') {
-        return
-      }
-    }
+    if (!ownsFileKeyboard(e, gridRef.current)) return
 
     const focusedFile = focused == null ? null : filteredFiles.find(el => el.name === focused)
-
-    gridRef.current?.focus?.()
 
     if (e.key === 'Escape') {
       onSelect([], false)
@@ -144,7 +130,7 @@ const FilesGrid = ({
     }
 
     if ((e.key === 'Delete' || e.key === 'Backspace') && selected.length > 0) {
-      const selectedFiles = filteredFiles.filter(f => selected.includes(f.name))
+      const selectedFiles = files.filter(f => selected.includes(f.name))
       return onRemove(selectedFiles)
     }
 
@@ -162,7 +148,7 @@ const FilesGrid = ({
 
     if (isArrowKey) {
       e.preventDefault()
-      const columns = Math.floor((gridRef.current?.clientWidth || window.innerWidth) / 220)
+      const columns = Math.max(1, Math.floor((gridRef.current?.clientWidth || window.innerWidth) / 220))
       const currentIndex = filteredFiles.findIndex(el => el.name === focusedFile?.name)
       let newIndex = currentIndex
 
@@ -203,14 +189,14 @@ const FilesGrid = ({
         const name = filteredFiles[newIndex].name
         setFocused(name)
         const element = filesRefs.current[name]
-        if (element && element.scrollIntoView) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        if (element) {
+          element.scrollIntoView?.({ behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' })
           const checkbox: HTMLInputElement | null = element.querySelector('input[type="checkbox"]')
           if (checkbox != null) checkbox.focus()
         }
       }
     }
-  }, [filteredFiles, focused, selected, onSelect, onRename, onRemove, onNavigate, handleSelect])
+  }, [files, filteredFiles, focused, selected, onSelect, onRename, onRemove, onNavigate, handleSelect])
 
   useEffect(() => {
     if (filesIsFetching) return
@@ -219,6 +205,13 @@ const FilesGrid = ({
       document.removeEventListener('keydown', keyHandler)
     }
   }, [keyHandler, filesIsFetching])
+
+  const move = (source: string, destination: string) => {
+    const selectedFiles = files.filter(file => selected.includes(file.name))
+    const operations = selectedMoveOperations(selectedFiles, source, destination)
+    if (selectedFiles.length) onSelect([], false)
+    return Promise.all(operations.map(([from, to]) => onMove(from, to)))
+  }
 
   const gridClassName = `files-grid${isOver && canDrop ? ' files-grid--drop-target' : ''}`
 
@@ -247,7 +240,10 @@ const FilesGrid = ({
           <GridFile
             key={file.name}
             {...file}
-            refSetter={(r: HTMLDivElement | null) => { filesRefs.current[file.name] = r as HTMLDivElement }}
+            refSetter={(node: HTMLDivElement | null) => {
+              if (node) filesRefs.current[file.name] = node
+              else delete filesRefs.current[file.name]
+            }}
             selected={selected.includes(file.name)}
             focused={focused === file.name}
             pinned={pins?.includes(file.cid?.toString())}
@@ -257,7 +253,7 @@ const FilesGrid = ({
             isMfs={filesPathInfo?.isMfs}
             onNavigate={() => onNavigate({ path: file.path, cid: file.cid })}
             onAddFiles={onAddFiles}
-            onMove={onMove}
+            onMove={move}
             onSetPinning={onSetPinning}
             onDismissFailedPin={onDismissFailedPin}
             handleContextMenuClick={handleContextMenuClick}
@@ -269,7 +265,7 @@ const FilesGrid = ({
         )}
         {filteredFiles.length === 0 && !filter && !filesPathInfo?.isRoot && (
           <Trans i18nKey='filesList.noFiles' t={t}>
-            <div className='pv3 files-grid-empty tc charcoal-muted f6 noselect'>No files in this directory. Click the "Import" button to add some.</div>
+            <div className='pv3 files-grid-empty tc charcoal-muted f6 noselect'>No files in this directory. Click the &quot;Import&quot; button to add some.</div>
           </Trans>
         )}
       </div>

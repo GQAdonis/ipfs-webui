@@ -133,7 +133,7 @@ const consentGroups = {
 
 /**
  * @param {string|string[]} consent
- * @param {Store} store
+ * @param {DesktopExt} store
  */
 function addConsent (consent, store) {
   const consentArray = Array.isArray(consent) ? consent : [consent]
@@ -147,7 +147,7 @@ function addConsent (consent, store) {
 
 /**
  * @param {string|string[]} consent
- * @param {Store} store
+ * @param {DesktopExt} store
  */
 function removeConsent (consent, store) {
   const consentArray = Array.isArray(consent) ? consent : [consent]
@@ -255,12 +255,12 @@ const selectors = {
  * @typedef {import('redux-bundler').Actions<typeof actions>} Actions
  * @typedef {Selectors & Actions & DesktopExt} Ext
  * @typedef {import('redux-bundler').Store<State, Message, Ext>} Store
- * @typedef {import('redux-bundler').Context<State, Message, Ext>} Context
+ * @typedef {import('redux-bundler').Context<State, Message, Selectors & DesktopExt & {doEnableAnalytics: () => void, doDisableAnalytics: () => void, doRemoveConsent: (name: string) => void, doAddConsent: (name: string) => void, doToggleShowAnalyticsBanner: (show: boolean) => void}>} Context
  */
 
 const actions = {
   /**
-   * @returns {function(Context):void}
+   * @returns {(arg0: Context) => void}
    */
   doToggleAnalytics: () => ({ store }) => {
     const enable = !store.selectAnalyticsEnabled()
@@ -271,7 +271,7 @@ const actions = {
     }
   },
   /**
-   * @returns {function(Context):void}
+   * @returns {(arg0: Context) => void}
    */
   doDisableAnalytics: () => ({ dispatch, store }) => {
     root.Countly.opt_out()
@@ -279,7 +279,7 @@ const actions = {
     dispatch({ type: 'ANALYTICS_DISABLED', payload: { consent: [] } })
   },
   /**
-   * @returns {function(Context):void}
+   * @returns {(arg0: Context) => void}
    */
   doEnableAnalytics: () => ({ dispatch, store }) => {
     removeConsent(consentGroups.all, store)
@@ -289,7 +289,7 @@ const actions = {
   },
   /**
    * @param {string} name
-   * @returns {function(Context):void}
+   * @returns {(arg0: Context) => void}
    */
   doToggleConsent: (name) => ({ store }) => {
     const isEnabled = store.selectAnalyticsConsent().includes(name)
@@ -301,7 +301,7 @@ const actions = {
   },
   /**
    * @param {string} name
-   * @returns {function(Context):void}
+   * @returns {(arg0: Context) => void}
    */
   doRemoveConsent: (name) => ({ dispatch, store }) => {
     const existingConsents = store.selectAnalyticsConsent()
@@ -318,7 +318,7 @@ const actions = {
   },
   /**
    * @param {string} name
-   * @returns {function(Context):void}
+   * @returns {(arg0: Context) => void}
    */
   doAddConsent: (name) => ({ dispatch, store }) => {
     const existingConsents = store.selectAnalyticsConsent()
@@ -331,7 +331,7 @@ const actions = {
   },
   /**
    * @param {boolean?} shouldShow
-   * @returns {function(Context):void}
+   * @returns {(arg0: Context) => void}
    */
   doToggleShowAnalyticsBanner: (shouldShow) => ({ dispatch }) => {
     dispatch({ type: 'SET_SHOW_ANALYTICS_BANNER', payload: { shouldShow } })
@@ -442,8 +442,8 @@ const createAnalyticsBundle = ({
     // Listen to redux actions
     getMiddleware: () => () => {
       /**
-       * @param {function(Message):void} next
-       * @returns {function(Message):void}
+       * @param {(arg0: Message) => void} next
+       * @returns {(arg0: Message) => void}
        */
       const middleware = next => action => {
         const payload = parseTask(action)
